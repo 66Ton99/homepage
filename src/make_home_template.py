@@ -99,7 +99,7 @@ sub(r'(?s)<aside class="links" aria-label="Tools and references">.*?</aside>',
     '<aside class="links" aria-label="{{A_TOOLS}}">\n'
     "          <header>\n"
     "            <span>{{T_TOOLS}}</span>\n"
-    "            <span>02</span>\n"
+    "            <span>{{N_TOOLS}}</span>\n"
     "          </header>\n"
     '          <ul class="link-list">\n'
     "{{TOOLS_LIST}}\n"

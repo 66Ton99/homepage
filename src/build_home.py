@@ -27,18 +27,27 @@ ICON = (
 )
 
 
-def tool(href, label, open_label, hreflang, lang=None):
-    lang_attr = f' lang="{lang}"' if lang else ""
-    return (
+def tools(items, open_label, hreflang):
+    """Render the Tools list.
+
+    Each homepage links only to the tools in its own language — the header
+    language switcher is what moves between languages, so listing the other
+    translation here as a second entry would just be the same page twice.
+    """
+    return "\n".join(
         "            <li>\n"
-        f'              <a class="profile-link" href="{href}" hreflang="{hreflang}"{lang_attr}>\n'
+        f'              <a class="profile-link" href="{href}" hreflang="{hreflang}">\n'
         f"                {ICON}\n"
         f"                <strong>{label}</strong>\n"
         f"                <span>{open_label}</span>\n"
         "              </a>\n"
         "            </li>"
+        for href, label in items
     )
 
+
+EN_TOOLS = [("/awg-to-amps", "AWG to amps")]
+UK_TOOLS = [("/uk/awg-to-amps", "AWG в ампери")]
 
 EN = {
     "LANG": "en",
@@ -65,12 +74,8 @@ EN = {
     "SYSTEM_MAP": system_map(
         "Abstract monochrome system map", "WEB / LINUX / CLOUD", "SYSTEM MAP"
     ),
-    "TOOLS_LIST": "\n".join(
-        [
-            tool("/awg-to-amps", "AWG to amps", "Open", "en"),
-            tool("/uk/awg-to-amps", "AWG в ампери", "Відкрити", "uk", "uk"),
-        ]
-    ),
+    "TOOLS_LIST": tools(EN_TOOLS, "Open", "en"),
+    "N_TOOLS": f"{len(EN_TOOLS):02d}",
     "FOOTER_R": "Personal index",
 }
 
@@ -99,12 +104,8 @@ UK = {
     "SYSTEM_MAP": system_map(
         "Абстрактна монохромна системна карта", "ВЕБ / LINUX / ХМАРА", "СИСТЕМНА КАРТА"
     ),
-    "TOOLS_LIST": "\n".join(
-        [
-            tool("/uk/awg-to-amps", "AWG в ампери", "Відкрити", "uk"),
-            tool("/awg-to-amps", "AWG to amps", "Open", "en", "en"),
-        ]
-    ),
+    "TOOLS_LIST": tools(UK_TOOLS, "Відкрити", "uk"),
+    "N_TOOLS": f"{len(UK_TOOLS):02d}",
     "FOOTER_R": "Персональний індекс",
 }
 
