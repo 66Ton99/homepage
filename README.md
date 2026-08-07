@@ -1,7 +1,6 @@
 # 66ton99.org.ua
 
-Static site served by nginx on the OCI edge VM `nixos-micro`, which also terminates
-TLS for `pass.66ton99.org.ua`.
+Static site served by nginx on the OCI edge VM.
 
 ## Layout
 

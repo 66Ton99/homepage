@@ -5,6 +5,17 @@
     <loc>https://66ton99.org.ua/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://66ton99.org.ua/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://66ton99.org.ua/uk"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://66ton99.org.ua/"/>
+  </url>
+  <url>
+    <loc>https://66ton99.org.ua/uk</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://66ton99.org.ua/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://66ton99.org.ua/uk"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://66ton99.org.ua/"/>
   </url>
   <url>
     <loc>https://66ton99.org.ua/awg-to-amps</loc>

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{LANG}}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="66Ton99 personal index: profile links and engineering references, including an AWG to amps chart and wire gauge ampacity calculator." />
-    <title>66Ton99 — profiles and engineering references</title>
-    <link rel="canonical" href="https://66ton99.org.ua/" />
+    <meta name="description" content="{{DESC}}" />
+    <title>{{TITLE}}</title>
+    <link rel="canonical" href="{{CANONICAL}}" />
     <link rel="alternate" hreflang="en" href="https://66ton99.org.ua/" />
     <link rel="alternate" hreflang="uk" href="https://66ton99.org.ua/uk" />
     <link rel="alternate" hreflang="x-default" href="https://66ton99.org.ua/" />
@@ -16,20 +16,20 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="66ton99.org.ua" />
-    <meta property="og:title" content="66Ton99 — profiles and engineering references" />
-    <meta property="og:description" content="66Ton99 personal index: profile links and engineering references, including an AWG to amps chart and wire gauge ampacity calculator." />
-    <meta property="og:url" content="https://66ton99.org.ua/" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:locale:alternate" content="uk_UA" />
-    <meta property="og:image" content="https://66ton99.org.ua/og-home.png" />
+    <meta property="og:title" content="{{TITLE}}" />
+    <meta property="og:description" content="{{DESC}}" />
+    <meta property="og:url" content="{{CANONICAL}}" />
+    <meta property="og:locale" content="{{OG_LOCALE}}" />
+    <meta property="og:locale:alternate" content="{{OG_LOCALE_ALT}}" />
+    <meta property="og:image" content="{{OG_IMAGE}}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:alt" content="66Ton99 — profiles and engineering references" />
+    <meta property="og:image:alt" content="{{OG_IMAGE_ALT}}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="66Ton99 — profiles and engineering references" />
-    <meta name="twitter:description" content="66Ton99 personal index: profile links and engineering references, including an AWG to amps chart and wire gauge ampacity calculator." />
-    <meta name="twitter:image" content="https://66ton99.org.ua/og-home.png" />
+    <meta name="twitter:title" content="{{TITLE}}" />
+    <meta name="twitter:description" content="{{DESC}}" />
+    <meta name="twitter:image" content="{{OG_IMAGE}}" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -304,20 +304,20 @@
   </head>
   <body>
     <main class="page">
-      <header class="top" aria-label="Site header">
+      <header class="top" aria-label="{{A_HEADER}}">
         <h1 class="brand">66Ton99</h1>
-        <nav class="langswitch" aria-label="Language"><span aria-current="true" lang="en">EN</span><a href="/uk" hreflang="uk" lang="uk">УК</a></nav>
+        <nav class="langswitch" aria-label="{{A_LANG}}">{{LANG_LINKS}}</nav>
       </header>
 
-      <section class="main" aria-label="66Ton99 homepage">
-        <section aria-label="Visual profile">
-          <img class="visual" width="900" height="620" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5MDAgNjIwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkFic3RyYWN0IG1vbm9jaHJvbWUgc3lzdGVtIG1hcCI+CiAgPHJlY3Qgd2lkdGg9IjkwMCIgaGVpZ2h0PSI2MjAiIGZpbGw9IiMxNTE1MTUiLz4KICA8ZyBzdHJva2U9IiMzNTM1MzAiIHN0cm9rZS13aWR0aD0iMSI+CiAgICA8cGF0aCBkPSJNODAgODhoNzQwTTgwIDE3Nmg3NDBNODAgMjY0aDc0ME04MCAzNTJoNzQwTTgwIDQ0MGg3NDBNODAgNTI4aDc0MCIgb3BhY2l0eT0iLjU1Ii8+CiAgICA8cGF0aCBkPSJNMTMyIDYwdjUwME0yNTYgNjB2NTAwTTM4MCA2MHY1MDBNNTA0IDYwdjUwME02MjggNjB2NTAwTTc1MiA2MHY1MDAiIG9wYWNpdHk9Ii4zOCIvPgogIDwvZz4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiNhYWE2OWIiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjc4Ij4KICAgIDxwYXRoIGQ9Ik0xNDIgNDA0aDEyNHYtOTZoMTQ2di0xMTZoMTU0djgyaDE4NCIvPgogICAgPHBhdGggZD0iTTE0MiAyNDhoOTB2LTcyaDE2OHY4MmgxNjZ2LTEwMmgxOTIiIG9wYWNpdHk9Ii40OCIvPgogICAgPHBhdGggZD0iTTIzMiA0NTJoMTY4di02NmgxMzh2NzZoMjIwIiBvcGFjaXR5PSIuMzYiLz4KICA8L2c+CiAgPGcgZmlsbD0iIzIyMjIxZiIgc3Ryb2tlPSIjNzc3MzZhIiBzdHJva2Utd2lkdGg9IjIiPgogICAgPHJlY3QgeD0iOTYiIHk9IjM2NCIgd2lkdGg9IjkyIiBoZWlnaHQ9IjgwIi8+CiAgICA8cmVjdCB4PSIzNjAiIHk9IjE1MiIgd2lkdGg9IjEwNCIgaGVpZ2h0PSI4MCIvPgogICAgPHJlY3QgeD0iNTE2IiB5PSIyMzQiIHdpZHRoPSIxMDAiIGhlaWdodD0iODAiLz4KICAgIDxyZWN0IHg9IjcxMiIgeT0iMjMwIiB3aWR0aD0iOTIiIGhlaWdodD0iODAiLz4KICAgIDxyZWN0IHg9IjcwNCIgeT0iNDEwIiB3aWR0aD0iMTA4IiBoZWlnaHQ9IjgwIi8+CiAgPC9nPgogIDxnIGZpbGw9IiNkOWQ1Y2EiPgogICAgPGNpcmNsZSBjeD0iMTQyIiBjeT0iNDA0IiByPSI4Ii8+CiAgICA8Y2lyY2xlIGN4PSIyNjYiIGN5PSIzMDgiIHI9IjgiLz4KICAgIDxjaXJjbGUgY3g9IjQxMiIgY3k9IjE5MiIgcj0iOCIvPgogICAgPGNpcmNsZSBjeD0iNTY2IiBjeT0iMjc0IiByPSI4Ii8+CiAgICA8Y2lyY2xlIGN4PSI3NTAiIGN5PSIyNzQiIHI9IjgiLz4KICAgIDxjaXJjbGUgY3g9IjQwMCIgY3k9IjM4NiIgcj0iOCIvPgogICAgPGNpcmNsZSBjeD0iNzU4IiBjeT0iNDUyIiByPSI4Ii8+CiAgPC9nPgogIDxnIGZpbGw9IiM3NzczNmEiIGZvbnQtZmFtaWx5PSJ1aS1tb25vc3BhY2UsIFNGTW9uby1SZWd1bGFyLCBNZW5sbywgQ29uc29sYXMsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9IjcwMCI+CiAgICA8dGV4dCB4PSI5NiIgeT0iMTEwIj42NlRPTjk5PC90ZXh0PgogICAgPHRleHQgeD0iOTYiIHk9IjU1MiIgZm9udC1zaXplPSIxNSIgb3BhY2l0eT0iLjcyIj5XRUIgLyBMSU5VWCAvIENMT1VEPC90ZXh0PgogICAgPHRleHQgeD0iNjc0IiB5PSIxMTAiIGZvbnQtc2l6ZT0iMTUiIG9wYWNpdHk9Ii43MiI+U1lTVEVNIE1BUDwvdGV4dD4KICA8L2c+CiAgPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iODIwIiBoZWlnaHQ9IjU0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTY1MzRkIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+" alt="Abstract monochrome system map" />
+      <section class="main" aria-label="{{A_MAIN}}">
+        <section aria-label="{{A_VISUAL}}">
+          <img class="visual" width="900" height="620" src="data:image/svg+xml;base64,{{SYSTEM_MAP}}" alt="{{SVG_ALT}}" />
         </section>
 
         <div class="rail">
-        <aside class="links" aria-label="Social profiles">
+        <aside class="links" aria-label="{{A_PROFILES}}">
           <header>
-            <span>Profiles</span>
+            <span>{{T_PROFILES}}</span>
             <span>05</span>
           </header>
           <ul class="link-list">
@@ -325,60 +325,47 @@
               <a class="profile-link" href="https://www.linkedin.com/in/66ton99" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.94 8.9H3.72v10.34h3.22V8.9ZM5.33 4.76a1.87 1.87 0 1 0 0 3.74 1.87 1.87 0 0 0 0-3.74Zm13.95 8.77c0-3.11-1.66-4.56-3.87-4.56-1.78 0-2.58.98-3.02 1.67V8.9H9.3c.04.97 0 10.34 0 10.34h3.22v-5.77c0-.31.02-.62.11-.84.23-.62.77-1.26 1.67-1.26 1.18 0 1.65.9 1.65 2.22v5.65h3.22v-5.71h.11Z"/></svg>
                 <strong>LinkedIn</strong>
-                <span>Open</span>
+                <span>{{OPEN}}</span>
               </a>
             </li>
             <li>
               <a class="profile-link" href="https://github.com/66Ton99" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.25a9.75 9.75 0 0 0-3.08 19c.49.09.67-.21.67-.47v-1.7c-2.74.6-3.31-1.17-3.31-1.17-.45-1.14-1.1-1.44-1.1-1.44-.9-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.88 1.52 2.32 1.08 2.88.83.09-.64.35-1.08.63-1.33-2.18-.25-4.48-1.09-4.48-4.86 0-1.07.38-1.95 1.02-2.64-.1-.25-.44-1.25.1-2.6 0 0 .83-.27 2.72 1.01A9.4 9.4 0 0 1 12 6.01c.84 0 1.68.11 2.47.33 1.89-1.28 2.72-1.01 2.72-1.01.54 1.35.2 2.35.1 2.6.64.69 1.02 1.57 1.02 2.64 0 3.78-2.3 4.61-4.49 4.85.36.31.68.92.68 1.85v2.74c0 .26.18.57.68.47A9.75 9.75 0 0 0 12 2.25Z"/></svg>
                 <strong>GitHub</strong>
-                <span>Open</span>
+                <span>{{OPEN}}</span>
               </a>
             </li>
             <li>
               <a class="profile-link" href="https://www.facebook.com/66ton99" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.1 8.7V6.95c0-.84.56-1.03.95-1.03h2.42V2.13L14.14 2.1c-3.7 0-4.54 2.77-4.54 4.54V8.7H6.68v3.9H9.6v9.3h4.5v-9.3h3.04l.4-3.9H14.1Z"/></svg>
                 <strong>Facebook</strong>
-                <span>Open</span>
+                <span>{{OPEN}}</span>
               </a>
             </li>
             <li>
               <a class="profile-link" href="https://www.instagram.com/66ton99" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.7 2.75h8.6a4.95 4.95 0 0 1 4.95 4.95v8.6a4.95 4.95 0 0 1-4.95 4.95H7.7a4.95 4.95 0 0 1-4.95-4.95V7.7A4.95 4.95 0 0 1 7.7 2.75Zm0 1.8A3.15 3.15 0 0 0 4.55 7.7v8.6a3.15 3.15 0 0 0 3.15 3.15h8.6a3.15 3.15 0 0 0 3.15-3.15V7.7a3.15 3.15 0 0 0-3.15-3.15H7.7Zm4.3 3.1a4.35 4.35 0 1 1 0 8.7 4.35 4.35 0 0 1 0-8.7Zm0 1.8a2.55 2.55 0 1 0 0 5.1 2.55 2.55 0 0 0 0-5.1Zm4.56-2.08a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/></svg>
                 <strong>Instagram</strong>
-                <span>Open</span>
+                <span>{{OPEN}}</span>
               </a>
             </li>
             <li>
               <a class="profile-link" href="https://www.youtube.com/channel/66ton99" target="_blank" rel="noopener noreferrer">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.58 7.2a2.73 2.73 0 0 0-1.92-1.93C17.97 4.82 12 4.82 12 4.82s-5.97 0-7.66.45A2.73 2.73 0 0 0 2.42 7.2 28.45 28.45 0 0 0 2 12a28.45 28.45 0 0 0 .42 4.8 2.73 2.73 0 0 0 1.92 1.93c1.69.45 7.66.45 7.66.45s5.97 0 7.66-.45a2.73 2.73 0 0 0 1.92-1.93A28.45 28.45 0 0 0 22 12a28.45 28.45 0 0 0-.42-4.8ZM10 15.18V8.82L15.2 12 10 15.18Z"/></svg>
                 <strong>YouTube</strong>
-                <span>Open</span>
+                <span>{{OPEN}}</span>
               </a>
             </li>
           </ul>
         </aside>
 
-        <aside class="links" aria-label="Tools and references">
+        <aside class="links" aria-label="{{A_TOOLS}}">
           <header>
-            <span>Tools</span>
+            <span>{{T_TOOLS}}</span>
             <span>02</span>
           </header>
           <ul class="link-list">
-            <li>
-              <a class="profile-link" href="/awg-to-amps" hreflang="en">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5h18v1.6H3V5.5Zm0 4.1h18v2.2H3V9.6Zm0 4.7h18v3H3v-3Zm0 5.5h18v1.2H3v-1.2Z"/></svg>
-                <strong>AWG to amps</strong>
-                <span>Open</span>
-              </a>
-            </li>
-            <li>
-              <a class="profile-link" href="/uk/awg-to-amps" hreflang="uk" lang="uk">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5h18v1.6H3V5.5Zm0 4.1h18v2.2H3V9.6Zm0 4.7h18v3H3v-3Zm0 5.5h18v1.2H3v-1.2Z"/></svg>
-                <strong>AWG в ампери</strong>
-                <span>Відкрити</span>
-              </a>
-            </li>
+{{TOOLS_LIST}}
           </ul>
         </aside>
         </div>
@@ -386,7 +373,7 @@
 
       <footer class="foot">
         <span>66Ton99</span>
-        <span>Personal index</span>
+        <span>{{FOOTER_R}}</span>
       </footer>
     </main>
   </body>

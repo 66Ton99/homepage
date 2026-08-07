@@ -42,7 +42,8 @@ def wrap(draw, text, fnt, max_width):
     return lines
 
 
-def build(name, kicker, title, subtitle, footer_right, title_size, cells):
+def build(name, kicker, title, subtitle, footer_right, title_size, cells,
+          footer_left="66TON99.ORG.UA/AWG-TO-AMPS"):
     img = Image.new("RGB", (W, H), BG)
     grid = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     gd = ImageDraw.Draw(grid)
@@ -89,7 +90,7 @@ def build(name, kicker, title, subtitle, footer_right, title_size, cells):
     # footer
     fy = 566
     d.line([(PAD, fy), (W - PAD, fy)], fill=LINE, width=1)
-    d.text((PAD, fy + 20), "66TON99.ORG.UA/AWG-TO-AMPS", font=f_foot, fill=FAINT)
+    d.text((PAD, fy + 20), footer_left.upper(), font=f_foot, fill=FAINT)
     right = footer_right.upper()
     d.text(
         (W - PAD - d.textlength(right, font=f_foot), fy + 20),
@@ -114,6 +115,37 @@ build(
     "17 gauges",
     76,
     CELLS,
+)
+
+HOME_CELLS = [
+    ("Stack", "web / linux"),
+    ("Cloud", "OCI / NixOS"),
+    ("Tools", "AWG → A"),
+    ("Profiles", "5"),
+]
+
+build(
+    "og-home.png",
+    "66ton99.org.ua",
+    "Profiles and engineering references",
+    "Personal index — profile links plus an AWG to amps chart and wire gauge "
+    "ampacity calculator.",
+    "personal index",
+    68,
+    HOME_CELLS,
+    footer_left="66ton99.org.ua",
+)
+
+build(
+    "og-home-uk.png",
+    "66ton99.org.ua",
+    "Профілі та інженерні довідники",
+    "Персональний індекс — посилання на профілі, таблиця AWG в ампери й "
+    "калькулятор перерізу дроту.",
+    "персональний індекс",
+    62,
+    [("Стек", "web / linux"), ("Хмара", "OCI / NixOS"), ("Інструменти", "AWG → А"), ("Профілі", "5")],
+    footer_left="66ton99.org.ua/uk",
 )
 
 build(

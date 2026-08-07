@@ -635,7 +635,7 @@ UK = {
     "60 °C і 200 °C, калькулятор жилок, поправок на пучок і падіння напруги.",
     "OG_IMAGE": f"{BASE}/og-awg-to-amps-uk.png",
     "OG_IMAGE_ALT": "Таблиця AWG в ампери та калькулятор перерізу дроту",
-    "HOME_HREF": "/",
+    "HOME_HREF": "/uk",
     "BRAND": "AWG / АМПЕРИ",
     "TOPBAR_META": "Гнучка луджена мідь · силіконова ізоляція",
     "TOPBAR_SIGNAL": "довідкова збірка",
@@ -831,7 +831,7 @@ def build_jsonld(cfg, faq_items):
                     "@type": "ListItem",
                     "position": 1,
                     "name": cfg["BC_HOME"],
-                    "item": f"{BASE}/",
+                    "item": f"{BASE}{cfg['HOME_HREF']}",
                 },
                 {"@type": "ListItem", "position": 2, "name": cfg["BC_CURRENT"]},
             ],
@@ -968,33 +968,44 @@ def main():
     )
     print("wrote robots.txt")
 
-    def alt_links(indent):
+    def alt_links(en_href, uk_href, indent=4):
         pad = " " * indent
         return (
-            f'{pad}<xhtml:link rel="alternate" hreflang="en" href="{EN_URL}"/>\n'
-            f'{pad}<xhtml:link rel="alternate" hreflang="uk" href="{UK_URL}"/>\n'
-            f'{pad}<xhtml:link rel="alternate" hreflang="x-default" href="{EN_URL}"/>'
+            f'{pad}<xhtml:link rel="alternate" hreflang="en" href="{en_href}"/>\n'
+            f'{pad}<xhtml:link rel="alternate" hreflang="uk" href="{uk_href}"/>\n'
+            f'{pad}<xhtml:link rel="alternate" hreflang="x-default" href="{en_href}"/>'
         )
+
+    home_en, home_uk = f"{BASE}/", f"{BASE}/uk"
+    home_alts = alt_links(home_en, home_uk)
+    page_alts = alt_links(EN_URL, UK_URL)
 
     sitemap = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>{BASE}/</loc>
+    <loc>{home_en}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+{home_alts}
+  </url>
+  <url>
+    <loc>{home_uk}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+{home_alts}
   </url>
   <url>
     <loc>{EN_URL}</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-{alt_links(4)}
+{page_alts}
   </url>
   <url>
     <loc>{UK_URL}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-{alt_links(4)}
+{page_alts}
   </url>
 </urlset>
 """

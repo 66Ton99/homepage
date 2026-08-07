@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" role="img" aria-label="{{SVG_ALT}}">
+  <rect width="900" height="620" fill="#151515"/>
+  <g stroke="#353530" stroke-width="1">
+    <path d="M80 88h740M80 176h740M80 264h740M80 352h740M80 440h740M80 528h740" opacity=".55"/>
+    <path d="M132 60v500M256 60v500M380 60v500M504 60v500M628 60v500M752 60v500" opacity=".38"/>
+  </g>
+  <g fill="none" stroke="#aaa69b" stroke-width="2" opacity=".78">
+    <path d="M142 404h124v-96h146v-116h154v82h184"/>
+    <path d="M142 248h90v-72h168v82h166v-102h192" opacity=".48"/>
+    <path d="M232 452h168v-66h138v76h220" opacity=".36"/>
+  </g>
+  <g fill="#22221f" stroke="#77736a" stroke-width="2">
+    <rect x="96" y="364" width="92" height="80"/>
+    <rect x="360" y="152" width="104" height="80"/>
+    <rect x="516" y="234" width="100" height="80"/>
+    <rect x="712" y="230" width="92" height="80"/>
+    <rect x="704" y="410" width="108" height="80"/>
+  </g>
+  <g fill="#d9d5ca">
+    <circle cx="142" cy="404" r="8"/>
+    <circle cx="266" cy="308" r="8"/>
+    <circle cx="412" cy="192" r="8"/>
+    <circle cx="566" cy="274" r="8"/>
+    <circle cx="750" cy="274" r="8"/>
+    <circle cx="400" cy="386" r="8"/>
+    <circle cx="758" cy="452" r="8"/>
+  </g>
+  <g fill="#77736a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="700">
+    <text x="96" y="110">66TON99</text>
+    <text x="96" y="552" font-size="15" opacity=".72">{{SVG_STACK}}</text>
+    <text x="674" y="110" font-size="15" opacity=".72">{{SVG_MAP}}</text>
+  </g>
+  <rect x="40" y="40" width="820" height="540" fill="none" stroke="#56534d" stroke-width="2"/>
+</svg>
