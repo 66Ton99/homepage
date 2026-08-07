@@ -54,6 +54,12 @@ sub(r'<meta property="og:locale" content="[^"]*" />',
     '    <meta name="twitter:description" content="{{DESC}}" />\n'
     '    <meta name="twitter:image" content="{{OG_IMAGE}}" />')
 
+# ---- css: the img gets width/height attributes below, and height="620" is a
+# presentational hint that would pin the box and make aspect-ratio inert ------
+sub(r"      \.visual \{\n        width: 100%;\n",
+    "      .visual {\n        width: 100%;\n        height: auto;\n")
+sub(r"        object-fit: cover;\n", "        object-fit: contain;\n")
+
 # ---- css: h1 brand must look exactly like the old span, plus lang switch ---
 sub(r"      \.brand \{\n        display: inline-flex;",
     "      .brand {\n"

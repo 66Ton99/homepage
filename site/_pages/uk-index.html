@@ -147,11 +147,19 @@
 
       .visual {
         width: 100%;
+        /* The width/height attributes on the img are there so the browser knows
+           the ratio before the image loads. They also act as presentational
+           hints, and height="620" would otherwise pin the box to a fixed 620px,
+           making aspect-ratio inert. height:auto hands sizing back to CSS. */
+        height: auto;
         display: block;
         border: 1px solid var(--line);
         background: var(--surface);
         aspect-ratio: 900 / 620;
-        object-fit: cover;
+        /* contain, not cover: this is a diagram with text at its edges, so it
+           must never be cropped. The mobile padding rules below make the content
+           box a different shape than the artwork, which cover would crop into. */
+        object-fit: contain;
       }
 
       .rail {
