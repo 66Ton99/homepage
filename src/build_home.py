@@ -124,5 +124,5 @@ def render(cfg, out_path):
 
 
 if __name__ == "__main__":
-    render(EN, OUT / "index.html")
+    render(EN, OUT / "_pages" / "index.html")
     render(UK, OUT / "_pages" / "uk-index.html")
