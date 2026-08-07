@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Explicitly allow AI/answer engines to read the reference data
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://66ton99.org.ua/sitemap.xml

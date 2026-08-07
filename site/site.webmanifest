@@ -1,0 +1,12 @@
+{
+  "name": "AWG to amps — wire gauge ampacity reference",
+  "short_name": "AWG / Ampacity",
+  "start_url": "/awg-to-amps",
+  "display": "browser",
+  "background_color": "#0d0e0e",
+  "theme_color": "#0d0e0e",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
