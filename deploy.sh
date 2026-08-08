@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Deploy site/ to the nginx web root on nixos-micro.
 #
-#   ./deploy.sh            rsync site/ -> /var/www/66ton99.org.ua/
-#   ./deploy.sh --nixos    also copy nixos/site.nix and nixos-rebuild switch
+#   ./deploy.sh    rsync site/ -> /var/www/66ton99.org.ua/
 #
 # site/ mirrors the web root exactly, so what is in git is what is served.
+# The nginx/NixOS config lives in a separate private repo, homepage-infra.
 
 set -euo pipefail
 
@@ -21,14 +21,6 @@ rsync -avz --delete \
 
 echo "==> fixing ownership"
 ssh "$HOST" "sudo chown -R nginx:nginx $WEBROOT"
-
-if [[ "${1:-}" == "--nixos" ]]; then
-  echo "==> copying nixos/site.nix"
-  scp "$HERE/nixos/site.nix" "$HOST:/tmp/site.nix"
-  ssh "$HOST" 'sudo cp /tmp/site.nix /etc/nixos/site.nix && rm /tmp/site.nix'
-  echo "==> nixos-rebuild switch"
-  ssh "$HOST" 'sudo nixos-rebuild switch'
-fi
 
 echo "==> smoke test"
 for url in \
