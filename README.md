@@ -15,8 +15,7 @@ site/                       mirrors /var/www/66ton99.org.ua exactly
   favicon.svg  apple-touch-icon.png  site.webmanifest
   og-home.png  og-home-uk.png
   og-awg-to-amps.png  og-awg-to-amps-uk.png
-nixos/site.nix              nginx vhosts, copy of /etc/nixos/site.nix
-src/                        generator for the AWG pages
+src/                        generator for the pages
 deploy.sh                   rsync to the server
 ```
 
@@ -24,7 +23,7 @@ Pages live under `_pages/` so that each one has exactly one public URL. nginx ma
 the extensionless URL onto the file with `try_files` and marks `/_pages/` as
 `internal`, so there is no `.html` duplicate for search engines to index.
 
-**Do not add an `index` directive to that vhost.** `index` issues an internal
+**If you maintain that config: do not add an `index` directive to the vhost.** `index` issues an internal
 redirect to `/index.html` which re-enters location matching; combined with a
 `= /index.html` redirect back to `/` it loops forever and takes the homepage
 down. `try_files` resolves a file in place without re-entering, which is why
@@ -58,13 +57,25 @@ output and get overwritten.
 ## Deploy
 
 ```bash
-./deploy.sh             # content only
-./deploy.sh --nixos     # content + /etc/nixos/site.nix + nixos-rebuild switch
+./deploy.sh
 ```
 
-`nixos-rebuild` validates the nginx config at build time, so a broken vhost fails
-the build rather than taking the running server down. That matters here: the same
-nginx terminates TLS for Passbolt.
+`site/` mirrors the web root exactly, so this is a plain `rsync --delete`:
+whatever is committed here is what gets served.
+
+The nginx/NixOS configuration is **not** in this repo — it names internal
+addresses, so it lives in a separate private one. The notes below describe how
+it is wired, which is what you need to understand the URLs.
+
+## Contributing
+
+Corrections to the ampacity data are welcome, especially with a datasheet or
+standard to back them. The AWG 24–30 rows are the least certain: they are
+indicative for fine-stranded silicone wire rather than taken from one
+authoritative table.
+
+Edit `src/build.py`, never `site/_pages/*.html` — those are build output. Run
+`python3 build.py && node test.js` before opening a pull request.
 
 ## SEO notes
 

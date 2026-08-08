@@ -285,6 +285,28 @@ EN_CONTENT = f"""            <section id="how-to-read">
             <section id="faq">
               <h2>Frequently asked questions</h2>
 {faq_html(EN_FAQ)}
+            </section>
+
+            <section id="source">
+              <h2>Read the source, or fix it</h2>
+              <p>
+                This page is open source. The table data, both translations, the calculator and
+                this text are all produced by one generator, which is why the English and
+                Ukrainian versions cannot drift apart.
+              </p>
+              <ul>
+                <li><strong>src/build.py</strong> — the ampacity table, the copy, the FAQ and the JSON-LD</li>
+                <li><strong>src/template.html</strong> — the page shell and the calculator</li>
+                <li><strong>src/test.js</strong> — checks that run the calculator against the built pages</li>
+              </ul>
+              <p>
+                Found a wrong number, or want a gauge added? Open an issue or send a pull request
+                at <a href="https://github.com/66Ton99/homepage" target="_blank"
+                rel="noopener noreferrer">github.com/66Ton99/homepage</a>. Corrections backed by a
+                datasheet or a standard are especially welcome — the AWG 24–30 rows are the
+                shakiest, since they are indicative for fine-stranded silicone wire rather than
+                taken from a single authoritative table.
+              </p>
             </section>"""
 
 EN = {
@@ -393,6 +415,7 @@ EN = {
             ("#how-it-works", "How the calculator works"),
             ("#conversions", "AWG to mm² conversions"),
             ("#faq", "Frequently asked questions"),
+            ("#source", "Read the source"),
             ("/uk/awg-to-amps", "Українська версія"),
         ]
     ),
@@ -621,6 +644,28 @@ UK_CONTENT = f"""            <section id="how-to-read">
             <section id="faq">
               <h2>Часті запитання</h2>
 {faq_html(UK_FAQ)}
+            </section>
+
+            <section id="source">
+              <h2>Подивитися код або виправити його</h2>
+              <p>
+                Ця сторінка з відкритим кодом. Дані таблиці, обидва переклади, калькулятор і цей
+                текст створює один генератор — саме тому англійська та українська версії не можуть
+                розійтися.
+              </p>
+              <ul>
+                <li><strong>src/build.py</strong> — таблиця струмів, тексти, FAQ і розмітка JSON-LD</li>
+                <li><strong>src/template.html</strong> — каркас сторінки та калькулятор</li>
+                <li><strong>src/test.js</strong> — тести, що ганяють калькулятор на зібраних сторінках</li>
+              </ul>
+              <p>
+                Помітили хибне число або хочете додати калібр? Створіть issue чи надішліть pull
+                request на <a href="https://github.com/66Ton99/homepage" target="_blank"
+                rel="noopener noreferrer">github.com/66Ton99/homepage</a>. Особливо вітаються
+                виправлення з посиланням на даташит або стандарт — найменш надійні рядки AWG 24–30,
+                бо вони орієнтовні для тонкожильного силіконового дроту, а не взяті з однієї
+                авторитетної таблиці.
+              </p>
             </section>"""
 
 UK = {
@@ -729,6 +774,7 @@ UK = {
             ("#how-it-works", "Як працює калькулятор"),
             ("#conversions", "AWG у мм²"),
             ("#faq", "Часті запитання"),
+            ("#source", "Подивитися код"),
             ("/awg-to-amps", "English version"),
         ]
     ),
