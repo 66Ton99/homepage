@@ -146,8 +146,9 @@ async function runModes(file, label, expect) {
 
   pick("ac3");   // voltage should follow the mode to 400 V
   check("voltage follows the mode", $("systemVoltage").value, "400");
-  checkClose("0 AWG 3-phase run @3% on 400 V", cellNum("0", "js-len"), 189.1, 1);
-  checkClose("22 AWG 3-phase run @3% on 400 V", cellNum("22", "js-len"), 25.8, 0.5);
+  // the run gets *longer* on three-phase: the rated current it must hold is lower
+  checkClose("0 AWG 3-phase run @3% on 400 V", cellNum("0", "js-len"), 206.7, 1);
+  checkClose("22 AWG 3-phase run @3% on 400 V", cellNum("22", "js-len"), 28.2, 0.5);
   check("length header names the mode", $("thLengthUnit").textContent.includes("400"), true);
 
   // a voltage the reader typed must survive a mode change
@@ -160,7 +161,8 @@ async function runModes(file, label, expect) {
   pick("ac3");
   $("frequency").value = "400";
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "104");
+  // 400 Hz skin+proximity on top of the three-phase conductor-count factor
+  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "95");
   check("22 AWG ampacity unchanged at 400 Hz", cellNum("22", "js-b60").toFixed(0), "5");
   checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.381, 0.003);
   check("resistance header names the frequency", $("thResistUnit").textContent.includes("400"), true);
@@ -168,7 +170,25 @@ async function runModes(file, label, expect) {
   pick("dc");
   check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.327");
 
-  // ---- the same 112 A buys very different power per mode ----
+  // ---- three loaded conductors derate the in-cable columns ----
+  pick("dc");
+  $("frequency").value = "50";
+  $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  const dcB60 = cellNum("0", "js-b60");
+  const dcF60 = cellNum("0", "js-f60");
+  check("0 AWG in-cable on DC", dcB60.toFixed(0), "112");
+
+  pick("ac1");
+  check("single-phase matches DC (both are 2 loaded conductors)",
+        cellNum("0", "js-b60").toFixed(0), dcB60.toFixed(0));
+
+  pick("ac3");
+  check("three-phase derates the in-cable column", cellNum("0", "js-b60").toFixed(0), "102");
+  check("three-phase derates 200 C too", cellNum("0", "js-b200").toFixed(0), "205");
+  check("free air is a lone conductor, unchanged", cellNum("0", "js-f60").toFixed(0), dcF60.toFixed(0));
+  checkClose("small gauges derate too", cellNum("22", "js-b60"), 4.6, 0.1);
+
+  // ---- the same amps buy very different power per mode ----
   pick("dc");
   $("frequency").value = "50";
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
@@ -182,7 +202,8 @@ async function runModes(file, label, expect) {
   checkClose("0 AWG delivers ~25.8 kW on 230 V 1-phase", cellNum("0", "js-p"), 25.8, 0.2);
 
   pick("ac3");
-  checkClose("0 AWG delivers ~77.6 kW on 400 V 3-phase", cellNum("0", "js-p"), 77.6, 0.5);
+  // 112 A x 0.915 = 102.5 A carried into the power column
+  checkClose("0 AWG delivers ~71 kW on 400 V 3-phase", cellNum("0", "js-p"), 71.0, 0.5);
   check("power header names the mode", $("thPowerUnit").textContent.includes("400"), true);
 }
 

@@ -1557,6 +1557,14 @@
       const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
       const MODE_KEY = "awg-current-mode";
       const MODE_VOLTAGE = { dc: 24, ac1: 230, ac3: 400 };
+
+      // Three-phase puts three current-carrying conductors in the cable where DC
+      // and single-phase put two, so the same copper has to shed 1.5x the heat
+      // and each conductor is rated lower. IEC 60364-5-52 tabulates this as
+      // separate "2 loaded conductors" and "3 loaded conductors" columns; across
+      // its copper tables the ratio averages 0.915. This is an order of magnitude
+      // larger than the skin effect and applies at any frequency.
+      const PHASE_FACTOR = { dc: 1, ac1: 1, ac3: 0.915 };
       let lastMode = "dc";
 
       const $ = (id) => document.getElementById(id);
@@ -1681,15 +1689,19 @@
             if (cell) cell.textContent = text;
           };
 
-          [["b60", "bundle60"], ["f60", "free60"], ["b200", "bundle200"], ["f200", "free200"]]
-            .forEach(([cls, key]) => {
-              const value = row[key] * derate;
+          // The free-air columns describe one isolated conductor, which is the
+          // same object in every mode; only the in-cable columns see the extra
+          // phase conductor.
+          [["b60", "bundle60", true], ["f60", "free60", false],
+           ["b200", "bundle200", true], ["f200", "free200", false]]
+            .forEach(([cls, key, bundled]) => {
+              const value = row[key] * derate * (bundled ? PHASE_FACTOR[mode] : 1);
               set(".js-" + cls, formatNumber(value, value < 10 ? 1 : 0) + " " + I18N.uAmp);
             });
 
           set(".js-r", formatResistance(resistance * 1000));
 
-          const rated = row.bundle60 * derate;
+          const rated = row.bundle60 * derate * PHASE_FACTOR[mode];
           const metres = voltage > 0 && rated > 0
             ? (0.03 * voltage) / (runFactor * rated * resistance * appliedPowerFactor)
             : 0;
@@ -1773,7 +1785,9 @@
           const ambientFactor = interpolateFactor(ambientFactors[thermalKey], ambient);
           return {
             ambientFactor,
-            ampacity: baseAmpacity * ambientFactor * groupingFactor,
+            ampacity:
+              baseAmpacity * ambientFactor * groupingFactor *
+              (freeAir ? 1 : PHASE_FACTOR[mode]),
             context: thermalKey + I18N.conductorSuffix
           };
         }

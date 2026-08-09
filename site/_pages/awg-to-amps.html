@@ -2041,12 +2041,27 @@
                 stops being negligible and you should size from the cable's published R and X.
               </p>
 
-              <h3>5. Why the ampacity table does not change for AC</h3>
+              <h3>5. Why three-phase derates, and why frequency mostly does not</h3>
               <p>
-                Alternating current pushes charge toward the conductor surface, so the effective resistance
-                rises. How much depends on how the skin depth compares to the conductor radius — and in
-                copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
-                has a radius of only 4.1&nbsp;mm.
+                Two separate things are at work, and they are wildly different in size.
+              </p>
+              <p>
+                <strong>Conductor count is the big one.</strong> A three-phase circuit puts three
+                current-carrying conductors in the cable where DC and single-phase put two. Three
+                conductors each dissipating <em>I</em>²<em>R</em> make half again as much heat in the same
+                bundle, so each one has to be rated lower. IEC&nbsp;60364-5-52 handles this by publishing
+                separate <em>2 loaded conductors</em> and <em>3 loaded conductors</em> columns; across its
+                copper tables the ratio averages <strong>0.915</strong>, and that is the factor applied to
+                the in-cable columns here. It is a frequency-independent, roughly 9&nbsp;% cut — the reason
+                0&nbsp;AWG reads 112&nbsp;A on DC and 102&nbsp;A on three-phase. The free-air columns
+                describe one isolated conductor, which is the same object in every mode, so they do not
+                move.
+              </p>
+              <p>
+                <strong>Frequency is the small one</strong>, at least at mains. Alternating current pushes
+                charge toward the conductor surface, so resistance rises — but in copper at 50&nbsp;Hz the
+                skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor has a radius of only
+                4.1&nbsp;mm.
               </p>
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
@@ -2054,8 +2069,8 @@
                 dominates once you leave mains frequency. Together they come to <strong>0.3&nbsp;%</strong>
                 at 50&nbsp;Hz for 0&nbsp;AWG and far less for everything thinner. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
-                spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
-                columns would be inventing precision that is not there.
+                spread between one manufacturer's datasheet and another's. So the frequency term alone would not justify a
+                separate AC column; the conductor count is what does.
               </p>
               <p>
                 It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
@@ -2179,7 +2194,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "mm²", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted out and back, now scaled by the power factor. Ampacity is unchanged from DC: at 50–60 Hz the skin effect is under 0.1% even at 0 AWG.", "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way run, and the three phase conductors are exactly the ≤3 conductors case in the table."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG conductor, so the AC resistance rise stays under 0.1%.", "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase conductors are the ≤3 conductors case. What changes is the voltage drop, not the current the copper can carry."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
+      const I18N = {"uArea": "mm²", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted out and back, now scaled by the power factor. Ampacity is unchanged from DC: at 50–60 Hz the skin effect is under 0.1% even at 0 AWG.", "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG conductor, so the AC resistance rise stays under 0.1%.", "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded conductors instead of two. The free-air columns describe a single isolated conductor and are unchanged."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
       const LOCALE = "en-US";
 
       const wireRows = [
@@ -2224,6 +2239,14 @@
       const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
       const MODE_KEY = "awg-current-mode";
       const MODE_VOLTAGE = { dc: 24, ac1: 230, ac3: 400 };
+
+      // Three-phase puts three current-carrying conductors in the cable where DC
+      // and single-phase put two, so the same copper has to shed 1.5x the heat
+      // and each conductor is rated lower. IEC 60364-5-52 tabulates this as
+      // separate "2 loaded conductors" and "3 loaded conductors" columns; across
+      // its copper tables the ratio averages 0.915. This is an order of magnitude
+      // larger than the skin effect and applies at any frequency.
+      const PHASE_FACTOR = { dc: 1, ac1: 1, ac3: 0.915 };
       let lastMode = "dc";
 
       const $ = (id) => document.getElementById(id);
@@ -2348,15 +2371,19 @@
             if (cell) cell.textContent = text;
           };
 
-          [["b60", "bundle60"], ["f60", "free60"], ["b200", "bundle200"], ["f200", "free200"]]
-            .forEach(([cls, key]) => {
-              const value = row[key] * derate;
+          // The free-air columns describe one isolated conductor, which is the
+          // same object in every mode; only the in-cable columns see the extra
+          // phase conductor.
+          [["b60", "bundle60", true], ["f60", "free60", false],
+           ["b200", "bundle200", true], ["f200", "free200", false]]
+            .forEach(([cls, key, bundled]) => {
+              const value = row[key] * derate * (bundled ? PHASE_FACTOR[mode] : 1);
               set(".js-" + cls, formatNumber(value, value < 10 ? 1 : 0) + " " + I18N.uAmp);
             });
 
           set(".js-r", formatResistance(resistance * 1000));
 
-          const rated = row.bundle60 * derate;
+          const rated = row.bundle60 * derate * PHASE_FACTOR[mode];
           const metres = voltage > 0 && rated > 0
             ? (0.03 * voltage) / (runFactor * rated * resistance * appliedPowerFactor)
             : 0;
@@ -2440,7 +2467,9 @@
           const ambientFactor = interpolateFactor(ambientFactors[thermalKey], ambient);
           return {
             ambientFactor,
-            ampacity: baseAmpacity * ambientFactor * groupingFactor,
+            ampacity:
+              baseAmpacity * ambientFactor * groupingFactor *
+              (freeAir ? 1 : PHASE_FACTOR[mode]),
             context: thermalKey + I18N.conductorSuffix
           };
         }

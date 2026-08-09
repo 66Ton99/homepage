@@ -86,14 +86,22 @@ not change.
 Every data cell in the table is recomputed when the mode changes, but not every
 column moves by the same amount, and that is deliberate.
 
-**The four ampacity columns barely move at mains frequency.** At 50–60 Hz the
-skin depth in copper is ~9.4 mm, while even a 0 AWG conductor has a 4.1 mm
-radius. Both skin and proximity effects are computed per IEC 60287-1-1 —
-proximity dominates as soon as you leave mains frequency — and together they
-come to 0.3 % at 50 Hz for 0 AWG. The derate is applied for real,
-`I / √(1 + ys + yp)`, so it is honest rather than hardcoded, and it shows up
-where it actually exists: 0 AWG drops from 112 A to 104 A at 400 Hz and 88 A at
-1 kHz. Inventing a bigger split at 50 Hz would be fabricating precision.
+**The ampacity columns move for three-phase**, and this is the large effect. A
+three-phase circuit puts three current-carrying conductors in the cable where DC
+and single-phase put two; three conductors dissipating I²R make half again as
+much heat in the same bundle. IEC 60364-5-52 publishes this as separate
+"2 loaded conductors" and "3 loaded conductors" columns, and across its copper
+tables the ratio averages **0.915** — the factor applied to the in-cable columns
+here. 0 AWG reads 112 A on DC and single-phase, 102 A on three-phase. The
+free-air columns describe one isolated conductor, the same object in every mode,
+so they do not move.
+
+**Frequency is the small effect.** Skin and proximity are computed per
+IEC 60287-1-1 (proximity dominates above mains frequency) and together come to
+just 0.3 % at 50 Hz for 0 AWG. The derate is real rather than hardcoded, so it
+shows up where it exists: at 400 Hz that same conductor drops another 8 %. On
+its own the frequency term would not justify a separate AC column — the
+conductor count is what does.
 
 **The maximum-load column is the honest answer to "the current is different on
 AC".** Amperes are amperes — copper does not care where the heat came from — but
@@ -108,11 +116,14 @@ between DC and the AC value at the chosen frequency. Maximum run is the longest
 one-way length holding the drop within 3 % at the row's rated current, using the
 mode's own drop formula — which is where DC and three-phase genuinely diverge:
 
-| 0 AWG | voltage | max run @3 % | max load |
-|---|---|---|---|
-| DC | 24 V | 9.8 m | 2.7 kW |
-| AC 1-phase | 230 V | 94 m | 26 kW |
-| AC 3-phase | 400 V | 189 m | 78 kW |
+| 0 AWG | in-cable 60 °C | voltage | max run @3 % | max load |
+|---|---|---|---|---|
+| DC | 112 A | 24 V | 9.8 m | 2.7 kW |
+| AC 1-phase | 112 A | 230 V | 94 m | 26 kW |
+| AC 3-phase | 102 A | 400 V | 207 m | 71 kW |
+
+The three-phase run comes out *longer* despite the √3, because the current it
+has to hold is lower.
 
 The system voltage follows the mode (24 / 230 / 400 V) unless the reader has
 typed their own, which is never overwritten.

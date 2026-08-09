@@ -360,12 +360,27 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 stops being negligible and you should size from the cable's published R and X.
               </p>
 
-              <h3>5. Why the ampacity table does not change for AC</h3>
+              <h3>5. Why three-phase derates, and why frequency mostly does not</h3>
               <p>
-                Alternating current pushes charge toward the conductor surface, so the effective resistance
-                rises. How much depends on how the skin depth compares to the conductor radius — and in
-                copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
-                has a radius of only 4.1&nbsp;mm.
+                Two separate things are at work, and they are wildly different in size.
+              </p>
+              <p>
+                <strong>Conductor count is the big one.</strong> A three-phase circuit puts three
+                current-carrying conductors in the cable where DC and single-phase put two. Three
+                conductors each dissipating <em>I</em>²<em>R</em> make half again as much heat in the same
+                bundle, so each one has to be rated lower. IEC&nbsp;60364-5-52 handles this by publishing
+                separate <em>2 loaded conductors</em> and <em>3 loaded conductors</em> columns; across its
+                copper tables the ratio averages <strong>0.915</strong>, and that is the factor applied to
+                the in-cable columns here. It is a frequency-independent, roughly 9&nbsp;% cut — the reason
+                0&nbsp;AWG reads 112&nbsp;A on DC and 102&nbsp;A on three-phase. The free-air columns
+                describe one isolated conductor, which is the same object in every mode, so they do not
+                move.
+              </p>
+              <p>
+                <strong>Frequency is the small one</strong>, at least at mains. Alternating current pushes
+                charge toward the conductor surface, so resistance rises — but in copper at 50&nbsp;Hz the
+                skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor has a radius of only
+                4.1&nbsp;mm.
               </p>
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
@@ -373,8 +388,8 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 dominates once you leave mains frequency. Together they come to <strong>0.3&nbsp;%</strong>
                 at 50&nbsp;Hz for 0&nbsp;AWG and far less for everything thinner. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
-                spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
-                columns would be inventing precision that is not there.
+                spread between one manufacturer's datasheet and another's. So the frequency term alone would not justify a
+                separate AC column; the conductor count is what does.
               </p>
               <p>
                 It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
@@ -593,17 +608,16 @@ EN = {
                 "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted "
                 "out and back, now scaled by the power factor. Ampacity is unchanged from DC: at "
                 "50–60 Hz the skin effect is under 0.1% even at 0 AWG.",
-                "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way "
-                "run, and the three phase conductors are exactly the ≤3 conductors case in the table.",
+                "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run.",
             },
             "tableModeNote": {
                 "dc": "These figures are for direct current.",
                 "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in "
                 "copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG "
                 "conductor, so the AC resistance rise stays under 0.1%.",
-                "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase "
-                "conductors are the ≤3 conductors case. What changes is the voltage drop, not the "
-                "current the copper can carry.",
+                "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded "
+                "conductors instead of two. The free-air columns describe a single isolated conductor "
+                "and are unchanged.",
             },
             "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its "
             "validated range, so treat the AC resistance as indicative only.",
@@ -850,12 +864,26 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 перестає бути знехтуваним — там рахуйте за published R і X конкретного кабелю.
               </p>
 
-              <h3>5. Чому таблиця струмів не змінюється для змінного струму</h3>
+              <h3>5. Чому трифаза знижує струм, а частота — здебільшого ні</h3>
               <p>
-                Змінний струм витісняється до поверхні провідника, тож ефективний опір зростає. Наскільки —
-                залежить від співвідношення глибини скін-шару й радіуса жили. У міді на 50&nbsp;Гц глибина
-                скін-шару становить близько 9,4&nbsp;мм, тоді як навіть жила 0&nbsp;AWG має радіус лише
-                4,1&nbsp;мм.
+                Тут діють дві різні причини, і за величиною вони незіставні.
+              </p>
+              <p>
+                <strong>Кількість жил — головна.</strong> Трифазне коло має в кабелі три струмопровідні
+                жили там, де постійне й однофазне мають дві. Три жили, кожна з яких виділяє
+                <em>I</em>²<em>R</em>, дають у півтора раза більше тепла в тому самому пучку, тож кожна має
+                нести менше. IEC&nbsp;60364-5-52 подає це окремими колонками <em>2 навантажені жили</em> та
+                <em>3 навантажені жили</em>; по мідних таблицях це відношення в середньому дорівнює
+                <strong>0,915</strong> — саме цей коефіцієнт застосовано тут до колонок «у кабелі». Він не
+                залежить від частоти й дає зниження приблизно на 9&nbsp;%: тому 0&nbsp;AWG показує
+                112&nbsp;А для постійного струму і 102&nbsp;А для трифазного. Колонки вільного повітря
+                описують одну ізольовану жилу — той самий об'єкт у будь-якому режимі, тож вони не
+                змінюються.
+              </p>
+              <p>
+                <strong>Частота — другорядна</strong>, принаймні на мережевій. Змінний струм витісняється до
+                поверхні жили, тож опір зростає, але в міді на 50&nbsp;Гц глибина скін-шару становить
+                близько 9,4&nbsp;мм, тоді як навіть жила 0&nbsp;AWG має радіус лише 4,1&nbsp;мм.
               </p>
               <p class="formula"><span>Скін-ефект і ефект близькості, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0,312 (d/s)² + 1,18 / (y<sub>s</sub> + 0,27)]</span></p>
               <p>
@@ -863,8 +891,8 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 поза мережевою частотою. Разом вони дають <strong>0,3&nbsp;%</strong> на 50&nbsp;Гц для
                 0&nbsp;AWG і значно менше для всього тоншого. Допустимий струм
                 масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
-                значно менше за розбіжність між даташитами двох виробників. Публікувати окремі колонки для
-                постійного та змінного струму означало б вигадати точність, якої немає.
+                значно менше за розбіжність між даташитами двох виробників. Тож сама лише частота не виправдала б окремої колонки для
+                змінного струму; її виправдовує кількість жил.
               </p>
               <p>
                 Вище за частотою це вже важить. На 400&nbsp;Гц — авіація та деякі приводи — 0&nbsp;AWG
@@ -1085,7 +1113,7 @@ UK = {
             "tableModeNote": {
                 "dc": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u043d\u0430\u0432\u0435\u0434\u0435\u043d\u043e \u0434\u043b\u044f \u043f\u043e\u0441\u0442\u0456\u0439\u043d\u043e\u0433\u043e \u0441\u0442\u0440\u0443\u043c\u0443.",
                 "ac1": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u0431\u0435\u0437 \u0437\u043c\u0456\u043d \u0434\u0456\u044e\u0442\u044c \u0456 \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0444\u0430\u0437\u043d\u043e\u0433\u043e \u0437\u043c\u0456\u043d\u043d\u043e\u0433\u043e \u0441\u0442\u0440\u0443\u043c\u0443 50\u201360 \u0413\u0446: \u0433\u043b\u0438\u0431\u0438\u043d\u0430 \u0441\u043a\u0456\u043d-\u0448\u0430\u0440\u0443 \u0432 \u043c\u0456\u0434\u0456 \u2014 \u0431\u043b\u0438\u0437\u044c\u043a\u043e 9,4 \u043c\u043c \u043d\u0430 50 \u0413\u0446, \u0449\u043e \u043d\u0430\u0431\u0430\u0433\u0430\u0442\u043e \u0431\u0456\u043b\u044c\u0448\u0435 \u0437\u0430 \u0440\u0430\u0434\u0456\u0443\u0441 4,1 \u043c\u043c \u043d\u0430\u0432\u0456\u0442\u044c \u0443 \u0436\u0438\u043b\u0438 0 AWG, \u0442\u043e\u0436 \u043f\u0440\u0438\u0440\u0456\u0441\u0442 \u043e\u043f\u043e\u0440\u0443 \u043b\u0438\u0448\u0430\u0454\u0442\u044c\u0441\u044f \u043c\u0435\u043d\u0448\u0438\u043c \u0437\u0430 0,1 %.",
-                "ac3": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u0431\u0435\u0437 \u0437\u043c\u0456\u043d \u0434\u0456\u044e\u0442\u044c \u0456 \u0434\u043b\u044f \u0442\u0440\u0438\u0444\u0430\u0437\u043d\u043e\u0433\u043e \u0437\u043c\u0456\u043d\u043d\u043e\u0433\u043e 50\u201360 \u0413\u0446, \u0430 \u0442\u0440\u0438 \u0444\u0430\u0437\u043d\u0456 \u0436\u0438\u043b\u0438 \u2014 \u0446\u0435 \u0432\u0438\u043f\u0430\u0434\u043e\u043a \u00ab\u22643 \u0436\u0438\u043b\u0438\u00bb. \u0417\u043c\u0456\u043d\u044e\u0454\u0442\u044c\u0441\u044f \u043f\u0430\u0434\u0456\u043d\u043d\u044f \u043d\u0430\u043f\u0440\u0443\u0433\u0438, \u0430 \u043d\u0435 \u0441\u0442\u0440\u0443\u043c, \u044f\u043a\u0438\u0439 \u0432\u0438\u0442\u0440\u0438\u043c\u0430\u0454 \u043c\u0456\u0434\u044c.",
+                "ac3": "\u041a\u043e\u043b\u043e\u043d\u043a\u0438 \u00ab\u0443 \u043a\u0430\u0431\u0435\u043b\u0456\u00bb \u0437\u043d\u0438\u0436\u0435\u043d\u043e \u043d\u0430 \u043a\u043e\u0435\u0444\u0456\u0446\u0456\u0454\u043d\u0442 0,915 \u0437\u0430 IEC 60364-5-52: \u0442\u0440\u0438 \u0441\u0442\u0440\u0443\u043c\u043e\u043f\u0440\u043e\u0432\u0456\u0434\u043d\u0456 \u0436\u0438\u043b\u0438 \u0433\u0440\u0456\u044e\u0442\u044c \u043a\u0430\u0431\u0435\u043b\u044c \u0441\u0438\u043b\u044c\u043d\u0456\u0448\u0435 \u0437\u0430 \u0434\u0432\u0456. \u041a\u043e\u043b\u043e\u043d\u043a\u0438 \u0432\u0456\u043b\u044c\u043d\u043e\u0433\u043e \u043f\u043e\u0432\u0456\u0442\u0440\u044f \u043e\u043f\u0438\u0441\u0443\u044e\u0442\u044c \u043e\u0434\u043d\u0443 \u0436\u0438\u043b\u0443 \u0456 \u043d\u0435 \u0437\u043c\u0456\u043d\u044e\u044e\u0442\u044c\u0441\u044f.",
             },
             "msgSkinRange": "\u041f\u043e\u043d\u0430\u0434 \u043f\u0440\u0438\u0431\u043b\u0438\u0437\u043d\u043e 1 \u043a\u0413\u0446 \u043d\u0430 \u043d\u0430\u0439\u0431\u0456\u043b\u044c\u0448\u0438\u0445 \u043a\u0430\u043b\u0456\u0431\u0440\u0430\u0445 \u0444\u043e\u0440\u043c\u0443\u043b\u0430 \u0441\u043a\u0456\u043d-\u0435\u0444\u0435\u043a\u0442\u0443 \u0432\u0438\u0445\u043e\u0434\u0438\u0442\u044c \u0437\u0430 \u043c\u0435\u0436\u0456 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0435\u043d\u043e\u0433\u043e \u0434\u0456\u0430\u043f\u0430\u0437\u043e\u043d\u0443, \u0442\u043e\u0436 \u043e\u043f\u0456\u0440 \u043d\u0430 \u0417\u0421 \u0432\u0432\u0430\u0436\u0430\u0439\u0442\u0435 \u043e\u0440\u0456\u0454\u043d\u0442\u043e\u0432\u043d\u0438\u043c.",
             "uAmp": "А",
