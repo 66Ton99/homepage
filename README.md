@@ -40,7 +40,8 @@ type so the two languages cannot drift apart.
 - `src/system-map.svg` — homepage artwork, inlined as a data URI at build time
   with its labels translated per language
 - `src/make_og.py` — the four 1200×630 Open Graph cards
-- `src/test.js` — jsdom checks of the calculator against the rendered pages
+- `src/test.js` — jsdom checks of the calculator against the rendered pages,
+  including the DC / AC 1-phase / AC 3-phase behaviour
 - `src/make_home_template.py` — one-shot, only rerun if the homepage is redesigned
 
 ```bash
@@ -76,6 +77,38 @@ authoritative table.
 
 Edit `src/build.py`, never `site/_pages/*.html` — those are build output. Run
 `python3 build.py && node test.js` before opening a pull request.
+
+## The DC / AC toggle
+
+The toggle above the table is deliberately honest about what it does and does
+not change.
+
+**Ampacity does not change.** At 50–60 Hz the skin depth in copper is ~9.4 mm,
+while even a 0 AWG conductor has a 4.1 mm radius. Per IEC 60287-1-1 the
+resistance rise is 0.08 % at 0 AWG and under 0.01 % below 4 AWG — far inside the
+spread between manufacturers' datasheets. Publishing separate DC and AC ampacity
+columns would be inventing precision that is not there, so the table's numbers
+stay put and the note under it explains why.
+
+**Voltage drop does change**, and that is the point:
+
+| | drop | I²R conductors |
+|---|---|---|
+| DC | `2·I·R·L` | 2 |
+| AC 1-phase | `2·I·R·L·cos φ` | 2 |
+| AC 3-phase | `√3·I·R·L·cos φ` | 3 |
+
+The AC modes also expose a frequency input, because skin effect does matter
+higher up: 0 AWG picks up 4.7 % at 400 Hz. The IEC fit holds for xs ≤ 2.8
+(~1 kHz on the largest gauge), and above that the calculator flags its own
+output as indicative rather than silently extrapolating.
+
+Reactance is neglected throughout — at these cross-sections and run lengths it
+is below the uncertainty in the resistance, but that assumption breaks on long
+three-phase runs in conduit.
+
+Mode is stored in `localStorage`, not in the URL, so it does not create
+crawlable duplicates of the page.
 
 ## SEO notes
 

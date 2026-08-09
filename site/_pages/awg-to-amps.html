@@ -241,6 +241,14 @@
         },
         {
           "@type": "Question",
+          "name": "Does the ampacity change between DC and AC?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not meaningfully at mains frequency. Alternating current crowds toward the conductor surface, but the skin depth in copper is about 9.4&nbsp;mm at 50&nbsp;Hz and 8.5&nbsp;mm at 60&nbsp;Hz, while a 0&nbsp;AWG conductor has a radius of just 4.1&nbsp;mm. By IEC&nbsp;60287 the resistance rise works out at 0.08&nbsp;% for 0&nbsp;AWG and under 0.01&nbsp;% below 4&nbsp;AWG, so the same table serves DC, single-phase and three-phase. What the current type really changes is the voltage drop: two conductors out and back for DC and single-phase, √3 line-to-line for three-phase, with the power factor on top. Skin effect only becomes worth counting in the hundreds of hertz, which is why the calculator asks for a frequency."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Is this chart the same as NEC or IEC ampacity?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -276,6 +284,12 @@
 
       * {
         box-sizing: border-box;
+      }
+
+      /* Class rules like `.field { display: grid }` outrank the UA stylesheet's
+         `[hidden] { display: none }`, so hidden fields would stay visible. */
+      [hidden] {
+        display: none !important;
       }
 
       html {
@@ -549,6 +563,82 @@
         font-size: 10px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+      }
+
+      .modebar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px 20px;
+        margin-bottom: 22px;
+        border: 1px solid var(--line);
+        padding: 16px 20px;
+        background: var(--panel);
+        box-shadow: 12px 12px 0 var(--shadow);
+      }
+
+      .modeswitch {
+        display: inline-flex;
+        border: 1px solid var(--line);
+      }
+
+      .modeswitch label {
+        position: relative;
+        border-right: 1px solid var(--line-soft);
+      }
+
+      .modeswitch label:last-child {
+        border-right: 0;
+      }
+
+      .modeswitch input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .modeswitch span {
+        display: block;
+        padding: 9px 15px;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        transition: background 160ms ease, color 160ms ease;
+      }
+
+      .modeswitch span:hover {
+        color: var(--accent-soft);
+        background: rgba(125, 116, 102, 0.12);
+      }
+
+      .modeswitch input:checked + span {
+        color: var(--bg);
+        background: var(--accent);
+        font-weight: 700;
+      }
+
+      .modeswitch input:focus-visible + span {
+        outline: 1px solid var(--accent);
+        outline-offset: -3px;
+      }
+
+      .modebar-note {
+        flex: 1 1 320px;
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .modebar-note strong {
+        color: var(--accent-soft);
+        font-weight: 500;
       }
 
       .layout {
@@ -1006,7 +1096,7 @@
 
       .drop-card {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
         gap: 12px;
         margin-top: 12px;
         color: var(--muted);
@@ -1424,6 +1514,25 @@
           </div>
         </section>
 
+        <div class="modebar" id="modeBar" role="radiogroup" aria-labelledby="modeBarLabel">
+          <span class="section-kicker" id="modeBarLabel">Current type</span>
+          <div class="modeswitch">
+            <label>
+              <input type="radio" name="currentMode" value="dc" checked />
+              <span>DC</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac1" />
+              <span>AC 1-phase</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac3" />
+              <span>AC 3-phase</span>
+            </label>
+          </div>
+          <p class="modebar-note" id="modeNote"><strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.</p>
+        </div>
+
         <section class="layout" aria-label="AWG chart and wire gauge calculator">
           <article class="panel table-panel" id="chart">
             <div class="panel-header">
@@ -1589,7 +1698,7 @@
               </table>
             </div>
 
-            <div class="table-note"><strong>Conditions:</strong> copper lead wire, 30°C ambient. The 60°C columns are the conservative everyday reference. The 200°C columns are high-temperature conductor limits, not touch-safe or connector-safe operating targets. More than three conductors require further derating. AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact cable datasheet.</div>
+            <div class="table-note"><strong>Conditions:</strong> copper lead wire, 30°C ambient. The 60°C columns are the conservative everyday reference. The 200°C columns are high-temperature conductor limits, not touch-safe or connector-safe operating targets. More than three conductors require further derating. AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact cable datasheet. <span id="tableModeNote">These figures are for direct current.</span></div>
           </article>
 
           <aside class="panel calculator" aria-labelledby="calculator-title" id="calculator">
@@ -1634,7 +1743,7 @@
                   </summary>
                   <div class="form-grid">
                     <div class="field">
-                      <label for="systemVoltage">System voltage / V <span class="optional-tag">optional</span></label>
+                      <label for="systemVoltage"><span id="voltageLabel">System voltage / V</span> <span class="optional-tag">optional</span></label>
                       <input id="systemVoltage" name="systemVoltage" type="number" min="0" step="0.1" value="24" placeholder="24" inputmode="decimal" />
                     </div>
                     <div class="field">
@@ -1648,6 +1757,14 @@
                     <div class="field">
                       <label for="ambient">Ambient / °C <span class="optional-tag">optional</span></label>
                       <input id="ambient" name="ambient" type="number" min="-50" step="1" value="30" placeholder="30" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="frequency">Frequency / Hz</label>
+                      <input id="frequency" name="frequency" type="number" min="0" max="1000" step="1" value="50" placeholder="50" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="powerFactor">Power factor cos φ</label>
+                      <input id="powerFactor" name="powerFactor" type="number" min="0.1" max="1" step="0.01" value="1" placeholder="1" inputmode="decimal" />
                     </div>
                   </div>
                 </details>
@@ -1698,6 +1815,7 @@
                   <div>Voltage drop<strong id="dropResult">—</strong></div>
                   <div>Drop percentage<strong id="dropPercentResult">—</strong></div>
                   <div>Wire loss<strong id="lossResult">—</strong></div>
+                  <div class="ac-only" hidden>Skin effect<strong id="skinResult">—</strong></div>
                 </div>
 
                 <p class="calc-message" id="calcMessage">Enter the real conductor construction to start.</p>
@@ -1779,13 +1897,48 @@
                 comes from the installation selector, and the two multiply.
               </p>
 
-              <h3>4. DC voltage drop and wire loss</h3>
-              <p class="formula"><span>Voltage drop</span>ΔU = I × ρ × 2L / A&nbsp;&nbsp;&nbsp;(ρ = 0.0175 Ω·mm²/m)</p>
+              <h3>4. Voltage drop and wire loss</h3>
+              <p class="formula"><span>Direct current, and single-phase AC</span>ΔU = 2 × I × R × L × cos φ<span
+                style="margin-top:10px">Three-phase AC, line to line</span>ΔU = √3 × I × R × L × cos φ</p>
               <p>
-                Length is counted both ways, because current returns. Power lost as heat in the cable is
-                <em>I</em>²&nbsp;×&nbsp;<em>R</em>. On low-voltage DC systems this, not ampacity, is usually
+                <em>R</em> is the resistance per metre, ρ/<em>A</em>, with ρ&nbsp;=&nbsp;0.0175&nbsp;Ω·mm²/m
+                for copper at 20&nbsp;°C, and <em>L</em> is the one-way run. Direct current and single-phase
+                AC both travel out and back, so the length counts twice. A three-phase circuit does not:
+                the line-to-line drop carries a √3 instead. Power factor is 1 for DC, which is why the
+                first formula collapses to the familiar 2<em>IRL</em>.
+              </p>
+              <p>
+                Power lost as heat is <em>I</em>²<em>R</em> per conductor — two conductors for DC and
+                single-phase, three for three-phase. On low-voltage systems this, not ampacity, is usually
                 what forces a bigger conductor: a 12&nbsp;V circuit allows only 0.36&nbsp;V of drop at the
                 common 3&nbsp;% target.
+              </p>
+              <p>
+                Reactance is left out. For the cross-sections and run lengths this page covers it sits well
+                below the uncertainty in the resistance itself, but on long three-phase runs in conduit it
+                stops being negligible and you should size from the cable's published R and X.
+              </p>
+
+              <h3>5. Why the ampacity table does not change for AC</h3>
+              <p>
+                Alternating current pushes charge toward the conductor surface, so the effective resistance
+                rises. How much depends on how the skin depth compares to the conductor radius — and in
+                copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
+                has a radius of only 4.1&nbsp;mm.
+              </p>
+              <p class="formula"><span>Skin effect, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)</p>
+              <p>
+                Run the numbers and the resistance rise at 50&nbsp;Hz is <strong>0.08&nbsp;%</strong> for
+                0&nbsp;AWG and less than 0.01&nbsp;% for everything below 4&nbsp;AWG. Ampacity scales as
+                1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
+                spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
+                columns would be inventing precision that is not there.
+              </p>
+              <p>
+                It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
+                0&nbsp;AWG picks up 4.7&nbsp;%, which is why the calculator takes a frequency rather than
+                assuming mains. The published fit holds to x<sub>s</sub>&nbsp;≤&nbsp;2.8, roughly 1&nbsp;kHz
+                on the largest gauge here; above that the calculator flags its own result as indicative.
               </p>
             </section>
 
@@ -1848,6 +2001,10 @@
                 <div class="faq-a"><p>Bundling traps heat, so every conductor in the group carries less. Common factors are 80&nbsp;% for 4–6 current-carrying conductors, 70&nbsp;% for 7–9, 50&nbsp;% for 10–20, 45&nbsp;% for 21–30, 40&nbsp;% for 31–40 and 35&nbsp;% beyond that. Ambient temperature derates on top of grouping, and the two multiply. Conductors that never carry current at the same time, and neutrals in a balanced circuit, usually do not count towards the group.</p></div>
               </details>
               <details class="faq-item">
+                <summary class="faq-q"><h3>Does the ampacity change between DC and AC?</h3></summary>
+                <div class="faq-a"><p>Not meaningfully at mains frequency. Alternating current crowds toward the conductor surface, but the skin depth in copper is about 9.4&nbsp;mm at 50&nbsp;Hz and 8.5&nbsp;mm at 60&nbsp;Hz, while a 0&nbsp;AWG conductor has a radius of just 4.1&nbsp;mm. By IEC&nbsp;60287 the resistance rise works out at 0.08&nbsp;% for 0&nbsp;AWG and under 0.01&nbsp;% below 4&nbsp;AWG, so the same table serves DC, single-phase and three-phase. What the current type really changes is the voltage drop: two conductors out and back for DC and single-phase, √3 line-to-line for three-phase, with the power factor on top. Skin effect only becomes worth counting in the hundreds of hertz, which is why the calculator asks for a frequency.</p></div>
+              </details>
+              <details class="faq-item">
                 <summary class="faq-q"><h3>Is this chart the same as NEC or IEC ampacity?</h3></summary>
                 <div class="faq-a"><p>No. This is a reference for flexible, fine-stranded tinned copper lead wire with silicone insulation, of the kind used in equipment wiring, battery leads, robotics and RC. Building installations are governed by NEC&nbsp;310 tables in North America and IEC&nbsp;60364-5-52 in Europe, which assume different insulation, installation methods and correction factors. Use those codes for fixed wiring, and use this chart for equipment and appliance wiring.</p></div>
               </details>
@@ -1899,7 +2056,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "mm²", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
+      const I18N = {"uArea": "mm²", "uHz": "Hz", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted out and back, now scaled by the power factor. Ampacity is unchanged from DC: at 50–60 Hz the skin effect is under 0.1% even at 0 AWG.", "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way run, and the three phase conductors are exactly the ≤3 conductors case in the table."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG conductor, so the AC resistance rise stays under 0.1%.", "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase conductors are the ≤3 conductors case. What changes is the voltage drop, not the current the copper can carry."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
       const LOCALE = "en-US";
 
       const wireRows = [
@@ -1941,6 +2098,9 @@
         "41-plus": 0.35
       };
 
+      const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
+      const MODE_KEY = "awg-current-mode";
+
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
       const tableBody = $("ampacityTableBody");
@@ -1973,6 +2133,22 @@
         return wireRows.reduce((best, row) => {
           return Math.abs(row.area - area) < Math.abs(best.area - area) ? row : best;
         }, wireRows[0]);
+      }
+
+      // Skin effect per IEC 60287-1-1. xs² = (8πf / R') · 1e-7 · ks, with ks = 1
+      // for solid and ordinary stranded round conductors; ys is the fractional
+      // increase in resistance. The published fit holds for xs ≤ 2.8, which for
+      // 0 AWG runs out around 1 kHz — hence the frequency input's cap.
+      function skinEffect(area, frequency) {
+        if (!(area > 0) || !(frequency > 0)) return { ys: 0, xs: 0, valid: true };
+        const rdc = COPPER_RESISTIVITY / area;
+        const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
+        const xs4 = xs2 * xs2;
+        return {
+          ys: xs4 / (192 + 0.8 * xs4),
+          xs: Math.sqrt(xs2),
+          valid: Math.sqrt(xs2) <= 2.8
+        };
       }
 
       function equivalentAwg(area) {
@@ -2031,6 +2207,9 @@
         const ambientInput = readOptionalNumber("ambient");
         const ambient = ambientInput ?? 30;
         const installation = $("installation").value;
+        const mode = currentMode();
+        const frequency = readOptionalNumber("frequency") ?? 50;
+        const powerFactor = Math.min(1, Math.max(0.1, readOptionalNumber("powerFactor") ?? 1));
 
         const area = strandCount * Math.PI * Math.pow(strandDiameter, 2) / 4;
         const equivalent = equivalentAwg(area);
@@ -2052,19 +2231,50 @@
 
         const result60 = thermalResult("60");
         const result200 = thermalResult("200");
-        const copperResistance = 0.0175 / area;
+        // Only the AC modes carry a skin-effect penalty. At 50/60 Hz it stays
+        // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
+        // visible in the hundreds of hertz.
+        const alternating = mode !== "dc";
+        const skin = alternating ? skinEffect(area, frequency) : { ys: 0, xs: 0, valid: true };
+        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.ys);
+        const skinDerate = 1 / Math.sqrt(1 + skin.ys);
+
+        result60.ampacity *= skinDerate;
+        result200.ampacity *= skinDerate;
+
+        // Three-phase drop is √3·I·R·L line-to-line over the one-way run. DC and
+        // single-phase AC both travel out and back, so 2·I·R·L. Reactance is
+        // neglected: at these cross-sections and run lengths it sits well below
+        // the uncertainty in the resistance itself.
+        const threePhase = mode === "ac3";
+        const runFactor = threePhase ? Math.sqrt(3) : 2;
+        const lossConductors = threePhase ? 3 : 2;
+        const appliedPowerFactor = alternating ? powerFactor : 1;
+
         const hasDropInputs = voltage !== null && oneWayLength !== null && loadCurrent !== null;
-        const roundTripLength = hasDropInputs ? oneWayLength * 2 : null;
-        const voltageDrop = hasDropInputs ? loadCurrent * copperResistance * roundTripLength : null;
+        const voltageDrop = hasDropInputs
+          ? loadCurrent * copperResistance * oneWayLength * runFactor * appliedPowerFactor
+          : null;
         const voltageDropPercent = hasDropInputs && voltage > 0 ? (voltageDrop / voltage) * 100 : null;
-        const powerLoss = hasDropInputs ? Math.pow(loadCurrent, 2) * copperResistance * roundTripLength : null;
+        const powerLoss = hasDropInputs
+          ? lossConductors * Math.pow(loadCurrent, 2) * copperResistance * oneWayLength
+          : null;
         const ambientLabel = ambientInput === null ? I18N.ambientDefault : formatNumber(ambient, 0) + I18N.ambientSuffix;
 
         $("areaResult").textContent = formatNumber(area, 2) + " " + I18N.uArea;
         $("gaugeResult").textContent = formatAwg(equivalent);
         $("ampacity60Result").textContent = result60.ambientFactor > 0 ? formatNumber(result60.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
         $("ampacity200Result").textContent = result200.ambientFactor > 0 ? formatNumber(result200.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
-        $("ampacitySharedContext").textContent = installationLabel + " · " + ambientLabel;
+        const modeContext = alternating
+          ? " · " + formatNumber(frequency, 0) + " " + I18N.uHz
+          : "";
+        $("ampacitySharedContext").textContent =
+          I18N.modeShort[mode] + " · " + installationLabel + " · " + ambientLabel + modeContext;
+        // As a ratio this reads "×1" at mains frequency, which tells the reader
+        // nothing. The percentage rise over DC does: +0.002% versus +4.7%.
+        $("skinResult").textContent = alternating
+          ? "+" + formatNumber(skin.ys * 100, 3) + "%"
+          : "—";
         $("ampacity60Context").textContent = result60.context;
         $("ampacity200Context").textContent = result200.context;
         $("dropResult").textContent = Number.isFinite(voltageDrop) ? formatNumber(voltageDrop, 3) + " " + I18N.uVolt : "—";
@@ -2101,7 +2311,49 @@
           $("calcMessage").innerHTML = I18N.msgWithin.replace("{i}", formatNumber(loadCurrent, 1));
         }
 
+        if (alternating && !skin.valid) {
+          $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
+        }
+
         selectTableRow(row.gauge);
+      }
+
+      // The mode radios sit outside the form, so they need their own wiring and
+      // survive a form reset — the mode is a page-wide setting, not an input.
+      function currentMode() {
+        const checked = document.querySelector('input[name="currentMode"]:checked');
+        return checked ? checked.value : "dc";
+      }
+
+      function applyMode() {
+        const mode = currentMode();
+        const alternating = mode !== "dc";
+        document.querySelectorAll(".ac-only").forEach((element) => {
+          element.hidden = !alternating;
+        });
+        $("voltageLabel").textContent = mode === "ac3" ? I18N.labelLineVoltage : I18N.labelSystemVoltage;
+        $("modeNote").innerHTML = I18N.modeNote[mode];
+        $("tableModeNote").innerHTML = I18N.tableModeNote[mode];
+        try {
+          localStorage.setItem(MODE_KEY, mode);
+        } catch (error) {
+          /* storage blocked; the toggle still works for this page view */
+        }
+        calculate();
+      }
+
+      function restoreMode() {
+        let stored = null;
+        try {
+          stored = localStorage.getItem(MODE_KEY);
+        } catch (error) {
+          /* storage blocked */
+        }
+        if (!stored) return;
+        const input = document.querySelector(
+          'input[name="currentMode"][value="' + CSS.escape(stored) + '"]'
+        );
+        if (input) input.checked = true;
       }
 
       function resetForm() {
@@ -2121,8 +2373,10 @@
         if (row) loadTablePreset(row.dataset.gauge);
       });
       $("resetButton").addEventListener("click", resetForm);
+      $("modeBar").addEventListener("change", applyMode);
       syncOptionalResults();
-      calculate();
+      restoreMode();
+      applyMode();
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>

@@ -241,6 +241,14 @@
         },
         {
           "@type": "Question",
+          "name": "Чи змінюється допустимий струм між постійним і змінним струмом?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "На мережевій частоті — практично ні. Змінний струм витісняється до поверхні жили, але глибина скін-шару в міді становить близько 9,4&nbsp;мм на 50&nbsp;Гц і 8,5&nbsp;мм на 60&nbsp;Гц, тоді як жила 0&nbsp;AWG має радіус лише 4,1&nbsp;мм. За IEC&nbsp;60287 приріст опору виходить 0,08&nbsp;% для 0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG, тож та сама таблиця слугує і для постійного, і для однофазного, і для трифазного струму. Рід струму справді змінює падіння напруги: дві жили туди й назад для постійного та однофазного, √3 між лініями для трифазного, плюс cos&nbsp;φ. Скін-ефект варто рахувати лише від сотень герців — тому калькулятор і питає частоту."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Чи це те саме, що допустимі струми за NEC або IEC?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -276,6 +284,12 @@
 
       * {
         box-sizing: border-box;
+      }
+
+      /* Class rules like `.field { display: grid }` outrank the UA stylesheet's
+         `[hidden] { display: none }`, so hidden fields would stay visible. */
+      [hidden] {
+        display: none !important;
       }
 
       html {
@@ -549,6 +563,82 @@
         font-size: 10px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+      }
+
+      .modebar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px 20px;
+        margin-bottom: 22px;
+        border: 1px solid var(--line);
+        padding: 16px 20px;
+        background: var(--panel);
+        box-shadow: 12px 12px 0 var(--shadow);
+      }
+
+      .modeswitch {
+        display: inline-flex;
+        border: 1px solid var(--line);
+      }
+
+      .modeswitch label {
+        position: relative;
+        border-right: 1px solid var(--line-soft);
+      }
+
+      .modeswitch label:last-child {
+        border-right: 0;
+      }
+
+      .modeswitch input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .modeswitch span {
+        display: block;
+        padding: 9px 15px;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        transition: background 160ms ease, color 160ms ease;
+      }
+
+      .modeswitch span:hover {
+        color: var(--accent-soft);
+        background: rgba(125, 116, 102, 0.12);
+      }
+
+      .modeswitch input:checked + span {
+        color: var(--bg);
+        background: var(--accent);
+        font-weight: 700;
+      }
+
+      .modeswitch input:focus-visible + span {
+        outline: 1px solid var(--accent);
+        outline-offset: -3px;
+      }
+
+      .modebar-note {
+        flex: 1 1 320px;
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .modebar-note strong {
+        color: var(--accent-soft);
+        font-weight: 500;
       }
 
       .layout {
@@ -1006,7 +1096,7 @@
 
       .drop-card {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
         gap: 12px;
         margin-top: 12px;
         color: var(--muted);
@@ -1424,6 +1514,25 @@
           </div>
         </section>
 
+        <div class="modebar" id="modeBar" role="radiogroup" aria-labelledby="modeBarLabel">
+          <span class="section-kicker" id="modeBarLabel">Рід струму</span>
+          <div class="modeswitch">
+            <label>
+              <input type="radio" name="currentMode" value="dc" checked />
+              <span>Постійний</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac1" />
+              <span>Змінний 1ф</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac3" />
+              <span>Змінний 3ф</span>
+            </label>
+          </div>
+          <p class="modebar-note" id="modeNote"><strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.</p>
+        </div>
+
         <section class="layout" aria-label="Таблиця AWG і калькулятор перерізу">
           <article class="panel table-panel" id="chart">
             <div class="panel-header">
@@ -1589,7 +1698,7 @@
               </table>
             </div>
 
-            <div class="table-note"><strong>Умови:</strong> мідний монтажний дріт, довкілля 30°C. Колонки 60°C — консервативний щоденний орієнтир. Колонки 200°C — граничні температури провідника, а не безпечні для дотику чи для клем робочі значення. Понад три жили потребують додаткового зниження струму. Рядки AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом конкретного кабелю.</div>
+            <div class="table-note"><strong>Умови:</strong> мідний монтажний дріт, довкілля 30°C. Колонки 60°C — консервативний щоденний орієнтир. Колонки 200°C — граничні температури провідника, а не безпечні для дотику чи для клем робочі значення. Понад три жили потребують додаткового зниження струму. Рядки AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом конкретного кабелю. <span id="tableModeNote">Ці значення наведено для постійного струму.</span></div>
           </article>
 
           <aside class="panel calculator" aria-labelledby="calculator-title" id="calculator">
@@ -1634,7 +1743,7 @@
                   </summary>
                   <div class="form-grid">
                     <div class="field">
-                      <label for="systemVoltage">Напруга системи / В <span class="optional-tag">необов'язково</span></label>
+                      <label for="systemVoltage"><span id="voltageLabel">Напруга системи / В</span> <span class="optional-tag">необов'язково</span></label>
                       <input id="systemVoltage" name="systemVoltage" type="number" min="0" step="0.1" value="24" placeholder="24" inputmode="decimal" />
                     </div>
                     <div class="field">
@@ -1648,6 +1757,14 @@
                     <div class="field">
                       <label for="ambient">Довкілля / °C <span class="optional-tag">необов'язково</span></label>
                       <input id="ambient" name="ambient" type="number" min="-50" step="1" value="30" placeholder="30" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="frequency">Частота / Гц</label>
+                      <input id="frequency" name="frequency" type="number" min="0" max="1000" step="1" value="50" placeholder="50" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="powerFactor">Коеф. потужності cos φ</label>
+                      <input id="powerFactor" name="powerFactor" type="number" min="0.1" max="1" step="0.01" value="1" placeholder="1" inputmode="decimal" />
                     </div>
                   </div>
                 </details>
@@ -1698,6 +1815,7 @@
                   <div>Падіння напруги<strong id="dropResult">—</strong></div>
                   <div>Відсоток падіння<strong id="dropPercentResult">—</strong></div>
                   <div>Втрати в дроті<strong id="lossResult">—</strong></div>
+                  <div class="ac-only" hidden>Скін-ефект<strong id="skinResult">—</strong></div>
                 </div>
 
                 <p class="calc-message" id="calcMessage">Введіть реальну конструкцію провідника, щоб почати.</p>
@@ -1781,12 +1899,47 @@
               </p>
 
               <h3>4. Падіння напруги та втрати в дроті</h3>
-              <p class="formula"><span>Падіння напруги</span>ΔU = I × ρ × 2L / A&nbsp;&nbsp;&nbsp;(ρ = 0,0175 Ом·мм²/м)</p>
+              <p class="formula"><span>Постійний і однофазний змінний</span>ΔU = 2 × I × R × L × cos φ<span
+                style="margin-top:10px">Трифазний змінний, між лініями</span>ΔU = √3 × I × R × L × cos φ</p>
               <p>
-                Довжина рахується в обидва боки, бо струм повертається. Потужність, втрачена в кабелі як
-                тепло, дорівнює <em>I</em>²&nbsp;×&nbsp;<em>R</em>. У низьковольтних системах постійного
-                струму саме це, а не допустимий струм, зазвичай змушує брати товщий провідник: коло
-                12&nbsp;В допускає лише 0,36&nbsp;В падіння за поширеної норми 3&nbsp;%.
+                <em>R</em> — опір одного метра, ρ/<em>A</em>, де ρ&nbsp;=&nbsp;0,0175&nbsp;Ом·мм²/м для міді
+                за 20&nbsp;°C, а <em>L</em> — довжина траси в один бік. Постійний і однофазний змінний струм
+                ідуть туди й назад, тому довжина враховується двічі. Трифазне коло — ні: у падінні між
+                лініями замість двійки стоїть √3. Для постійного струму cos&nbsp;φ дорівнює одиниці, тому
+                перша формула зводиться до звичного 2<em>IRL</em>.
+              </p>
+              <p>
+                Потужність, втрачена як тепло, дорівнює <em>I</em>²<em>R</em> на кожну жилу — дві жили для
+                постійного та однофазного струму, три для трифазного. У низьковольтних системах саме це, а
+                не допустимий струм, зазвичай змушує брати товщий провідник: коло 12&nbsp;В допускає лише
+                0,36&nbsp;В падіння за поширеної норми 3&nbsp;%.
+              </p>
+              <p>
+                Реактивний опір не враховано. Для перерізів і довжин, про які йдеться на цій сторінці, він
+                менший за невизначеність самого активного опору, але на довгих трифазних трасах у трубі він
+                перестає бути знехтуваним — там рахуйте за published R і X конкретного кабелю.
+              </p>
+
+              <h3>5. Чому таблиця струмів не змінюється для змінного струму</h3>
+              <p>
+                Змінний струм витісняється до поверхні провідника, тож ефективний опір зростає. Наскільки —
+                залежить від співвідношення глибини скін-шару й радіуса жили. У міді на 50&nbsp;Гц глибина
+                скін-шару становить близько 9,4&nbsp;мм, тоді як навіть жила 0&nbsp;AWG має радіус лише
+                4,1&nbsp;мм.
+              </p>
+              <p class="formula"><span>Скін-ефект, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)</p>
+              <p>
+                Порахуйте — і приріст опору на 50&nbsp;Гц становить <strong>0,08&nbsp;%</strong> для
+                0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG. Допустимий струм
+                масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
+                значно менше за розбіжність між даташитами двох виробників. Публікувати окремі колонки для
+                постійного та змінного струму означало б вигадати точність, якої немає.
+              </p>
+              <p>
+                Вище за частотою це вже важить. На 400&nbsp;Гц — авіація та деякі приводи — 0&nbsp;AWG
+                додає 4,7&nbsp;%, і саме тому калькулятор питає частоту, а не припускає мережеву. Формула
+                чинна до x<sub>s</sub>&nbsp;≤&nbsp;2,8, тобто приблизно до 1&nbsp;кГц на найбільшому калібрі;
+                вище калькулятор сам позначає результат як орієнтовний.
               </p>
             </section>
 
@@ -1849,6 +2002,10 @@
                 <div class="faq-a"><p>Пучок затримує тепло, тож кожна жила в групі витримує менше. Типові коефіцієнти: 80&nbsp;% для 4–6 струмопровідних жил, 70&nbsp;% для 7–9, 50&nbsp;% для 10–20, 45&nbsp;% для 21–30, 40&nbsp;% для 31–40 і 35&nbsp;% далі. Температура довкілля знижує струм додатково, і два коефіцієнти перемножуються. Жили, що ніколи не працюють одночасно, а також нейтралі у збалансованому колі, зазвичай до групи не зараховуються.</p></div>
               </details>
               <details class="faq-item">
+                <summary class="faq-q"><h3>Чи змінюється допустимий струм між постійним і змінним струмом?</h3></summary>
+                <div class="faq-a"><p>На мережевій частоті — практично ні. Змінний струм витісняється до поверхні жили, але глибина скін-шару в міді становить близько 9,4&nbsp;мм на 50&nbsp;Гц і 8,5&nbsp;мм на 60&nbsp;Гц, тоді як жила 0&nbsp;AWG має радіус лише 4,1&nbsp;мм. За IEC&nbsp;60287 приріст опору виходить 0,08&nbsp;% для 0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG, тож та сама таблиця слугує і для постійного, і для однофазного, і для трифазного струму. Рід струму справді змінює падіння напруги: дві жили туди й назад для постійного та однофазного, √3 між лініями для трифазного, плюс cos&nbsp;φ. Скін-ефект варто рахувати лише від сотень герців — тому калькулятор і питає частоту.</p></div>
+              </details>
+              <details class="faq-item">
                 <summary class="faq-q"><h3>Чи це те саме, що допустимі струми за NEC або IEC?</h3></summary>
                 <div class="faq-a"><p>Ні. Це довідник для гнучкого тонкожильного лудженого мідного дроту з силіконовою ізоляцією — того, що використовують у внутрішньому монтажі обладнання, акумуляторних перемичках, робототехніці та RC-моделях. Стаціонарні електроустановки регулюються таблицями NEC&nbsp;310 у Північній Америці та IEC&nbsp;60364-5-52 у Європі, які виходять з іншої ізоляції, способів прокладання та поправкових коефіцієнтів. Для стаціонарної проводки користуйтеся нормами, а цю таблицю застосовуйте для монтажу обладнання.</p></div>
               </details>
@@ -1900,7 +2057,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "мм²", "uAmp": "А", "uVolt": "В", "uWatt": "Вт", "below30": "менше 30 AWG", "below0": "більше 0 AWG", "instFree": "одна жила / вільне повітря", "instBundle": "до 3 жил у кабелі", "conductorSuffix": "°C провідник", "ambientDefault": "довкілля 30°C (типово)", "ambientSuffix": "°C довкілля", "noMargin": "Немає запасу", "stDanger": "Потрібен тепловий запас", "stReady": "Струм розраховано", "stAboveBoth": "Вище обох режимів", "stAbove60": "Вище режиму 60°C", "stWithin": "У межах обох режимів", "msgDanger": "Задана температура довкілля виходить за межі одного з довідкових діапазонів. Перегляньте обидва температурні результати, перш ніж обирати нижчий тепловий режим або іншу кабельну систему.", "msgReady": "Допустимий струм розраховано. Додайте струм навантаження, напругу системи та довжину в один бік, щоб перевірити запас і падіння напруги.", "msgAboveBoth": "<strong>{i} А</strong> перевищує і режим 60°C (<strong>{a60} А</strong>), і режим 200°C (<strong>{a200} А</strong>). Збільште переріз, покращте охолодження або зменште навантаження.", "msgAbove60": "<strong>{i} А</strong> перевищує консервативний режим 60°C (<strong>{a60} А</strong>), але вкладається в межу 200°C (<strong>{a200} А</strong>). Перевірте конкретний дріт, клеми, запобіжник, корпус і місцеві норми перед застосуванням.", "msgWithin": "<strong>{i} А</strong> вкладається в обидва температурні режими. Значення 60°C залишається консервативною щоденною базою; перед остаточним застосуванням перевірте клеми, запобіжник, корпус і обмеження виробника."};
+      const I18N = {"uArea": "мм²", "uHz": "Гц", "labelSystemVoltage": "Напруга системи / В", "labelLineVoltage": "Лінійна напруга / В", "modeShort": {"dc": "постійний", "ac1": "змінний 1ф", "ac3": "змінний 3ф"}, "modeNote": {"dc": "<strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.", "ac1": "<strong>Однофазний змінний.</strong> Жили дві, тож падіння все ще рахується туди й назад, але з поправкою на cos φ. Допустимий струм такий самий, як для постійного: на 50–60 Гц скін-ефект менший за 0,1 % навіть для 0 AWG.", "ac3": "<strong>Трифазний змінний.</strong> Падіння дорівнює √3·I·R·L між лініями на довжині в один бік, а три фазні жили — це рівно випадок «≤3 жили» із таблиці."}, "tableModeNote": {"dc": "Ці значення наведено для постійного струму.", "ac1": "Ці значення без змін діють і для однофазного змінного струму 50–60 Гц: глибина скін-шару в міді — близько 9,4 мм на 50 Гц, що набагато більше за радіус 4,1 мм навіть у жили 0 AWG, тож приріст опору лишається меншим за 0,1 %.", "ac3": "Ці значення без змін діють і для трифазного змінного 50–60 Гц, а три фазні жили — це випадок «≤3 жили». Змінюється падіння напруги, а не струм, який витримає мідь."}, "msgSkinRange": "Понад приблизно 1 кГц на найбільших калібрах формула скін-ефекту виходить за межі перевіреного діапазону, тож опір на ЗС вважайте орієнтовним.", "uAmp": "А", "uVolt": "В", "uWatt": "Вт", "below30": "менше 30 AWG", "below0": "більше 0 AWG", "instFree": "одна жила / вільне повітря", "instBundle": "до 3 жил у кабелі", "conductorSuffix": "°C провідник", "ambientDefault": "довкілля 30°C (типово)", "ambientSuffix": "°C довкілля", "noMargin": "Немає запасу", "stDanger": "Потрібен тепловий запас", "stReady": "Струм розраховано", "stAboveBoth": "Вище обох режимів", "stAbove60": "Вище режиму 60°C", "stWithin": "У межах обох режимів", "msgDanger": "Задана температура довкілля виходить за межі одного з довідкових діапазонів. Перегляньте обидва температурні результати, перш ніж обирати нижчий тепловий режим або іншу кабельну систему.", "msgReady": "Допустимий струм розраховано. Додайте струм навантаження, напругу системи та довжину в один бік, щоб перевірити запас і падіння напруги.", "msgAboveBoth": "<strong>{i} А</strong> перевищує і режим 60°C (<strong>{a60} А</strong>), і режим 200°C (<strong>{a200} А</strong>). Збільште переріз, покращте охолодження або зменште навантаження.", "msgAbove60": "<strong>{i} А</strong> перевищує консервативний режим 60°C (<strong>{a60} А</strong>), але вкладається в межу 200°C (<strong>{a200} А</strong>). Перевірте конкретний дріт, клеми, запобіжник, корпус і місцеві норми перед застосуванням.", "msgWithin": "<strong>{i} А</strong> вкладається в обидва температурні режими. Значення 60°C залишається консервативною щоденною базою; перед остаточним застосуванням перевірте клеми, запобіжник, корпус і обмеження виробника."};
       const LOCALE = "uk-UA";
 
       const wireRows = [
@@ -1942,6 +2099,9 @@
         "41-plus": 0.35
       };
 
+      const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
+      const MODE_KEY = "awg-current-mode";
+
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
       const tableBody = $("ampacityTableBody");
@@ -1974,6 +2134,22 @@
         return wireRows.reduce((best, row) => {
           return Math.abs(row.area - area) < Math.abs(best.area - area) ? row : best;
         }, wireRows[0]);
+      }
+
+      // Skin effect per IEC 60287-1-1. xs² = (8πf / R') · 1e-7 · ks, with ks = 1
+      // for solid and ordinary stranded round conductors; ys is the fractional
+      // increase in resistance. The published fit holds for xs ≤ 2.8, which for
+      // 0 AWG runs out around 1 kHz — hence the frequency input's cap.
+      function skinEffect(area, frequency) {
+        if (!(area > 0) || !(frequency > 0)) return { ys: 0, xs: 0, valid: true };
+        const rdc = COPPER_RESISTIVITY / area;
+        const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
+        const xs4 = xs2 * xs2;
+        return {
+          ys: xs4 / (192 + 0.8 * xs4),
+          xs: Math.sqrt(xs2),
+          valid: Math.sqrt(xs2) <= 2.8
+        };
       }
 
       function equivalentAwg(area) {
@@ -2032,6 +2208,9 @@
         const ambientInput = readOptionalNumber("ambient");
         const ambient = ambientInput ?? 30;
         const installation = $("installation").value;
+        const mode = currentMode();
+        const frequency = readOptionalNumber("frequency") ?? 50;
+        const powerFactor = Math.min(1, Math.max(0.1, readOptionalNumber("powerFactor") ?? 1));
 
         const area = strandCount * Math.PI * Math.pow(strandDiameter, 2) / 4;
         const equivalent = equivalentAwg(area);
@@ -2053,19 +2232,50 @@
 
         const result60 = thermalResult("60");
         const result200 = thermalResult("200");
-        const copperResistance = 0.0175 / area;
+        // Only the AC modes carry a skin-effect penalty. At 50/60 Hz it stays
+        // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
+        // visible in the hundreds of hertz.
+        const alternating = mode !== "dc";
+        const skin = alternating ? skinEffect(area, frequency) : { ys: 0, xs: 0, valid: true };
+        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.ys);
+        const skinDerate = 1 / Math.sqrt(1 + skin.ys);
+
+        result60.ampacity *= skinDerate;
+        result200.ampacity *= skinDerate;
+
+        // Three-phase drop is √3·I·R·L line-to-line over the one-way run. DC and
+        // single-phase AC both travel out and back, so 2·I·R·L. Reactance is
+        // neglected: at these cross-sections and run lengths it sits well below
+        // the uncertainty in the resistance itself.
+        const threePhase = mode === "ac3";
+        const runFactor = threePhase ? Math.sqrt(3) : 2;
+        const lossConductors = threePhase ? 3 : 2;
+        const appliedPowerFactor = alternating ? powerFactor : 1;
+
         const hasDropInputs = voltage !== null && oneWayLength !== null && loadCurrent !== null;
-        const roundTripLength = hasDropInputs ? oneWayLength * 2 : null;
-        const voltageDrop = hasDropInputs ? loadCurrent * copperResistance * roundTripLength : null;
+        const voltageDrop = hasDropInputs
+          ? loadCurrent * copperResistance * oneWayLength * runFactor * appliedPowerFactor
+          : null;
         const voltageDropPercent = hasDropInputs && voltage > 0 ? (voltageDrop / voltage) * 100 : null;
-        const powerLoss = hasDropInputs ? Math.pow(loadCurrent, 2) * copperResistance * roundTripLength : null;
+        const powerLoss = hasDropInputs
+          ? lossConductors * Math.pow(loadCurrent, 2) * copperResistance * oneWayLength
+          : null;
         const ambientLabel = ambientInput === null ? I18N.ambientDefault : formatNumber(ambient, 0) + I18N.ambientSuffix;
 
         $("areaResult").textContent = formatNumber(area, 2) + " " + I18N.uArea;
         $("gaugeResult").textContent = formatAwg(equivalent);
         $("ampacity60Result").textContent = result60.ambientFactor > 0 ? formatNumber(result60.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
         $("ampacity200Result").textContent = result200.ambientFactor > 0 ? formatNumber(result200.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
-        $("ampacitySharedContext").textContent = installationLabel + " · " + ambientLabel;
+        const modeContext = alternating
+          ? " · " + formatNumber(frequency, 0) + " " + I18N.uHz
+          : "";
+        $("ampacitySharedContext").textContent =
+          I18N.modeShort[mode] + " · " + installationLabel + " · " + ambientLabel + modeContext;
+        // As a ratio this reads "×1" at mains frequency, which tells the reader
+        // nothing. The percentage rise over DC does: +0.002% versus +4.7%.
+        $("skinResult").textContent = alternating
+          ? "+" + formatNumber(skin.ys * 100, 3) + "%"
+          : "—";
         $("ampacity60Context").textContent = result60.context;
         $("ampacity200Context").textContent = result200.context;
         $("dropResult").textContent = Number.isFinite(voltageDrop) ? formatNumber(voltageDrop, 3) + " " + I18N.uVolt : "—";
@@ -2102,7 +2312,49 @@
           $("calcMessage").innerHTML = I18N.msgWithin.replace("{i}", formatNumber(loadCurrent, 1));
         }
 
+        if (alternating && !skin.valid) {
+          $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
+        }
+
         selectTableRow(row.gauge);
+      }
+
+      // The mode radios sit outside the form, so they need their own wiring and
+      // survive a form reset — the mode is a page-wide setting, not an input.
+      function currentMode() {
+        const checked = document.querySelector('input[name="currentMode"]:checked');
+        return checked ? checked.value : "dc";
+      }
+
+      function applyMode() {
+        const mode = currentMode();
+        const alternating = mode !== "dc";
+        document.querySelectorAll(".ac-only").forEach((element) => {
+          element.hidden = !alternating;
+        });
+        $("voltageLabel").textContent = mode === "ac3" ? I18N.labelLineVoltage : I18N.labelSystemVoltage;
+        $("modeNote").innerHTML = I18N.modeNote[mode];
+        $("tableModeNote").innerHTML = I18N.tableModeNote[mode];
+        try {
+          localStorage.setItem(MODE_KEY, mode);
+        } catch (error) {
+          /* storage blocked; the toggle still works for this page view */
+        }
+        calculate();
+      }
+
+      function restoreMode() {
+        let stored = null;
+        try {
+          stored = localStorage.getItem(MODE_KEY);
+        } catch (error) {
+          /* storage blocked */
+        }
+        if (!stored) return;
+        const input = document.querySelector(
+          'input[name="currentMode"][value="' + CSS.escape(stored) + '"]'
+        );
+        if (input) input.checked = true;
       }
 
       function resetForm() {
@@ -2122,8 +2374,10 @@
         if (row) loadTablePreset(row.dataset.gauge);
       });
       $("resetButton").addEventListener("click", resetForm);
+      $("modeBar").addEventListener("change", applyMode);
       syncOptionalResults();
-      calculate();
+      restoreMode();
+      applyMode();
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>

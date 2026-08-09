@@ -70,6 +70,12 @@
         box-sizing: border-box;
       }
 
+      /* Class rules like `.field { display: grid }` outrank the UA stylesheet's
+         `[hidden] { display: none }`, so hidden fields would stay visible. */
+      [hidden] {
+        display: none !important;
+      }
+
       html {
         background: var(--bg);
         scroll-behavior: smooth;
@@ -341,6 +347,82 @@
         font-size: 10px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+      }
+
+      .modebar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px 20px;
+        margin-bottom: 22px;
+        border: 1px solid var(--line);
+        padding: 16px 20px;
+        background: var(--panel);
+        box-shadow: 12px 12px 0 var(--shadow);
+      }
+
+      .modeswitch {
+        display: inline-flex;
+        border: 1px solid var(--line);
+      }
+
+      .modeswitch label {
+        position: relative;
+        border-right: 1px solid var(--line-soft);
+      }
+
+      .modeswitch label:last-child {
+        border-right: 0;
+      }
+
+      .modeswitch input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .modeswitch span {
+        display: block;
+        padding: 9px 15px;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        transition: background 160ms ease, color 160ms ease;
+      }
+
+      .modeswitch span:hover {
+        color: var(--accent-soft);
+        background: rgba(125, 116, 102, 0.12);
+      }
+
+      .modeswitch input:checked + span {
+        color: var(--bg);
+        background: var(--accent);
+        font-weight: 700;
+      }
+
+      .modeswitch input:focus-visible + span {
+        outline: 1px solid var(--accent);
+        outline-offset: -3px;
+      }
+
+      .modebar-note {
+        flex: 1 1 320px;
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .modebar-note strong {
+        color: var(--accent-soft);
+        font-weight: 500;
       }
 
       .layout {
@@ -798,7 +880,7 @@
 
       .drop-card {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
         gap: 12px;
         margin-top: 12px;
         color: var(--muted);
@@ -1216,6 +1298,25 @@
           </div>
         </section>
 
+        <div class="modebar" id="modeBar" role="radiogroup" aria-labelledby="modeBarLabel">
+          <span class="section-kicker" id="modeBarLabel">{{MODE_LEGEND}}</span>
+          <div class="modeswitch">
+            <label>
+              <input type="radio" name="currentMode" value="dc" checked />
+              <span>{{MODE_DC}}</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac1" />
+              <span>{{MODE_AC1}}</span>
+            </label>
+            <label>
+              <input type="radio" name="currentMode" value="ac3" />
+              <span>{{MODE_AC3}}</span>
+            </label>
+          </div>
+          <p class="modebar-note" id="modeNote">{{MODE_NOTE_DC}}</p>
+        </div>
+
         <section class="layout" aria-label="{{LAYOUT_LABEL}}">
           <article class="panel table-panel" id="chart">
             <div class="panel-header">
@@ -1246,7 +1347,7 @@
               </table>
             </div>
 
-            <div class="table-note">{{TABLE_NOTE}}</div>
+            <div class="table-note">{{TABLE_NOTE}} <span id="tableModeNote">{{TABLE_MODE_DC}}</span></div>
           </article>
 
           <aside class="panel calculator" aria-labelledby="calculator-title" id="calculator">
@@ -1284,7 +1385,7 @@
                   </summary>
                   <div class="form-grid">
                     <div class="field">
-                      <label for="systemVoltage">{{L_VOLT}} <span class="optional-tag">{{OPTIONAL}}</span></label>
+                      <label for="systemVoltage"><span id="voltageLabel">{{L_VOLT}}</span> <span class="optional-tag">{{OPTIONAL}}</span></label>
                       <input id="systemVoltage" name="systemVoltage" type="number" min="0" step="0.1" value="24" placeholder="24" inputmode="decimal" />
                     </div>
                     <div class="field">
@@ -1298,6 +1399,14 @@
                     <div class="field">
                       <label for="ambient">{{L_AMB}} <span class="optional-tag">{{OPTIONAL}}</span></label>
                       <input id="ambient" name="ambient" type="number" min="-50" step="1" value="30" placeholder="30" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="frequency">{{L_FREQ}}</label>
+                      <input id="frequency" name="frequency" type="number" min="0" max="1000" step="1" value="50" placeholder="50" inputmode="numeric" />
+                    </div>
+                    <div class="field ac-only" hidden>
+                      <label for="powerFactor">{{L_PF}}</label>
+                      <input id="powerFactor" name="powerFactor" type="number" min="0.1" max="1" step="0.01" value="1" placeholder="1" inputmode="decimal" />
                     </div>
                   </div>
                 </details>
@@ -1348,6 +1457,7 @@
                   <div>{{D_DROP}}<strong id="dropResult">—</strong></div>
                   <div>{{D_PCT}}<strong id="dropPercentResult">—</strong></div>
                   <div>{{D_LOSS}}<strong id="lossResult">—</strong></div>
+                  <div class="ac-only" hidden>{{D_SKIN}}<strong id="skinResult">—</strong></div>
                 </div>
 
                 <p class="calc-message" id="calcMessage">{{MSG_START}}</p>
@@ -1420,6 +1530,9 @@
         "41-plus": 0.35
       };
 
+      const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
+      const MODE_KEY = "awg-current-mode";
+
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
       const tableBody = $("ampacityTableBody");
@@ -1452,6 +1565,22 @@
         return wireRows.reduce((best, row) => {
           return Math.abs(row.area - area) < Math.abs(best.area - area) ? row : best;
         }, wireRows[0]);
+      }
+
+      // Skin effect per IEC 60287-1-1. xs² = (8πf / R') · 1e-7 · ks, with ks = 1
+      // for solid and ordinary stranded round conductors; ys is the fractional
+      // increase in resistance. The published fit holds for xs ≤ 2.8, which for
+      // 0 AWG runs out around 1 kHz — hence the frequency input's cap.
+      function skinEffect(area, frequency) {
+        if (!(area > 0) || !(frequency > 0)) return { ys: 0, xs: 0, valid: true };
+        const rdc = COPPER_RESISTIVITY / area;
+        const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
+        const xs4 = xs2 * xs2;
+        return {
+          ys: xs4 / (192 + 0.8 * xs4),
+          xs: Math.sqrt(xs2),
+          valid: Math.sqrt(xs2) <= 2.8
+        };
       }
 
       function equivalentAwg(area) {
@@ -1510,6 +1639,9 @@
         const ambientInput = readOptionalNumber("ambient");
         const ambient = ambientInput ?? 30;
         const installation = $("installation").value;
+        const mode = currentMode();
+        const frequency = readOptionalNumber("frequency") ?? 50;
+        const powerFactor = Math.min(1, Math.max(0.1, readOptionalNumber("powerFactor") ?? 1));
 
         const area = strandCount * Math.PI * Math.pow(strandDiameter, 2) / 4;
         const equivalent = equivalentAwg(area);
@@ -1531,19 +1663,50 @@
 
         const result60 = thermalResult("60");
         const result200 = thermalResult("200");
-        const copperResistance = 0.0175 / area;
+        // Only the AC modes carry a skin-effect penalty. At 50/60 Hz it stays
+        // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
+        // visible in the hundreds of hertz.
+        const alternating = mode !== "dc";
+        const skin = alternating ? skinEffect(area, frequency) : { ys: 0, xs: 0, valid: true };
+        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.ys);
+        const skinDerate = 1 / Math.sqrt(1 + skin.ys);
+
+        result60.ampacity *= skinDerate;
+        result200.ampacity *= skinDerate;
+
+        // Three-phase drop is √3·I·R·L line-to-line over the one-way run. DC and
+        // single-phase AC both travel out and back, so 2·I·R·L. Reactance is
+        // neglected: at these cross-sections and run lengths it sits well below
+        // the uncertainty in the resistance itself.
+        const threePhase = mode === "ac3";
+        const runFactor = threePhase ? Math.sqrt(3) : 2;
+        const lossConductors = threePhase ? 3 : 2;
+        const appliedPowerFactor = alternating ? powerFactor : 1;
+
         const hasDropInputs = voltage !== null && oneWayLength !== null && loadCurrent !== null;
-        const roundTripLength = hasDropInputs ? oneWayLength * 2 : null;
-        const voltageDrop = hasDropInputs ? loadCurrent * copperResistance * roundTripLength : null;
+        const voltageDrop = hasDropInputs
+          ? loadCurrent * copperResistance * oneWayLength * runFactor * appliedPowerFactor
+          : null;
         const voltageDropPercent = hasDropInputs && voltage > 0 ? (voltageDrop / voltage) * 100 : null;
-        const powerLoss = hasDropInputs ? Math.pow(loadCurrent, 2) * copperResistance * roundTripLength : null;
+        const powerLoss = hasDropInputs
+          ? lossConductors * Math.pow(loadCurrent, 2) * copperResistance * oneWayLength
+          : null;
         const ambientLabel = ambientInput === null ? I18N.ambientDefault : formatNumber(ambient, 0) + I18N.ambientSuffix;
 
         $("areaResult").textContent = formatNumber(area, 2) + " " + I18N.uArea;
         $("gaugeResult").textContent = formatAwg(equivalent);
         $("ampacity60Result").textContent = result60.ambientFactor > 0 ? formatNumber(result60.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
         $("ampacity200Result").textContent = result200.ambientFactor > 0 ? formatNumber(result200.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
-        $("ampacitySharedContext").textContent = installationLabel + " · " + ambientLabel;
+        const modeContext = alternating
+          ? " · " + formatNumber(frequency, 0) + " " + I18N.uHz
+          : "";
+        $("ampacitySharedContext").textContent =
+          I18N.modeShort[mode] + " · " + installationLabel + " · " + ambientLabel + modeContext;
+        // As a ratio this reads "×1" at mains frequency, which tells the reader
+        // nothing. The percentage rise over DC does: +0.002% versus +4.7%.
+        $("skinResult").textContent = alternating
+          ? "+" + formatNumber(skin.ys * 100, 3) + "%"
+          : "—";
         $("ampacity60Context").textContent = result60.context;
         $("ampacity200Context").textContent = result200.context;
         $("dropResult").textContent = Number.isFinite(voltageDrop) ? formatNumber(voltageDrop, 3) + " " + I18N.uVolt : "—";
@@ -1580,7 +1743,49 @@
           $("calcMessage").innerHTML = I18N.msgWithin.replace("{i}", formatNumber(loadCurrent, 1));
         }
 
+        if (alternating && !skin.valid) {
+          $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
+        }
+
         selectTableRow(row.gauge);
+      }
+
+      // The mode radios sit outside the form, so they need their own wiring and
+      // survive a form reset — the mode is a page-wide setting, not an input.
+      function currentMode() {
+        const checked = document.querySelector('input[name="currentMode"]:checked');
+        return checked ? checked.value : "dc";
+      }
+
+      function applyMode() {
+        const mode = currentMode();
+        const alternating = mode !== "dc";
+        document.querySelectorAll(".ac-only").forEach((element) => {
+          element.hidden = !alternating;
+        });
+        $("voltageLabel").textContent = mode === "ac3" ? I18N.labelLineVoltage : I18N.labelSystemVoltage;
+        $("modeNote").innerHTML = I18N.modeNote[mode];
+        $("tableModeNote").innerHTML = I18N.tableModeNote[mode];
+        try {
+          localStorage.setItem(MODE_KEY, mode);
+        } catch (error) {
+          /* storage blocked; the toggle still works for this page view */
+        }
+        calculate();
+      }
+
+      function restoreMode() {
+        let stored = null;
+        try {
+          stored = localStorage.getItem(MODE_KEY);
+        } catch (error) {
+          /* storage blocked */
+        }
+        if (!stored) return;
+        const input = document.querySelector(
+          'input[name="currentMode"][value="' + CSS.escape(stored) + '"]'
+        );
+        if (input) input.checked = true;
       }
 
       function resetForm() {
@@ -1600,8 +1805,10 @@
         if (row) loadTablePreset(row.dataset.gauge);
       });
       $("resetButton").addEventListener("click", resetForm);
+      $("modeBar").addEventListener("change", applyMode);
       syncOptionalResults();
-      calculate();
+      restoreMode();
+      applyMode();
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>

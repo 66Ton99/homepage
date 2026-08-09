@@ -2,6 +2,12 @@ const fs = require("fs");
 const { JSDOM } = require("jsdom");
 
 let failures = 0;
+function checkClose(label, actual, expected, tol) {
+  const ok = Math.abs(actual - expected) <= tol;
+  if (!ok) failures++;
+  console.log(`  ${ok ? "PASS" : "FAIL"}  ${label}: ${actual}${ok ? "" : `  (expected ~${expected})`}`);
+}
+
 function check(label, actual, expected) {
   const ok = String(actual) === String(expected);
   if (!ok) failures++;
@@ -57,5 +63,73 @@ async function run(file, label, expect) {
     drop: "0,295 В",
   });
   console.log(failures ? `\n${failures} FAILURES` : "\nAll checks passed.");
+  process.exit(failures ? 1 : 0);
+})();
+
+// ---------------------------------------------------------------------------
+// DC / AC mode switching
+// ---------------------------------------------------------------------------
+async function runModes(file, label, expect) {
+  console.log(`\n== ${label}: current mode ==`);
+  const dom = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+  });
+  const { document } = dom.window;
+  const $ = (id) => document.getElementById(id);
+  const pick = (value) => {
+    document.querySelector(`input[name="currentMode"][value="${value}"]`).checked = true;
+    $("modeBar").dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+  };
+  const num = (id) => parseFloat($(id).textContent.replace(",", ".").replace(/[^\d.]/g, ""));
+
+  $("optionalChecks").open = true;
+  $("optionalChecks").dispatchEvent(new dom.window.Event("toggle"));
+
+  // defaults: 1650 x 0.08 mm = 8.29 mm2, 35 A, 2 m one-way, 24 V
+  check("DC is the default", $("modeBar").querySelector("input:checked").value, "dc");
+  check("AC fields hidden in DC", document.querySelector(".ac-only").hidden, true);
+  const dcDrop = num("dropResult");
+  const dcLoss = num("lossResult");
+  const dcAmpacity = num("ampacity60Result");
+
+  pick("ac1");
+  check("AC fields shown", document.querySelector(".ac-only").hidden, false);
+  check("1-phase drop equals DC at cos φ = 1", num("dropResult").toFixed(3), dcDrop.toFixed(3));
+  check("1-phase loss equals DC", num("lossResult").toFixed(1), dcLoss.toFixed(1));
+  check("ampacity unchanged at 50 Hz", num("ampacity60Result").toFixed(1), dcAmpacity.toFixed(1));
+  check("skin effect at 50 Hz is negligible", $("skinResult").textContent, expect.skin50);
+
+  // power factor 0.8 scales the drop but not the loss (loss is I²R)
+  $("powerFactor").value = "0.8";
+  $("powerFactor").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  check("cos φ 0.8 scales drop", num("dropResult").toFixed(3), (dcDrop * 0.8).toFixed(3));
+  check("cos φ does not change loss", num("lossResult").toFixed(1), dcLoss.toFixed(1));
+  $("powerFactor").value = "1";
+  $("powerFactor").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+
+  pick("ac3");
+  // dcDrop is read back already rounded to 3 dp, so compare with a tolerance
+  checkClose("3-phase drop is √3/2 of DC", num("dropResult"), dcDrop * Math.sqrt(3) / 2, 0.001);
+  check("3-phase loss is 3/2 of DC", num("lossResult").toFixed(1), (dcLoss * 1.5).toFixed(1));
+  check("voltage label switches to line", $("voltageLabel").textContent, expect.lineLabel);
+
+  // 400 Hz on 0 AWG is where skin effect finally bites
+  $("strandCount").value = "10643";           // 10643 x 0.08 mm ≈ 53.5 mm2 = 0 AWG
+  $("strandCount").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  $("frequency").value = "400";
+  $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  const highF = parseFloat($("skinResult").textContent.replace(",", ".").replace(/[^\d.]/g, ""));
+  checkClose("0 AWG at 400 Hz raises resistance ~4.7%", highF, 4.73, 0.05);
+
+  pick("dc");
+  check("back to DC hides AC fields", document.querySelector(".ac-only").hidden, true);
+}
+
+(async () => {
+  await runModes("../site/_pages/awg-to-amps.html", "EN",
+    { skin50: "+0.002%", lineLabel: "Line voltage / V" });
+  await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
+    { skin50: "+0,002%", lineLabel: "Лінійна напруга / В" });
+  console.log(failures ? `\n${failures} FAILURES` : "\nAll mode checks passed.");
   process.exit(failures ? 1 : 0);
 })();

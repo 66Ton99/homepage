@@ -167,6 +167,17 @@ EN_FAQ = [
         "circuit, usually do not count towards the group.</p>",
     ),
     (
+        "Does the ampacity change between DC and AC?",
+        "<p>Not meaningfully at mains frequency. Alternating current crowds toward the conductor "
+        "surface, but the skin depth in copper is about 9.4&nbsp;mm at 50&nbsp;Hz and 8.5&nbsp;mm at "
+        "60&nbsp;Hz, while a 0&nbsp;AWG conductor has a radius of just 4.1&nbsp;mm. By IEC&nbsp;60287 "
+        "the resistance rise works out at 0.08&nbsp;% for 0&nbsp;AWG and under 0.01&nbsp;% below "
+        "4&nbsp;AWG, so the same table serves DC, single-phase and three-phase. What the current type "
+        "really changes is the voltage drop: two conductors out and back for DC and single-phase, √3 "
+        "line-to-line for three-phase, with the power factor on top. Skin effect only becomes worth "
+        "counting in the hundreds of hertz, which is why the calculator asks for a frequency.</p>",
+    ),
+    (
         "Is this chart the same as NEC or IEC ampacity?",
         "<p>No. This is a reference for flexible, fine-stranded tinned copper lead wire with silicone "
         "insulation, of the kind used in equipment wiring, battery leads, robotics and RC. Building "
@@ -245,13 +256,48 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 comes from the installation selector, and the two multiply.
               </p>
 
-              <h3>4. DC voltage drop and wire loss</h3>
-              <p class="formula"><span>Voltage drop</span>ΔU = I × ρ × 2L / A&nbsp;&nbsp;&nbsp;(ρ = 0.0175 Ω·mm²/m)</p>
+              <h3>4. Voltage drop and wire loss</h3>
+              <p class="formula"><span>Direct current, and single-phase AC</span>ΔU = 2 × I × R × L × cos φ<span
+                style="margin-top:10px">Three-phase AC, line to line</span>ΔU = √3 × I × R × L × cos φ</p>
               <p>
-                Length is counted both ways, because current returns. Power lost as heat in the cable is
-                <em>I</em>²&nbsp;×&nbsp;<em>R</em>. On low-voltage DC systems this, not ampacity, is usually
+                <em>R</em> is the resistance per metre, ρ/<em>A</em>, with ρ&nbsp;=&nbsp;0.0175&nbsp;Ω·mm²/m
+                for copper at 20&nbsp;°C, and <em>L</em> is the one-way run. Direct current and single-phase
+                AC both travel out and back, so the length counts twice. A three-phase circuit does not:
+                the line-to-line drop carries a √3 instead. Power factor is 1 for DC, which is why the
+                first formula collapses to the familiar 2<em>IRL</em>.
+              </p>
+              <p>
+                Power lost as heat is <em>I</em>²<em>R</em> per conductor — two conductors for DC and
+                single-phase, three for three-phase. On low-voltage systems this, not ampacity, is usually
                 what forces a bigger conductor: a 12&nbsp;V circuit allows only 0.36&nbsp;V of drop at the
                 common 3&nbsp;% target.
+              </p>
+              <p>
+                Reactance is left out. For the cross-sections and run lengths this page covers it sits well
+                below the uncertainty in the resistance itself, but on long three-phase runs in conduit it
+                stops being negligible and you should size from the cable's published R and X.
+              </p>
+
+              <h3>5. Why the ampacity table does not change for AC</h3>
+              <p>
+                Alternating current pushes charge toward the conductor surface, so the effective resistance
+                rises. How much depends on how the skin depth compares to the conductor radius — and in
+                copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
+                has a radius of only 4.1&nbsp;mm.
+              </p>
+              <p class="formula"><span>Skin effect, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)</p>
+              <p>
+                Run the numbers and the resistance rise at 50&nbsp;Hz is <strong>0.08&nbsp;%</strong> for
+                0&nbsp;AWG and less than 0.01&nbsp;% for everything below 4&nbsp;AWG. Ampacity scales as
+                1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
+                spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
+                columns would be inventing precision that is not there.
+              </p>
+              <p>
+                It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
+                0&nbsp;AWG picks up 4.7&nbsp;%, which is why the calculator takes a frequency rather than
+                assuming mains. The published fit holds to x<sub>s</sub>&nbsp;≤&nbsp;2.8, roughly 1&nbsp;kHz
+                on the largest gauge here; above that the calculator flags its own result as indicative.
               </p>
             </section>
 
@@ -358,6 +404,15 @@ EN = {
     "touch-safe or connector-safe operating targets. More than three conductors require further derating. "
     "AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact "
     "cable datasheet.",
+    "MODE_LEGEND": "Current type",
+    "MODE_DC": "DC",
+    "MODE_AC1": "AC 1-phase",
+    "MODE_AC3": "AC 3-phase",
+    "MODE_NOTE_DC": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.",
+    "TABLE_MODE_DC": "These figures are for direct current.",
+    "L_FREQ": "Frequency / Hz",
+    "L_PF": "Power factor cos \u03c6",
+    "D_SKIN": "Skin effect",
     "KICKER_CALC": "Live calculation",
     "H2_CALC": "Wire gauge calculator",
     "P_CALC": "Count strands, enter their diameter, and compare the result to the nearest AWG row at both "
@@ -424,6 +479,34 @@ EN = {
     "I18N": json.dumps(
         {
             "uArea": "mm²",
+            "uHz": "Hz",
+            "labelSystemVoltage": "System voltage / V",
+            "labelLineVoltage": "Line voltage / V",
+            "modeShort": {
+                "dc": "DC",
+                "ac1": "AC 1-phase",
+                "ac3": "AC 3-phase",
+            },
+            "modeNote": {
+                "dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, "
+                "out and back.",
+                "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted "
+                "out and back, now scaled by the power factor. Ampacity is unchanged from DC: at "
+                "50–60 Hz the skin effect is under 0.1% even at 0 AWG.",
+                "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way "
+                "run, and the three phase conductors are exactly the ≤3 conductors case in the table.",
+            },
+            "tableModeNote": {
+                "dc": "These figures are for direct current.",
+                "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in "
+                "copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG "
+                "conductor, so the AC resistance rise stays under 0.1%.",
+                "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase "
+                "conductors are the ≤3 conductors case. What changes is the voltage drop, not the "
+                "current the copper can carry.",
+            },
+            "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its "
+            "validated range, so treat the AC resistance as indicative only.",
             "uAmp": "A",
             "uVolt": "V",
             "uWatt": "W",
@@ -524,6 +607,17 @@ UK_FAQ = [
         "зазвичай до групи не зараховуються.</p>",
     ),
     (
+        "Чи змінюється допустимий струм між постійним і змінним струмом?",
+        "<p>На мережевій частоті — практично ні. Змінний струм витісняється до поверхні жили, але "
+        "глибина скін-шару в міді становить близько 9,4&nbsp;мм на 50&nbsp;Гц і 8,5&nbsp;мм на "
+        "60&nbsp;Гц, тоді як жила 0&nbsp;AWG має радіус лише 4,1&nbsp;мм. За IEC&nbsp;60287 приріст "
+        "опору виходить 0,08&nbsp;% для 0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за "
+        "4&nbsp;AWG, тож та сама таблиця слугує і для постійного, і для однофазного, і для "
+        "трифазного струму. Рід струму справді змінює падіння напруги: дві жили туди й назад для "
+        "постійного та однофазного, √3 між лініями для трифазного, плюс cos&nbsp;φ. Скін-ефект варто "
+        "рахувати лише від сотень герців — тому калькулятор і питає частоту.</p>",
+    ),
+    (
         "Чи це те саме, що допустимі струми за NEC або IEC?",
         "<p>Ні. Це довідник для гнучкого тонкожильного лудженого мідного дроту з силіконовою ізоляцією — "
         "того, що використовують у внутрішньому монтажі обладнання, акумуляторних перемичках, робототехніці "
@@ -605,12 +699,47 @@ UK_CONTENT = f"""            <section id="how-to-read">
               </p>
 
               <h3>4. Падіння напруги та втрати в дроті</h3>
-              <p class="formula"><span>Падіння напруги</span>ΔU = I × ρ × 2L / A&nbsp;&nbsp;&nbsp;(ρ = 0,0175 Ом·мм²/м)</p>
+              <p class="formula"><span>Постійний і однофазний змінний</span>ΔU = 2 × I × R × L × cos φ<span
+                style="margin-top:10px">Трифазний змінний, між лініями</span>ΔU = √3 × I × R × L × cos φ</p>
               <p>
-                Довжина рахується в обидва боки, бо струм повертається. Потужність, втрачена в кабелі як
-                тепло, дорівнює <em>I</em>²&nbsp;×&nbsp;<em>R</em>. У низьковольтних системах постійного
-                струму саме це, а не допустимий струм, зазвичай змушує брати товщий провідник: коло
-                12&nbsp;В допускає лише 0,36&nbsp;В падіння за поширеної норми 3&nbsp;%.
+                <em>R</em> — опір одного метра, ρ/<em>A</em>, де ρ&nbsp;=&nbsp;0,0175&nbsp;Ом·мм²/м для міді
+                за 20&nbsp;°C, а <em>L</em> — довжина траси в один бік. Постійний і однофазний змінний струм
+                ідуть туди й назад, тому довжина враховується двічі. Трифазне коло — ні: у падінні між
+                лініями замість двійки стоїть √3. Для постійного струму cos&nbsp;φ дорівнює одиниці, тому
+                перша формула зводиться до звичного 2<em>IRL</em>.
+              </p>
+              <p>
+                Потужність, втрачена як тепло, дорівнює <em>I</em>²<em>R</em> на кожну жилу — дві жили для
+                постійного та однофазного струму, три для трифазного. У низьковольтних системах саме це, а
+                не допустимий струм, зазвичай змушує брати товщий провідник: коло 12&nbsp;В допускає лише
+                0,36&nbsp;В падіння за поширеної норми 3&nbsp;%.
+              </p>
+              <p>
+                Реактивний опір не враховано. Для перерізів і довжин, про які йдеться на цій сторінці, він
+                менший за невизначеність самого активного опору, але на довгих трифазних трасах у трубі він
+                перестає бути знехтуваним — там рахуйте за published R і X конкретного кабелю.
+              </p>
+
+              <h3>5. Чому таблиця струмів не змінюється для змінного струму</h3>
+              <p>
+                Змінний струм витісняється до поверхні провідника, тож ефективний опір зростає. Наскільки —
+                залежить від співвідношення глибини скін-шару й радіуса жили. У міді на 50&nbsp;Гц глибина
+                скін-шару становить близько 9,4&nbsp;мм, тоді як навіть жила 0&nbsp;AWG має радіус лише
+                4,1&nbsp;мм.
+              </p>
+              <p class="formula"><span>Скін-ефект, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)</p>
+              <p>
+                Порахуйте — і приріст опору на 50&nbsp;Гц становить <strong>0,08&nbsp;%</strong> для
+                0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG. Допустимий струм
+                масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
+                значно менше за розбіжність між даташитами двох виробників. Публікувати окремі колонки для
+                постійного та змінного струму означало б вигадати точність, якої немає.
+              </p>
+              <p>
+                Вище за частотою це вже важить. На 400&nbsp;Гц — авіація та деякі приводи — 0&nbsp;AWG
+                додає 4,7&nbsp;%, і саме тому калькулятор питає частоту, а не припускає мережеву. Формула
+                чинна до x<sub>s</sub>&nbsp;≤&nbsp;2,8, тобто приблизно до 1&nbsp;кГц на найбільшому калібрі;
+                вище калькулятор сам позначає результат як орієнтовний.
               </p>
             </section>
 
@@ -717,6 +846,15 @@ UK = {
     "дотику чи для клем робочі значення. Понад три жили потребують додаткового зниження струму. Рядки "
     "AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом "
     "конкретного кабелю.",
+    "MODE_LEGEND": "\u0420\u0456\u0434 \u0441\u0442\u0440\u0443\u043c\u0443",
+    "MODE_DC": "\u041f\u043e\u0441\u0442\u0456\u0439\u043d\u0438\u0439",
+    "MODE_AC1": "\u0417\u043c\u0456\u043d\u043d\u0438\u0439 1\u0444",
+    "MODE_AC3": "\u0417\u043c\u0456\u043d\u043d\u0438\u0439 3\u0444",
+    "MODE_NOTE_DC": "<strong>\u041f\u043e\u0441\u0442\u0456\u0439\u043d\u0438\u0439 \u0441\u0442\u0440\u0443\u043c.</strong> \u041f\u0430\u0434\u0456\u043d\u043d\u044f \u043d\u0430\u043f\u0440\u0443\u0433\u0438 \u0440\u0430\u0445\u0443\u0454\u0442\u044c\u0441\u044f \u043f\u043e \u0432\u0441\u044c\u043e\u043c\u0443 \u043a\u043e\u043b\u0443, \u0442\u0443\u0434\u0438 \u0439 \u043d\u0430\u0437\u0430\u0434.",
+    "TABLE_MODE_DC": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u043d\u0430\u0432\u0435\u0434\u0435\u043d\u043e \u0434\u043b\u044f \u043f\u043e\u0441\u0442\u0456\u0439\u043d\u043e\u0433\u043e \u0441\u0442\u0440\u0443\u043c\u0443.",
+    "L_FREQ": "\u0427\u0430\u0441\u0442\u043e\u0442\u0430 / \u0413\u0446",
+    "L_PF": "\u041a\u043e\u0435\u0444. \u043f\u043e\u0442\u0443\u0436\u043d\u043e\u0441\u0442\u0456 cos \u03c6",
+    "D_SKIN": "\u0421\u043a\u0456\u043d-\u0435\u0444\u0435\u043a\u0442",
     "KICKER_CALC": "Живий розрахунок",
     "H2_CALC": "Калькулятор перерізу дроту",
     "P_CALC": "Вкажіть кількість жилок і їхній діаметр — і порівняйте результат із найближчим рядком AWG "
@@ -783,6 +921,25 @@ UK = {
     "I18N": json.dumps(
         {
             "uArea": "мм²",
+            "uHz": "\u0413\u0446",
+            "labelSystemVoltage": "\u041d\u0430\u043f\u0440\u0443\u0433\u0430 \u0441\u0438\u0441\u0442\u0435\u043c\u0438 / \u0412",
+            "labelLineVoltage": "\u041b\u0456\u043d\u0456\u0439\u043d\u0430 \u043d\u0430\u043f\u0440\u0443\u0433\u0430 / \u0412",
+            "modeShort": {
+                "dc": "\u043f\u043e\u0441\u0442\u0456\u0439\u043d\u0438\u0439",
+                "ac1": "\u0437\u043c\u0456\u043d\u043d\u0438\u0439 1\u0444",
+                "ac3": "\u0437\u043c\u0456\u043d\u043d\u0438\u0439 3\u0444",
+            },
+            "modeNote": {
+                "dc": "<strong>\u041f\u043e\u0441\u0442\u0456\u0439\u043d\u0438\u0439 \u0441\u0442\u0440\u0443\u043c.</strong> \u041f\u0430\u0434\u0456\u043d\u043d\u044f \u043d\u0430\u043f\u0440\u0443\u0433\u0438 \u0440\u0430\u0445\u0443\u0454\u0442\u044c\u0441\u044f \u043f\u043e \u0432\u0441\u044c\u043e\u043c\u0443 \u043a\u043e\u043b\u0443, \u0442\u0443\u0434\u0438 \u0439 \u043d\u0430\u0437\u0430\u0434.",
+                "ac1": "<strong>\u041e\u0434\u043d\u043e\u0444\u0430\u0437\u043d\u0438\u0439 \u0437\u043c\u0456\u043d\u043d\u0438\u0439.</strong> \u0416\u0438\u043b\u0438 \u0434\u0432\u0456, \u0442\u043e\u0436 \u043f\u0430\u0434\u0456\u043d\u043d\u044f \u0432\u0441\u0435 \u0449\u0435 \u0440\u0430\u0445\u0443\u0454\u0442\u044c\u0441\u044f \u0442\u0443\u0434\u0438 \u0439 \u043d\u0430\u0437\u0430\u0434, \u0430\u043b\u0435 \u0437 \u043f\u043e\u043f\u0440\u0430\u0432\u043a\u043e\u044e \u043d\u0430 cos \u03c6. \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438\u0439 \u0441\u0442\u0440\u0443\u043c \u0442\u0430\u043a\u0438\u0439 \u0441\u0430\u043c\u0438\u0439, \u044f\u043a \u0434\u043b\u044f \u043f\u043e\u0441\u0442\u0456\u0439\u043d\u043e\u0433\u043e: \u043d\u0430 50\u201360 \u0413\u0446 \u0441\u043a\u0456\u043d-\u0435\u0444\u0435\u043a\u0442 \u043c\u0435\u043d\u0448\u0438\u0439 \u0437\u0430 0,1 % \u043d\u0430\u0432\u0456\u0442\u044c \u0434\u043b\u044f 0 AWG.",
+                "ac3": "<strong>\u0422\u0440\u0438\u0444\u0430\u0437\u043d\u0438\u0439 \u0437\u043c\u0456\u043d\u043d\u0438\u0439.</strong> \u041f\u0430\u0434\u0456\u043d\u043d\u044f \u0434\u043e\u0440\u0456\u0432\u043d\u044e\u0454 \u221a3\u00b7I\u00b7R\u00b7L \u043c\u0456\u0436 \u043b\u0456\u043d\u0456\u044f\u043c\u0438 \u043d\u0430 \u0434\u043e\u0432\u0436\u0438\u043d\u0456 \u0432 \u043e\u0434\u0438\u043d \u0431\u0456\u043a, \u0430 \u0442\u0440\u0438 \u0444\u0430\u0437\u043d\u0456 \u0436\u0438\u043b\u0438 \u2014 \u0446\u0435 \u0440\u0456\u0432\u043d\u043e \u0432\u0438\u043f\u0430\u0434\u043e\u043a \u00ab\u22643 \u0436\u0438\u043b\u0438\u00bb \u0456\u0437 \u0442\u0430\u0431\u043b\u0438\u0446\u0456.",
+            },
+            "tableModeNote": {
+                "dc": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u043d\u0430\u0432\u0435\u0434\u0435\u043d\u043e \u0434\u043b\u044f \u043f\u043e\u0441\u0442\u0456\u0439\u043d\u043e\u0433\u043e \u0441\u0442\u0440\u0443\u043c\u0443.",
+                "ac1": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u0431\u0435\u0437 \u0437\u043c\u0456\u043d \u0434\u0456\u044e\u0442\u044c \u0456 \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0444\u0430\u0437\u043d\u043e\u0433\u043e \u0437\u043c\u0456\u043d\u043d\u043e\u0433\u043e \u0441\u0442\u0440\u0443\u043c\u0443 50\u201360 \u0413\u0446: \u0433\u043b\u0438\u0431\u0438\u043d\u0430 \u0441\u043a\u0456\u043d-\u0448\u0430\u0440\u0443 \u0432 \u043c\u0456\u0434\u0456 \u2014 \u0431\u043b\u0438\u0437\u044c\u043a\u043e 9,4 \u043c\u043c \u043d\u0430 50 \u0413\u0446, \u0449\u043e \u043d\u0430\u0431\u0430\u0433\u0430\u0442\u043e \u0431\u0456\u043b\u044c\u0448\u0435 \u0437\u0430 \u0440\u0430\u0434\u0456\u0443\u0441 4,1 \u043c\u043c \u043d\u0430\u0432\u0456\u0442\u044c \u0443 \u0436\u0438\u043b\u0438 0 AWG, \u0442\u043e\u0436 \u043f\u0440\u0438\u0440\u0456\u0441\u0442 \u043e\u043f\u043e\u0440\u0443 \u043b\u0438\u0448\u0430\u0454\u0442\u044c\u0441\u044f \u043c\u0435\u043d\u0448\u0438\u043c \u0437\u0430 0,1 %.",
+                "ac3": "\u0426\u0456 \u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044f \u0431\u0435\u0437 \u0437\u043c\u0456\u043d \u0434\u0456\u044e\u0442\u044c \u0456 \u0434\u043b\u044f \u0442\u0440\u0438\u0444\u0430\u0437\u043d\u043e\u0433\u043e \u0437\u043c\u0456\u043d\u043d\u043e\u0433\u043e 50\u201360 \u0413\u0446, \u0430 \u0442\u0440\u0438 \u0444\u0430\u0437\u043d\u0456 \u0436\u0438\u043b\u0438 \u2014 \u0446\u0435 \u0432\u0438\u043f\u0430\u0434\u043e\u043a \u00ab\u22643 \u0436\u0438\u043b\u0438\u00bb. \u0417\u043c\u0456\u043d\u044e\u0454\u0442\u044c\u0441\u044f \u043f\u0430\u0434\u0456\u043d\u043d\u044f \u043d\u0430\u043f\u0440\u0443\u0433\u0438, \u0430 \u043d\u0435 \u0441\u0442\u0440\u0443\u043c, \u044f\u043a\u0438\u0439 \u0432\u0438\u0442\u0440\u0438\u043c\u0430\u0454 \u043c\u0456\u0434\u044c.",
+            },
+            "msgSkinRange": "\u041f\u043e\u043d\u0430\u0434 \u043f\u0440\u0438\u0431\u043b\u0438\u0437\u043d\u043e 1 \u043a\u0413\u0446 \u043d\u0430 \u043d\u0430\u0439\u0431\u0456\u043b\u044c\u0448\u0438\u0445 \u043a\u0430\u043b\u0456\u0431\u0440\u0430\u0445 \u0444\u043e\u0440\u043c\u0443\u043b\u0430 \u0441\u043a\u0456\u043d-\u0435\u0444\u0435\u043a\u0442\u0443 \u0432\u0438\u0445\u043e\u0434\u0438\u0442\u044c \u0437\u0430 \u043c\u0435\u0436\u0456 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0435\u043d\u043e\u0433\u043e \u0434\u0456\u0430\u043f\u0430\u0437\u043e\u043d\u0443, \u0442\u043e\u0436 \u043e\u043f\u0456\u0440 \u043d\u0430 \u0417\u0421 \u0432\u0432\u0430\u0436\u0430\u0439\u0442\u0435 \u043e\u0440\u0456\u0454\u043d\u0442\u043e\u0432\u043d\u0438\u043c.",
             "uAmp": "А",
             "uVolt": "В",
             "uWatt": "Вт",
