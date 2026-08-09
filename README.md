@@ -83,14 +83,32 @@ Edit `src/build.py`, never `site/_pages/*.html` — those are build output. Run
 The toggle above the table is deliberately honest about what it does and does
 not change.
 
-**Ampacity does not change.** At 50–60 Hz the skin depth in copper is ~9.4 mm,
-while even a 0 AWG conductor has a 4.1 mm radius. Per IEC 60287-1-1 the
-resistance rise is 0.08 % at 0 AWG and under 0.01 % below 4 AWG — far inside the
-spread between manufacturers' datasheets. Publishing separate DC and AC ampacity
-columns would be inventing precision that is not there, so the table's numbers
-stay put and the note under it explains why.
+Every data cell in the table is recomputed when the mode changes, but not every
+column moves by the same amount, and that is deliberate.
 
-**Voltage drop does change**, and that is the point:
+**The four ampacity columns barely move at mains frequency.** At 50–60 Hz the
+skin depth in copper is ~9.4 mm, while even a 0 AWG conductor has a 4.1 mm
+radius. Per IEC 60287-1-1 the resistance rise is 0.08 % at 0 AWG and under
+0.01 % below 4 AWG. The derate is applied for real — `I / √(1+ys)` — so it is
+honest rather than hardcoded, and it becomes visible where it actually exists:
+0 AWG drops from 112 A to 109 A at 400 Hz. Inventing a bigger DC/AC split at
+50 Hz would be fabricating precision.
+
+**The resistance and maximum-run columns move a lot.** Resistance switches
+between DC and the AC value at the chosen frequency. Maximum run is the longest
+one-way length holding the drop within 3 % at the row's rated current, using the
+mode's own drop formula — which is where DC and three-phase genuinely diverge:
+
+| 0 AWG | voltage | max run @3 % |
+|---|---|---|
+| DC | 24 V | 9.8 m |
+| AC 1-phase | 230 V | 94 m |
+| AC 3-phase | 400 V | 189 m |
+
+The system voltage follows the mode (24 / 230 / 400 V) unless the reader has
+typed their own, which is never overwritten.
+
+**Voltage drop in the calculator:**
 
 | | drop | I²R conductors |
 |---|---|---|

@@ -123,7 +123,51 @@ async function runModes(file, label, expect) {
 
   pick("dc");
   check("back to DC hides AC fields", document.querySelector(".ac-only").hidden, true);
+
+  // ---- the table itself must follow the mode ----
+  const cell = (gauge, cls) =>
+    document.querySelector(`tr[data-gauge="${gauge}"] .${cls}`).textContent;
+  const cellNum = (gauge, cls) =>
+    parseFloat(cell(gauge, cls).replace(",", ".").replace(/[^\d.]/g, ""));
+
+  pick("dc");
+  // the 400 Hz block above left the frequency set; put it back to mains so the
+  // baseline rows are not carrying a skin-effect derate
+  $("frequency").value = "50";
+  $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  $("strandCount").value = "1650";
+  $("strandCount").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  $("systemVoltage").value = "24";
+  $("systemVoltage").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  check("0 AWG DC resistance", cellNum("0", "js-r").toFixed(3), "0.327");
+  checkClose("0 AWG DC run @3% on 24 V", cellNum("0", "js-len"), 9.8, 0.1);
+  checkClose("22 AWG DC run @3% on 24 V", cellNum("22", "js-len"), 1.3, 0.1);
+
+  pick("ac3");   // voltage should follow the mode to 400 V
+  check("voltage follows the mode", $("systemVoltage").value, "400");
+  checkClose("0 AWG 3-phase run @3% on 400 V", cellNum("0", "js-len"), 189.1, 1);
+  checkClose("22 AWG 3-phase run @3% on 400 V", cellNum("22", "js-len"), 25.8, 0.5);
+  check("length header names the mode", $("thLengthUnit").textContent.includes("400"), true);
+
+  // a voltage the reader typed must survive a mode change
+  $("systemVoltage").value = "48";
+  $("systemVoltage").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  pick("ac1");
+  check("typed voltage is not overwritten", $("systemVoltage").value, "48");
+
+  // at 400 Hz the ampacity column itself moves on the big gauges
+  pick("ac3");
+  $("frequency").value = "400";
+  $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "109");
+  check("22 AWG ampacity unchanged at 400 Hz", cellNum("22", "js-b60").toFixed(0), "5");
+  checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.343, 0.002);
+  check("resistance header names the frequency", $("thResistUnit").textContent.includes("400"), true);
+
+  pick("dc");
+  check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.327");
 }
+
 
 (async () => {
   await runModes("../site/_pages/awg-to-amps.html", "EN",

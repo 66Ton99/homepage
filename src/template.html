@@ -476,7 +476,7 @@
 
       table {
         width: 100%;
-        min-width: 760px;
+        min-width: 940px;
         border-collapse: collapse;
         font-variant-numeric: tabular-nums;
       }
@@ -1339,6 +1339,8 @@
                     <th scope="col">{{TH_SINGLE}}<br /><span class="unit">{{U_FREE}}</span></th>
                     <th scope="col">{{TH_BUNDLE}}<br /><span class="unit">{{U_200}}</span></th>
                     <th scope="col">{{TH_SINGLE}}<br /><span class="unit">{{U_FREE}}</span></th>
+                    <th scope="col">{{TH_R}}<br /><span class="unit" id="thResistUnit">{{U_R_DC}}</span></th>
+                    <th scope="col">{{TH_LEN}}<br /><span class="unit" id="thLengthUnit">{{U_LEN_DC}}</span></th>
                   </tr>
                 </thead>
                 <tbody id="ampacityTableBody">
@@ -1532,6 +1534,8 @@
 
       const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
       const MODE_KEY = "awg-current-mode";
+      const MODE_VOLTAGE = { dc: 24, ac1: 230, ac3: 400 };
+      let lastMode = "dc";
 
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
@@ -1593,6 +1597,73 @@
         if (value < 0) return I18N.below0;
         if (Math.abs(value) < 0.05) return "≈ 0 AWG";
         return "≈ " + formatNumber(value, 1) + " AWG";
+      }
+
+      // Mirrors fmt_resistance / fmt_length in build.py. The server renders the
+      // DC state; if these disagreed, every row would visibly change on load.
+      function fixed(value, digits) {
+        return value.toLocaleString(LOCALE, {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits
+        });
+      }
+
+      function formatResistance(milliohm) {
+        if (milliohm >= 100) return fixed(milliohm, 0);
+        if (milliohm >= 10) return fixed(milliohm, 1);
+        if (milliohm >= 1) return fixed(milliohm, 2);
+        return fixed(milliohm, 3);
+      }
+
+      function formatLength(metres) {
+        return metres >= 100 ? fixed(metres, 0) : fixed(metres, 1);
+      }
+
+      // Rewrites every data cell for the selected current type. Ampacity carries
+      // the skin-effect derate; resistance switches between DC and AC; the run
+      // length uses the mode's own drop formula, so it is where the modes differ
+      // most — a 0 AWG run is 9.8 m on 24 V DC and 189 m on 400 V three-phase.
+      function renderTableForMode(context) {
+        const { mode, frequency, voltage, powerFactor } = context;
+        const alternating = mode !== "dc";
+        const threePhase = mode === "ac3";
+        const runFactor = threePhase ? Math.sqrt(3) : 2;
+        const appliedPowerFactor = alternating ? powerFactor : 1;
+
+        wireRows.forEach((row) => {
+          const tr = tableBody.querySelector('[data-gauge="' + CSS.escape(row.gauge) + '"]');
+          if (!tr) return;
+
+          const skin = alternating ? skinEffect(row.area, frequency) : { ys: 0 };
+          const derate = 1 / Math.sqrt(1 + skin.ys);
+          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.ys);
+
+          const set = (selector, text) => {
+            const cell = tr.querySelector(selector);
+            if (cell) cell.textContent = text;
+          };
+
+          [["b60", "bundle60"], ["f60", "free60"], ["b200", "bundle200"], ["f200", "free200"]]
+            .forEach(([cls, key]) => {
+              const value = row[key] * derate;
+              set(".js-" + cls, formatNumber(value, value < 10 ? 1 : 0) + " " + I18N.uAmp);
+            });
+
+          set(".js-r", formatResistance(resistance * 1000));
+
+          const rated = row.bundle60 * derate;
+          const metres = voltage > 0 && rated > 0
+            ? (0.03 * voltage) / (runFactor * rated * resistance * appliedPowerFactor)
+            : 0;
+          set(".js-len", metres > 0 ? formatLength(metres) : "—");
+        });
+
+        $("thResistUnit").textContent = alternating
+          ? I18N.unitResistAc.replace("{f}", formatNumber(frequency, 0))
+          : I18N.unitResistDc;
+        $("thLengthUnit").textContent = I18N.unitLength
+          .replace("{u}", formatNumber(voltage, 0))
+          .replace("{m}", I18N.modeShort[mode]);
       }
 
       function clearSelection() {
@@ -1747,6 +1818,12 @@
           $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
         }
 
+        renderTableForMode({
+          mode,
+          frequency,
+          voltage: voltage ?? 0,
+          powerFactor
+        });
         selectTableRow(row.gauge);
       }
 
@@ -1760,6 +1837,17 @@
       function applyMode() {
         const mode = currentMode();
         const alternating = mode !== "dc";
+
+        // Follow the mode's typical voltage, but only while the field still holds
+        // the previous mode's default — a value the reader typed is never
+        // overwritten. Without this, switching to three-phase would quote run
+        // lengths for a 400 V system against a 24 V number.
+        const voltageField = $("systemVoltage");
+        if (voltageField.value.trim() === "" || Number(voltageField.value) === MODE_VOLTAGE[lastMode]) {
+          voltageField.value = MODE_VOLTAGE[mode];
+        }
+        lastMode = mode;
+
         document.querySelectorAll(".ac-only").forEach((element) => {
           element.hidden = !alternating;
         });
@@ -1790,6 +1878,9 @@
 
       function resetForm() {
         form.reset();
+        // form.reset() restores the markup default of 24 V, which is only right
+        // in DC; realign it with the mode that is actually selected.
+        $("systemVoltage").value = MODE_VOLTAGE[currentMode()];
         calculate();
       }
 

@@ -37,9 +37,39 @@ ROWS = [
 INSTALL_KEYS = ["bundle", "free", "4-6", "7-9", "10-20", "21-30", "31-40", "41-plus"]
 
 
+COPPER_RESISTIVITY = 0.0175  # Ω·mm²/m at 20 °C
+DEFAULT_VOLTAGE = {"dc": 24, "ac1": 230, "ac3": 400}
+
+
 def fmt_area(area, decimal_sep):
     text = f"{area:.3f}" if area < 10 else f"{area:.2f}"
     return text.replace(".", decimal_sep)
+
+
+def fmt_resistance(milliohm, decimal_sep):
+    """Resistance in mΩ/m spans 0.33 to 343 across the table, so the number of
+    decimals has to follow the magnitude. Mirrored exactly in the page's JS, or
+    the server-rendered row would flicker when the script re-renders it."""
+    if milliohm >= 100:
+        text = f"{milliohm:.0f}"
+    elif milliohm >= 10:
+        text = f"{milliohm:.1f}"
+    elif milliohm >= 1:
+        text = f"{milliohm:.2f}"
+    else:
+        text = f"{milliohm:.3f}"
+    return text.replace(".", decimal_sep)
+
+
+def fmt_length(metres, decimal_sep):
+    text = f"{metres:.0f}" if metres >= 100 else f"{metres:.1f}"
+    return text.replace(".", decimal_sep)
+
+
+def max_run_length(area, current, voltage, run_factor, power_factor=1.0):
+    """Longest one-way run that keeps the drop within 3% at the rated current."""
+    resistance = COPPER_RESISTIVITY / area
+    return (0.03 * voltage) / (run_factor * current * resistance * power_factor)
 
 
 def build_tbody(lang):
@@ -49,17 +79,26 @@ def build_tbody(lang):
         if lang == "en"
         else "Підставити {g} AWG у калькулятор"
     )
+    amp = "A" if lang == "en" else "А"
     out = []
+    # Server-rendered in the DC state at 24 V, matching the page defaults, so a
+    # crawler sees real numbers and the JS re-render produces identical text.
     for gauge, area, b60, f60, b200, f200 in ROWS:
+        resistance = fmt_resistance(COPPER_RESISTIVITY / area * 1000, sep)
+        length = fmt_length(
+            max_run_length(area, b60, DEFAULT_VOLTAGE["dc"], 2), sep
+        )
         out.append(
             f'                  <tr data-gauge="{gauge}">\n'
             f'                    <th scope="row"><button type="button" class="row-btn" '
             f'aria-label="{aria.format(g=gauge)}">{gauge} <span class="unit">AWG</span></button></th>\n'
             f"                    <td>{fmt_area(area, sep)}</td>\n"
-            f"                    <td>{b60} A</td>\n"
-            f"                    <td>{f60} A</td>\n"
-            f"                    <td>{b200} A</td>\n"
-            f"                    <td>{f200} A</td>\n"
+            f'                    <td class="js-b60">{b60} {amp}</td>\n'
+            f'                    <td class="js-f60">{f60} {amp}</td>\n'
+            f'                    <td class="js-b200">{b200} {amp}</td>\n'
+            f'                    <td class="js-f200">{f200} {amp}</td>\n'
+            f'                    <td class="js-r">{resistance}</td>\n'
+            f'                    <td class="js-len">{length}</td>\n'
             f"                  </tr>"
         )
     return "\n".join(out)
@@ -211,6 +250,20 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 columns are the thermal limit of the silicone insulation, not a design target. A conductor
                 run at its 200&nbsp;°C limit will melt heat-shrink, discolour terminals and burn skin on
                 contact, so use it only to understand the headroom you have, never as the number you design to.
+              </p>
+
+              <h3>Resistance and maximum run</h3>
+              <p>
+                The last two columns are the ones the current-type toggle moves most. Resistance is
+                ρ/<em>A</em> per metre, switching to the AC value at your chosen frequency. Maximum run is
+                the longest one-way length that keeps the drop within 3&nbsp;% while the conductor carries
+                its ≤3&nbsp;conductor 60&nbsp;°C current, at the voltage set in the calculator.
+              </p>
+              <p>
+                That last column is worth staring at. The same 0&nbsp;AWG conductor is good for
+                <strong>9.8&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>189&nbsp;m</strong> on
+                400&nbsp;V three-phase — a factor of nineteen, from voltage and the √3 alone, with the
+                copper completely unchanged. Ampacity is rarely what limits a long run; voltage drop is.
               </p>
 
               <h3>Bundled versus free air</h3>
@@ -390,11 +443,15 @@ EN = {
     "P_TABLE": "Power sizes from 30 AWG through 0 AWG, including the 4 AWG / 25 mm² market-label case. "
     "Select any gauge to load a representative 0.08 mm fine-strand construction into the calculator.",
     "COUNT": "17 gauges",
-    "TABLE_CAPTION": "AWG to amps: copper cross-section in mm² and reference ampacity at 60 °C and 200 °C",
+    "TABLE_CAPTION": "AWG to amps: copper cross-section in mm², reference ampacity at 60 °C and 200 °C, conductor resistance and the maximum run at 3% voltage drop, for DC or AC",
     "TH_GAUGE": "Gauge",
     "TH_AREA": "Nominal copper",
     "TH_BUNDLE": "≤3 conductors",
     "TH_SINGLE": "1 conductor",
+    "TH_R": "Resistance",
+    "TH_LEN": "Max run @3% drop",
+    "U_R_DC": "mΩ/m (DC)",
+    "U_LEN_DC": "m · 24 V DC",
     "U_MM2": "mm²",
     "U_60": "60°C / A",
     "U_200": "200°C / A",
@@ -480,6 +537,9 @@ EN = {
         {
             "uArea": "mm²",
             "uHz": "Hz",
+            "unitResistDc": "mΩ/m (DC)",
+            "unitResistAc": "mΩ/m · {f} Hz",
+            "unitLength": "m · {u} V {m}",
             "labelSystemVoltage": "System voltage / V",
             "labelLineVoltage": "Line voltage / V",
             "modeShort": {
@@ -652,6 +712,20 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 тепловий ліміт силіконової ізоляції, а не проєктна ціль. Провідник, який працює на межі
                 200&nbsp;°C, розплавить термоусадку, змінить колір клем і обпече шкіру при дотику, тож
                 використовуйте це число лише щоб розуміти наявний запас, а не як розрахункове.
+              </p>
+
+              <h3>Опір і максимальна траса</h3>
+              <p>
+                Дві останні колонки найсильніше залежать від перемикача роду струму. Опір — це ρ/<em>A</em>
+                на метр, який для змінного струму перераховується на обрану частоту. Максимальна траса — це
+                найбільша довжина в один бік, за якої падіння лишається в межах 3&nbsp;%, коли жила несе свій
+                струм для «≤3 жили» за 60&nbsp;°C і напруги, заданої в калькуляторі.
+              </p>
+              <p>
+                На цю колонку варто подивитись уважно. Та сама жила 0&nbsp;AWG придатна для
+                <strong>9,8&nbsp;м</strong> у системі 24&nbsp;В постійного струму і <strong>189&nbsp;м</strong>
+                у трифазній 400&nbsp;В — різниця в дев'ятнадцять разів, лише за рахунок напруги та √3, за
+                абсолютно незмінної міді. Довгу трасу рідко обмежує допустимий струм; її обмежує падіння напруги.
               </p>
 
               <h3>Пучок проти вільного повітря</h3>
@@ -832,11 +906,15 @@ UK = {
     "P_TABLE": "Силові розміри від 30 AWG до 0 AWG, разом із ринковим випадком «4 AWG / 25 мм²». Оберіть "
     "будь-який калібр, щоб підставити типову конструкцію з жилок 0,08 мм у калькулятор.",
     "COUNT": "17 калібрів",
-    "TABLE_CAPTION": "AWG в ампери: переріз міді в мм² і довідковий допустимий струм за 60 °C і 200 °C",
+    "TABLE_CAPTION": "AWG в ампери: переріз міді в мм², довідковий допустимий струм за 60 °C і 200 °C, опір жили та максимальна траса за падіння 3%, для постійного або змінного струму",
     "TH_GAUGE": "Калібр",
     "TH_AREA": "Номінальна мідь",
     "TH_BUNDLE": "≤3 жили",
     "TH_SINGLE": "1 жила",
+    "TH_R": "Опір",
+    "TH_LEN": "Макс. траса @3%",
+    "U_R_DC": "мОм/м (пост.)",
+    "U_LEN_DC": "м · 24 В постійний",
     "U_MM2": "мм²",
     "U_60": "60°C / А",
     "U_200": "200°C / А",
@@ -922,6 +1000,9 @@ UK = {
         {
             "uArea": "мм²",
             "uHz": "\u0413\u0446",
+            "unitResistDc": "мОм/м (пост.)",
+            "unitResistAc": "мОм/м · {f} Гц",
+            "unitLength": "м · {u} В {m}",
             "labelSystemVoltage": "\u041d\u0430\u043f\u0440\u0443\u0433\u0430 \u0441\u0438\u0441\u0442\u0435\u043c\u0438 / \u0412",
             "labelLineVoltage": "\u041b\u0456\u043d\u0456\u0439\u043d\u0430 \u043d\u0430\u043f\u0440\u0443\u0433\u0430 / \u0412",
             "modeShort": {
@@ -1078,6 +1159,18 @@ def build_jsonld(cfg, faq_items):
                     "unitText": "A",
                     "minValue": 2,
                     "maxValue": 348,
+                },
+                {
+                    "@type": "PropertyValue",
+                    "name": "Conductor resistance",
+                    "unitText": "mOhm/m",
+                    "minValue": 0.327,
+                    "maxValue": 343,
+                },
+                {
+                    "@type": "PropertyValue",
+                    "name": "Maximum run length at 3% voltage drop",
+                    "unitText": "m",
                 },
             ],
         },
