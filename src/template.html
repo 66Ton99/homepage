@@ -830,7 +830,7 @@
 
       .ampacity-card {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 36%);
         gap: 12px;
         align-items: start;
         min-width: 0;
@@ -845,7 +845,7 @@
 
       .ampacity-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
         margin-top: 8px;
       }
@@ -867,19 +867,18 @@
       .ampacity-card .micro-label {
         display: block;
         margin-bottom: 8px;
-        overflow-wrap: normal;
-        word-break: normal;
+        overflow-wrap: break-word;
       }
 
       .ampacity-card strong {
         display: block;
         color: var(--accent);
         font-family: var(--mono);
-        font-size: clamp(30px, 3.7vw, 42px);
+        font-size: clamp(24px, 2.8vw, 32px);
         font-weight: 650;
         letter-spacing: -0.06em;
-        line-height: 0.9;
-        white-space: nowrap;
+        line-height: 1;
+        overflow-wrap: break-word;
       }
 
       .ampacity-card .context {
@@ -1658,9 +1657,12 @@
       }
 
       function formatAwg(value) {
+        // The near-zero test has to come first. A conductor of exactly 0 AWG
+        // computes to about -0.0006, and a plain `value < 0` check caught that
+        // and reported it as larger than 0 AWG.
+        if (Math.abs(value) < 0.05) return "≈ 0 AWG";
         if (value > 30) return I18N.below30;
         if (value < 0) return I18N.below0;
-        if (Math.abs(value) < 0.05) return "≈ 0 AWG";
         return "≈ " + formatNumber(value, 1) + " AWG";
       }
 
@@ -1848,8 +1850,14 @@
 
         $("areaResult").textContent = formatNumber(area, 2) + " " + I18N.uArea;
         $("gaugeResult").textContent = formatAwg(equivalent);
-        $("ampacity60Result").textContent = result60.ambientFactor > 0 ? formatNumber(result60.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
-        $("ampacity200Result").textContent = result200.ambientFactor > 0 ? formatNumber(result200.ampacity, 1) + " " + I18N.uAmp : I18N.noMargin;
+        // Non-breaking space: the value is allowed to wrap now, and "166,7" must
+        // not end up on a different line from its "A".
+        $("ampacity60Result").textContent = result60.ambientFactor > 0
+          ? formatNumber(result60.ampacity, 1) + "\u00a0" + I18N.uAmp
+          : I18N.noMargin;
+        $("ampacity200Result").textContent = result200.ambientFactor > 0
+          ? formatNumber(result200.ampacity, 1) + "\u00a0" + I18N.uAmp
+          : I18N.noMargin;
         const modeContext = alternating
           ? " · " + formatNumber(frequency, 0) + " " + I18N.uHz
           : "";

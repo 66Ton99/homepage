@@ -269,6 +269,14 @@ async function runUrl(file, label, expect) {
   check("shared link opens the optional section", g2("optionalChecks").open, true);
   check("shared link recalculates", g2("areaResult").textContent.startsWith(expect.area), true);
 
+  // a conductor of exactly 0 AWG computes to about -0.0006 and must not be
+  // reported as larger than 0 AWG
+  const zero = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?n=10641&d=0.08",
+  }).window.document;
+  check("exactly 0 AWG reads as 0 AWG", zero.getElementById("gaugeResult").textContent, "≈ 0 AWG");
+
   // 3. parameters must not spawn a second indexable URL
   check("canonical ignores the query string",
         s2.querySelector('link[rel=canonical]').href, "https://66ton99.org.ua" + base);
