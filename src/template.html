@@ -427,7 +427,8 @@
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+        /* The table earned more room when the mode-dependent columns arrived. */
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.5fr);
         gap: 22px;
         align-items: start;
       }
@@ -472,11 +473,28 @@
 
       .table-wrap {
         overflow-x: auto;
+        scrollbar-color: var(--line) transparent;
+      }
+
+      .scroll-hint {
+        display: none;
+        padding: 10px 20px 0;
+        color: var(--faint);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 900px) {
+        .scroll-hint {
+          display: block;
+        }
       }
 
       table {
         width: 100%;
-        min-width: 940px;
+        min-width: 990px;
         border-collapse: collapse;
         font-variant-numeric: tabular-nums;
       }
@@ -494,20 +512,21 @@
 
       th,
       td {
-        padding: 13px 16px;
+        padding: 12px 11px;
         border-bottom: 1px solid var(--line-soft);
         text-align: right;
+        white-space: nowrap;
       }
 
       th:first-child,
       td:first-child {
-        padding-left: 24px;
+        padding-left: 20px;
         text-align: left;
       }
 
       th:last-child,
       td:last-child {
-        padding-right: 24px;
+        padding-right: 20px;
       }
 
       thead th {
@@ -541,6 +560,7 @@
       }
 
       .row-btn {
+        white-space: nowrap;
         padding: 0;
         border: 0;
         background: none;
@@ -562,7 +582,7 @@
       }
 
       tbody th[scope="row"] {
-        padding: 13px 16px 13px 24px;
+        padding: 12px 11px 12px 20px;
         border-bottom: 1px solid var(--line-soft);
         color: var(--accent);
         font-size: 14px;
@@ -1208,12 +1228,12 @@
         th:first-child,
         td:first-child,
         tbody th[scope="row"] {
-          padding-left: 16px;
+          padding-left: 14px;
         }
 
         th:last-child,
         td:last-child {
-          padding-right: 16px;
+          padding-right: 14px;
         }
 
         .form-grid {
@@ -1328,6 +1348,7 @@
               <div class="count">{{COUNT}}</div>
             </div>
 
+            <p class="scroll-hint">{{SCROLL_HINT}}</p>
             <div class="table-wrap">
               <table>
                 <caption>{{TABLE_CAPTION}}</caption>
@@ -1341,6 +1362,7 @@
                     <th scope="col">{{TH_SINGLE}}<br /><span class="unit">{{U_FREE}}</span></th>
                     <th scope="col">{{TH_R}}<br /><span class="unit" id="thResistUnit">{{U_R_DC}}</span></th>
                     <th scope="col">{{TH_LEN}}<br /><span class="unit" id="thLengthUnit">{{U_LEN_DC}}</span></th>
+                    <th scope="col">{{TH_POWER}}<br /><span class="unit" id="thPowerUnit">{{U_POWER_DC}}</span></th>
                   </tr>
                 </thead>
                 <tbody id="ampacityTableBody">
@@ -1575,16 +1597,32 @@
       // for solid and ordinary stranded round conductors; ys is the fractional
       // increase in resistance. The published fit holds for xs ≤ 2.8, which for
       // 0 AWG runs out around 1 kHz — hence the frequency input's cap.
+      // Proximity effect too: neighbouring conductors distort each other's
+      // current distribution, and above mains frequency it dominates the skin
+      // term. (dc/s)² is fixed at 0.64, the usual figure for insulated
+      // conductors lying against each other.
+      const PROXIMITY_SPACING = 0.64;
+
       function skinEffect(area, frequency) {
-        if (!(area > 0) || !(frequency > 0)) return { ys: 0, xs: 0, valid: true };
+        if (!(area > 0) || !(frequency > 0)) return { ys: 0, yp: 0, total: 0, valid: true };
         const rdc = COPPER_RESISTIVITY / area;
         const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
         const xs4 = xs2 * xs2;
-        return {
-          ys: xs4 / (192 + 0.8 * xs4),
-          xs: Math.sqrt(xs2),
-          valid: Math.sqrt(xs2) <= 2.8
-        };
+        const ys = xs4 / (192 + 0.8 * xs4);
+        const yp =
+          ys * PROXIMITY_SPACING *
+          (0.312 * PROXIMITY_SPACING + 1.18 / (ys + 0.27));
+        return { ys, yp, total: ys + yp, xs: Math.sqrt(xs2), valid: Math.sqrt(xs2) <= 2.8 };
+      }
+
+      // What the conductor can actually deliver, which is where the modes really
+      // separate: 112 A is 2.7 kW on 24 V DC and 77.6 kW on 400 V three-phase.
+      function formatPower(watts) {
+        if (!(watts > 0)) return "—";
+        if (watts < 1000) return fixed(watts, 0) + " " + I18N.uWatt;
+        const kilowatts = watts / 1000;
+        const digits = kilowatts >= 100 ? 0 : kilowatts >= 10 ? 1 : 2;
+        return fixed(kilowatts, digits) + " " + I18N.uKilowatt;
       }
 
       function equivalentAwg(area) {
@@ -1634,9 +1672,9 @@
           const tr = tableBody.querySelector('[data-gauge="' + CSS.escape(row.gauge) + '"]');
           if (!tr) return;
 
-          const skin = alternating ? skinEffect(row.area, frequency) : { ys: 0 };
-          const derate = 1 / Math.sqrt(1 + skin.ys);
-          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.ys);
+          const skin = alternating ? skinEffect(row.area, frequency) : { total: 0 };
+          const derate = 1 / Math.sqrt(1 + skin.total);
+          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.total);
 
           const set = (selector, text) => {
             const cell = tr.querySelector(selector);
@@ -1656,14 +1694,22 @@
             ? (0.03 * voltage) / (runFactor * rated * resistance * appliedPowerFactor)
             : 0;
           set(".js-len", metres > 0 ? formatLength(metres) : "—");
+
+          // The headline difference between the modes: the same amps buy wildly
+          // different power depending on voltage and whether there is a √3.
+          const powerFactorForMode = threePhase ? Math.sqrt(3) : 1;
+          set(".js-p", formatPower(voltage * rated * powerFactorForMode * appliedPowerFactor));
         });
 
         $("thResistUnit").textContent = alternating
           ? I18N.unitResistAc.replace("{f}", formatNumber(frequency, 0))
           : I18N.unitResistDc;
+        $("thPowerUnit").textContent = I18N.unitPower
+          .replace("{u}", formatNumber(voltage, 0))
+          .replace("{m}", I18N.modeTag[mode]);
         $("thLengthUnit").textContent = I18N.unitLength
           .replace("{u}", formatNumber(voltage, 0))
-          .replace("{m}", I18N.modeShort[mode]);
+          .replace("{m}", I18N.modeTag[mode]);
       }
 
       function clearSelection() {
@@ -1738,9 +1784,9 @@
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
         const alternating = mode !== "dc";
-        const skin = alternating ? skinEffect(area, frequency) : { ys: 0, xs: 0, valid: true };
-        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.ys);
-        const skinDerate = 1 / Math.sqrt(1 + skin.ys);
+        const skin = alternating ? skinEffect(area, frequency) : { total: 0, xs: 0, valid: true };
+        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.total);
+        const skinDerate = 1 / Math.sqrt(1 + skin.total);
 
         result60.ampacity *= skinDerate;
         result200.ampacity *= skinDerate;
@@ -1776,7 +1822,7 @@
         // As a ratio this reads "×1" at mains frequency, which tells the reader
         // nothing. The percentage rise over DC does: +0.002% versus +4.7%.
         $("skinResult").textContent = alternating
-          ? "+" + formatNumber(skin.ys * 100, 3) + "%"
+          ? "+" + formatNumber(skin.total * 100, 2) + "%"
           : "—";
         $("ampacity60Context").textContent = result60.context;
         $("ampacity200Context").textContent = result200.context;

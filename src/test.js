@@ -119,7 +119,8 @@ async function runModes(file, label, expect) {
   $("frequency").value = "400";
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   const highF = parseFloat($("skinResult").textContent.replace(",", ".").replace(/[^\d.]/g, ""));
-  checkClose("0 AWG at 400 Hz raises resistance ~4.7%", highF, 4.73, 0.05);
+  // skin + proximity together, per IEC 60287
+  checkClose("0 AWG at 400 Hz raises resistance ~16.6%", highF, 16.6, 0.2);
 
   pick("dc");
   check("back to DC hides AC fields", document.querySelector(".ac-only").hidden, true);
@@ -159,21 +160,38 @@ async function runModes(file, label, expect) {
   pick("ac3");
   $("frequency").value = "400";
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "109");
+  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "104");
   check("22 AWG ampacity unchanged at 400 Hz", cellNum("22", "js-b60").toFixed(0), "5");
-  checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.343, 0.002);
+  checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.381, 0.003);
   check("resistance header names the frequency", $("thResistUnit").textContent.includes("400"), true);
 
   pick("dc");
   check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.327");
+
+  // ---- the same 112 A buys very different power per mode ----
+  pick("dc");
+  $("frequency").value = "50";
+  $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  $("systemVoltage").value = "24";
+  $("systemVoltage").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  checkClose("0 AWG delivers ~2.7 kW on 24 V DC", cellNum("0", "js-p"), 2.69, 0.02);
+  check("small gauges are quoted in watts", cell("30", "js-p").includes(expect.watt), true);
+
+  pick("ac1");
+  check("voltage follows to 230 V", $("systemVoltage").value, "230");
+  checkClose("0 AWG delivers ~25.8 kW on 230 V 1-phase", cellNum("0", "js-p"), 25.8, 0.2);
+
+  pick("ac3");
+  checkClose("0 AWG delivers ~77.6 kW on 400 V 3-phase", cellNum("0", "js-p"), 77.6, 0.5);
+  check("power header names the mode", $("thPowerUnit").textContent.includes("400"), true);
 }
 
 
 (async () => {
   await runModes("../site/_pages/awg-to-amps.html", "EN",
-    { skin50: "+0.002%", lineLabel: "Line voltage / V" });
+    { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W" });
   await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
-    { skin50: "+0,002%", lineLabel: "Лінійна напруга / В" });
+    { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт" });
   console.log(failures ? `\n${failures} FAILURES` : "\nAll mode checks passed.");
   process.exit(failures ? 1 : 0);
 })();

@@ -66,6 +66,15 @@ def fmt_length(metres, decimal_sep):
     return text.replace(".", decimal_sep)
 
 
+def fmt_power(watts, decimal_sep, unit_w, unit_kw):
+    """Mirrored in the page's JS; see fmt_resistance for why that matters."""
+    if watts < 1000:
+        return f"{watts:.0f} {unit_w}"
+    kilowatts = watts / 1000
+    digits = 0 if kilowatts >= 100 else 1 if kilowatts >= 10 else 2
+    return f"{kilowatts:.{digits}f}".replace(".", decimal_sep) + f" {unit_kw}"
+
+
 def max_run_length(area, current, voltage, run_factor, power_factor=1.0):
     """Longest one-way run that keeps the drop within 3% at the rated current."""
     resistance = COPPER_RESISTIVITY / area
@@ -80,6 +89,8 @@ def build_tbody(lang):
         else "Підставити {g} AWG у калькулятор"
     )
     amp = "A" if lang == "en" else "А"
+    watt = "W" if lang == "en" else "Вт"
+    kilowatt = "kW" if lang == "en" else "кВт"
     out = []
     # Server-rendered in the DC state at 24 V, matching the page defaults, so a
     # crawler sees real numbers and the JS re-render produces identical text.
@@ -99,6 +110,8 @@ def build_tbody(lang):
             f'                    <td class="js-f200">{f200} {amp}</td>\n'
             f'                    <td class="js-r">{resistance}</td>\n'
             f'                    <td class="js-len">{length}</td>\n'
+            f'                    <td class="js-p">'
+            f'{fmt_power(DEFAULT_VOLTAGE["dc"] * b60, sep, watt, kilowatt)}</td>\n'
             f"                  </tr>"
         )
     return "\n".join(out)
@@ -252,6 +265,22 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 contact, so use it only to understand the headroom you have, never as the number you design to.
               </p>
 
+              <h3>Maximum load — where the current type really shows</h3>
+              <p>
+                The ampacity columns are in amperes, and amperes are amperes: a conductor does not care
+                whether the heat came from DC or AC. What changes completely is what those amperes are
+                <em>worth</em>. The same 0&nbsp;AWG conductor at its 112&nbsp;A rating delivers
+                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>26&nbsp;kW</strong> on
+                230&nbsp;V single-phase, and <strong>78&nbsp;kW</strong> on 400&nbsp;V three-phase — a
+                factor of twenty-nine, from voltage and the √3.
+              </p>
+              <p>
+                Read the other way round, that is the number most people actually want: for a given load,
+                the current you must carry is wildly different between DC and AC, and the copper you need
+                follows the current, not the watts. A 3&nbsp;kW load is 125&nbsp;A at 24&nbsp;V DC and
+                4.3&nbsp;A at 400&nbsp;V three-phase.
+              </p>
+
               <h3>Resistance and maximum run</h3>
               <p>
                 The last two columns are the ones the current-type toggle moves most. Resistance is
@@ -338,17 +367,18 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
                 has a radius of only 4.1&nbsp;mm.
               </p>
-              <p class="formula"><span>Skin effect, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)</p>
+              <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
-                Run the numbers and the resistance rise at 50&nbsp;Hz is <strong>0.08&nbsp;%</strong> for
-                0&nbsp;AWG and less than 0.01&nbsp;% for everything below 4&nbsp;AWG. Ampacity scales as
+                Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
+                dominates once you leave mains frequency. Together they come to <strong>0.3&nbsp;%</strong>
+                at 50&nbsp;Hz for 0&nbsp;AWG and far less for everything thinner. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
                 spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
                 columns would be inventing precision that is not there.
               </p>
               <p>
                 It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
-                0&nbsp;AWG picks up 4.7&nbsp;%, which is why the calculator takes a frequency rather than
+                0&nbsp;AWG picks up 17&nbsp;%, which is why the calculator takes a frequency rather than
                 assuming mains. The published fit holds to x<sub>s</sub>&nbsp;≤&nbsp;2.8, roughly 1&nbsp;kHz
                 on the largest gauge here; above that the calculator flags its own result as indicative.
               </p>
@@ -449,9 +479,11 @@ EN = {
     "TH_BUNDLE": "≤3 conductors",
     "TH_SINGLE": "1 conductor",
     "TH_R": "Resistance",
-    "TH_LEN": "Max run @3% drop",
-    "U_R_DC": "mΩ/m (DC)",
-    "U_LEN_DC": "m · 24 V DC",
+    "TH_LEN": "Max run",
+    "TH_POWER": "Max load",
+    "U_R_DC": "mΩ/m · DC",
+    "U_LEN_DC": "m @3% · 24 V DC",
+    "U_POWER_DC": "at 24 V DC",
     "U_MM2": "mm²",
     "U_60": "60°C / A",
     "U_200": "200°C / A",
@@ -470,6 +502,7 @@ EN = {
     "L_FREQ": "Frequency / Hz",
     "L_PF": "Power factor cos \u03c6",
     "D_SKIN": "Skin effect",
+    "SCROLL_HINT": "Scroll the table sideways for resistance and maximum run →",
     "KICKER_CALC": "Live calculation",
     "H2_CALC": "Wire gauge calculator",
     "P_CALC": "Count strands, enter their diameter, and compare the result to the nearest AWG row at both "
@@ -537,9 +570,16 @@ EN = {
         {
             "uArea": "mm²",
             "uHz": "Hz",
-            "unitResistDc": "mΩ/m (DC)",
+            "unitResistDc": "mΩ/m · DC",
+            "modeTag": {
+                "dc": "DC",
+                "ac1": "1φ",
+                "ac3": "3φ",
+            },
             "unitResistAc": "mΩ/m · {f} Hz",
-            "unitLength": "m · {u} V {m}",
+            "unitLength": "m @3% · {u} V {m}",
+            "unitPower": "at {u} V {m}",
+            "uKilowatt": "kW",
             "labelSystemVoltage": "System voltage / V",
             "labelLineVoltage": "Line voltage / V",
             "modeShort": {
@@ -714,6 +754,22 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 використовуйте це число лише щоб розуміти наявний запас, а не як розрахункове.
               </p>
 
+              <h3>Максимальна потужність — тут рід струму й видно</h3>
+              <p>
+                Колонки допустимого струму — в амперах, і ампер є ампер: провіднику байдуже, від постійного
+                чи змінного струму він нагрівся. Повністю змінюється те, чого ці ампери <em>варті</em>. Та
+                сама жила 0&nbsp;AWG на своїх 112&nbsp;А віддає <strong>2,7&nbsp;кВт</strong> у системі
+                24&nbsp;В постійного струму, <strong>26&nbsp;кВт</strong> на 230&nbsp;В однофазних і
+                <strong>78&nbsp;кВт</strong> на 400&nbsp;В трифазних — різниця у двадцять дев'ять разів,
+                лише за рахунок напруги та √3.
+              </p>
+              <p>
+                У зворотний бік це саме те число, яке більшості й потрібне: для однакового навантаження
+                струм, який доведеться нести, кардинально різний для постійного та змінного струму, а мідь
+                добирається за струмом, а не за ватами. Навантаження 3&nbsp;кВт — це 125&nbsp;А за
+                24&nbsp;В постійного струму і 4,3&nbsp;А за 400&nbsp;В трифазних.
+              </p>
+
               <h3>Опір і максимальна траса</h3>
               <p>
                 Дві останні колонки найсильніше залежать від перемикача роду струму. Опір — це ρ/<em>A</em>
@@ -801,17 +857,18 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 скін-шару становить близько 9,4&nbsp;мм, тоді як навіть жила 0&nbsp;AWG має радіус лише
                 4,1&nbsp;мм.
               </p>
-              <p class="formula"><span>Скін-ефект, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)</p>
+              <p class="formula"><span>Скін-ефект і ефект близькості, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0,312 (d/s)² + 1,18 / (y<sub>s</sub> + 0,27)]</span></p>
               <p>
-                Порахуйте — і приріст опору на 50&nbsp;Гц становить <strong>0,08&nbsp;%</strong> для
-                0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG. Допустимий струм
+                Враховано обидва ефекти — скін-ефект і ефект близькості сусідніх жил, який переважає одразу
+                поза мережевою частотою. Разом вони дають <strong>0,3&nbsp;%</strong> на 50&nbsp;Гц для
+                0&nbsp;AWG і значно менше для всього тоншого. Допустимий струм
                 масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
                 значно менше за розбіжність між даташитами двох виробників. Публікувати окремі колонки для
                 постійного та змінного струму означало б вигадати точність, якої немає.
               </p>
               <p>
                 Вище за частотою це вже важить. На 400&nbsp;Гц — авіація та деякі приводи — 0&nbsp;AWG
-                додає 4,7&nbsp;%, і саме тому калькулятор питає частоту, а не припускає мережеву. Формула
+                додає 17&nbsp;%, і саме тому калькулятор питає частоту, а не припускає мережеву. Формула
                 чинна до x<sub>s</sub>&nbsp;≤&nbsp;2,8, тобто приблизно до 1&nbsp;кГц на найбільшому калібрі;
                 вище калькулятор сам позначає результат як орієнтовний.
               </p>
@@ -912,9 +969,11 @@ UK = {
     "TH_BUNDLE": "≤3 жили",
     "TH_SINGLE": "1 жила",
     "TH_R": "Опір",
-    "TH_LEN": "Макс. траса @3%",
-    "U_R_DC": "мОм/м (пост.)",
-    "U_LEN_DC": "м · 24 В постійний",
+    "TH_LEN": "Макс. траса",
+    "TH_POWER": "Макс. потужність",
+    "U_R_DC": "мОм/м · пост.",
+    "U_LEN_DC": "м @3% · 24 В пост.",
+    "U_POWER_DC": "на 24 В пост.",
     "U_MM2": "мм²",
     "U_60": "60°C / А",
     "U_200": "200°C / А",
@@ -933,6 +992,7 @@ UK = {
     "L_FREQ": "\u0427\u0430\u0441\u0442\u043e\u0442\u0430 / \u0413\u0446",
     "L_PF": "\u041a\u043e\u0435\u0444. \u043f\u043e\u0442\u0443\u0436\u043d\u043e\u0441\u0442\u0456 cos \u03c6",
     "D_SKIN": "\u0421\u043a\u0456\u043d-\u0435\u0444\u0435\u043a\u0442",
+    "SCROLL_HINT": "Гортайте таблицю вбік — опір і максимальна траса →",
     "KICKER_CALC": "Живий розрахунок",
     "H2_CALC": "Калькулятор перерізу дроту",
     "P_CALC": "Вкажіть кількість жилок і їхній діаметр — і порівняйте результат із найближчим рядком AWG "
@@ -1000,9 +1060,16 @@ UK = {
         {
             "uArea": "мм²",
             "uHz": "\u0413\u0446",
-            "unitResistDc": "мОм/м (пост.)",
+            "unitResistDc": "мОм/м · пост.",
+            "modeTag": {
+                "dc": "пост.",
+                "ac1": "1ф",
+                "ac3": "3ф",
+            },
             "unitResistAc": "мОм/м · {f} Гц",
-            "unitLength": "м · {u} В {m}",
+            "unitLength": "м @3% · {u} В {m}",
+            "unitPower": "на {u} В {m}",
+            "uKilowatt": "кВт",
             "labelSystemVoltage": "\u041d\u0430\u043f\u0440\u0443\u0433\u0430 \u0441\u0438\u0441\u0442\u0435\u043c\u0438 / \u0412",
             "labelLineVoltage": "\u041b\u0456\u043d\u0456\u0439\u043d\u0430 \u043d\u0430\u043f\u0440\u0443\u0433\u0430 / \u0412",
             "modeShort": {
@@ -1171,6 +1238,11 @@ def build_jsonld(cfg, faq_items):
                     "@type": "PropertyValue",
                     "name": "Maximum run length at 3% voltage drop",
                     "unitText": "m",
+                },
+                {
+                    "@type": "PropertyValue",
+                    "name": "Maximum transmissible load",
+                    "unitText": "W",
                 },
             ],
         },

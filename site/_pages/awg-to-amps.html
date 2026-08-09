@@ -184,6 +184,11 @@
           "@type": "PropertyValue",
           "name": "Maximum run length at 3% voltage drop",
           "unitText": "m"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Maximum transmissible load",
+          "unitText": "W"
         }
       ]
     },
@@ -655,7 +660,8 @@
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+        /* The table earned more room when the mode-dependent columns arrived. */
+        grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.5fr);
         gap: 22px;
         align-items: start;
       }
@@ -700,11 +706,28 @@
 
       .table-wrap {
         overflow-x: auto;
+        scrollbar-color: var(--line) transparent;
+      }
+
+      .scroll-hint {
+        display: none;
+        padding: 10px 20px 0;
+        color: var(--faint);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 900px) {
+        .scroll-hint {
+          display: block;
+        }
       }
 
       table {
         width: 100%;
-        min-width: 940px;
+        min-width: 990px;
         border-collapse: collapse;
         font-variant-numeric: tabular-nums;
       }
@@ -722,20 +745,21 @@
 
       th,
       td {
-        padding: 13px 16px;
+        padding: 12px 11px;
         border-bottom: 1px solid var(--line-soft);
         text-align: right;
+        white-space: nowrap;
       }
 
       th:first-child,
       td:first-child {
-        padding-left: 24px;
+        padding-left: 20px;
         text-align: left;
       }
 
       th:last-child,
       td:last-child {
-        padding-right: 24px;
+        padding-right: 20px;
       }
 
       thead th {
@@ -769,6 +793,7 @@
       }
 
       .row-btn {
+        white-space: nowrap;
         padding: 0;
         border: 0;
         background: none;
@@ -790,7 +815,7 @@
       }
 
       tbody th[scope="row"] {
-        padding: 13px 16px 13px 24px;
+        padding: 12px 11px 12px 20px;
         border-bottom: 1px solid var(--line-soft);
         color: var(--accent);
         font-size: 14px;
@@ -1436,12 +1461,12 @@
         th:first-child,
         td:first-child,
         tbody th[scope="row"] {
-          padding-left: 16px;
+          padding-left: 14px;
         }
 
         th:last-child,
         td:last-child {
-          padding-right: 16px;
+          padding-right: 14px;
         }
 
         .form-grid {
@@ -1556,6 +1581,7 @@
               <div class="count">17 gauges</div>
             </div>
 
+            <p class="scroll-hint">Scroll the table sideways for resistance and maximum run →</p>
             <div class="table-wrap">
               <table>
                 <caption>AWG to amps: copper cross-section in mm², reference ampacity at 60 °C and 200 °C, conductor resistance and the maximum run at 3% voltage drop, for DC or AC</caption>
@@ -1567,8 +1593,9 @@
                     <th scope="col">1 conductor<br /><span class="unit">free air / A</span></th>
                     <th scope="col">≤3 conductors<br /><span class="unit">200°C / A</span></th>
                     <th scope="col">1 conductor<br /><span class="unit">free air / A</span></th>
-                    <th scope="col">Resistance<br /><span class="unit" id="thResistUnit">mΩ/m (DC)</span></th>
-                    <th scope="col">Max run @3% drop<br /><span class="unit" id="thLengthUnit">m · 24 V DC</span></th>
+                    <th scope="col">Resistance<br /><span class="unit" id="thResistUnit">mΩ/m · DC</span></th>
+                    <th scope="col">Max run<br /><span class="unit" id="thLengthUnit">m @3% · 24 V DC</span></th>
+                    <th scope="col">Max load<br /><span class="unit" id="thPowerUnit">at 24 V DC</span></th>
                   </tr>
                 </thead>
                 <tbody id="ampacityTableBody">
@@ -1581,6 +1608,7 @@
                     <td class="js-f200">4 A</td>
                     <td class="js-r">343</td>
                     <td class="js-len">0.5</td>
+                    <td class="js-p">48 W</td>
                   </tr>
                   <tr data-gauge="28">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 28 AWG into the calculator">28 <span class="unit">AWG</span></button></th>
@@ -1591,6 +1619,7 @@
                     <td class="js-f200">6 A</td>
                     <td class="js-r">219</td>
                     <td class="js-len">0.5</td>
+                    <td class="js-p">72 W</td>
                   </tr>
                   <tr data-gauge="26">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 26 AWG into the calculator">26 <span class="unit">AWG</span></button></th>
@@ -1601,6 +1630,7 @@
                     <td class="js-f200">7 A</td>
                     <td class="js-r">136</td>
                     <td class="js-len">0.7</td>
+                    <td class="js-p">96 W</td>
                   </tr>
                   <tr data-gauge="24">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 24 AWG into the calculator">24 <span class="unit">AWG</span></button></th>
@@ -1611,6 +1641,7 @@
                     <td class="js-f200">10 A</td>
                     <td class="js-r">85.4</td>
                     <td class="js-len">0.8</td>
+                    <td class="js-p">120 W</td>
                   </tr>
                   <tr data-gauge="22">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 22 AWG into the calculator">22 <span class="unit">AWG</span></button></th>
@@ -1621,6 +1652,7 @@
                     <td class="js-f200">15 A</td>
                     <td class="js-r">53.7</td>
                     <td class="js-len">1.3</td>
+                    <td class="js-p">120 W</td>
                   </tr>
                   <tr data-gauge="20">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 20 AWG into the calculator">20 <span class="unit">AWG</span></button></th>
@@ -1631,6 +1663,7 @@
                     <td class="js-f200">20 A</td>
                     <td class="js-r">33.8</td>
                     <td class="js-len">1.8</td>
+                    <td class="js-p">144 W</td>
                   </tr>
                   <tr data-gauge="18">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 18 AWG into the calculator">18 <span class="unit">AWG</span></button></th>
@@ -1641,6 +1674,7 @@
                     <td class="js-f200">26 A</td>
                     <td class="js-r">21.3</td>
                     <td class="js-len">2.1</td>
+                    <td class="js-p">192 W</td>
                   </tr>
                   <tr data-gauge="16">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 16 AWG into the calculator">16 <span class="unit">AWG</span></button></th>
@@ -1651,6 +1685,7 @@
                     <td class="js-f200">34 A</td>
                     <td class="js-r">13.4</td>
                     <td class="js-len">2.4</td>
+                    <td class="js-p">264 W</td>
                   </tr>
                   <tr data-gauge="14">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 14 AWG into the calculator">14 <span class="unit">AWG</span></button></th>
@@ -1661,6 +1696,7 @@
                     <td class="js-f200">46 A</td>
                     <td class="js-r">8.41</td>
                     <td class="js-len">3.1</td>
+                    <td class="js-p">336 W</td>
                   </tr>
                   <tr data-gauge="12">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 12 AWG into the calculator">12 <span class="unit">AWG</span></button></th>
@@ -1671,6 +1707,7 @@
                     <td class="js-f200">60 A</td>
                     <td class="js-r">5.29</td>
                     <td class="js-len">3.6</td>
+                    <td class="js-p">456 W</td>
                   </tr>
                   <tr data-gauge="10">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 10 AWG into the calculator">10 <span class="unit">AWG</span></button></th>
@@ -1681,6 +1718,7 @@
                     <td class="js-f200">81 A</td>
                     <td class="js-r">3.33</td>
                     <td class="js-len">4.2</td>
+                    <td class="js-p">624 W</td>
                   </tr>
                   <tr data-gauge="8">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 8 AWG into the calculator">8 <span class="unit">AWG</span></button></th>
@@ -1691,6 +1729,7 @@
                     <td class="js-f200">113 A</td>
                     <td class="js-r">2.09</td>
                     <td class="js-len">4.9</td>
+                    <td class="js-p">840 W</td>
                   </tr>
                   <tr data-gauge="6">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 6 AWG into the calculator">6 <span class="unit">AWG</span></button></th>
@@ -1701,6 +1740,7 @@
                     <td class="js-f200">156 A</td>
                     <td class="js-r">1.32</td>
                     <td class="js-len">5.7</td>
+                    <td class="js-p">1.15 kW</td>
                   </tr>
                   <tr data-gauge="4">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 4 AWG into the calculator">4 <span class="unit">AWG</span></button></th>
@@ -1711,6 +1751,7 @@
                     <td class="js-f200">210 A</td>
                     <td class="js-r">0.827</td>
                     <td class="js-len">7.0</td>
+                    <td class="js-p">1.49 kW</td>
                   </tr>
                   <tr data-gauge="2">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 2 AWG into the calculator">2 <span class="unit">AWG</span></button></th>
@@ -1721,6 +1762,7 @@
                     <td class="js-f200">286 A</td>
                     <td class="js-r">0.521</td>
                     <td class="js-len">8.5</td>
+                    <td class="js-p">1.94 kW</td>
                   </tr>
                   <tr data-gauge="1">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 1 AWG into the calculator">1 <span class="unit">AWG</span></button></th>
@@ -1731,6 +1773,7 @@
                     <td class="js-f200">338 A</td>
                     <td class="js-r">0.413</td>
                     <td class="js-len">9.4</td>
+                    <td class="js-p">2.23 kW</td>
                   </tr>
                   <tr data-gauge="0">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 0 AWG into the calculator">0 <span class="unit">AWG</span></button></th>
@@ -1741,6 +1784,7 @@
                     <td class="js-f200">348 A</td>
                     <td class="js-r">0.327</td>
                     <td class="js-len">9.8</td>
+                    <td class="js-p">2.69 kW</td>
                   </tr>
                 </tbody>
               </table>
@@ -1902,6 +1946,22 @@
                 contact, so use it only to understand the headroom you have, never as the number you design to.
               </p>
 
+              <h3>Maximum load — where the current type really shows</h3>
+              <p>
+                The ampacity columns are in amperes, and amperes are amperes: a conductor does not care
+                whether the heat came from DC or AC. What changes completely is what those amperes are
+                <em>worth</em>. The same 0&nbsp;AWG conductor at its 112&nbsp;A rating delivers
+                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>26&nbsp;kW</strong> on
+                230&nbsp;V single-phase, and <strong>78&nbsp;kW</strong> on 400&nbsp;V three-phase — a
+                factor of twenty-nine, from voltage and the √3.
+              </p>
+              <p>
+                Read the other way round, that is the number most people actually want: for a given load,
+                the current you must carry is wildly different between DC and AC, and the copper you need
+                follows the current, not the watts. A 3&nbsp;kW load is 125&nbsp;A at 24&nbsp;V DC and
+                4.3&nbsp;A at 400&nbsp;V three-phase.
+              </p>
+
               <h3>Resistance and maximum run</h3>
               <p>
                 The last two columns are the ones the current-type toggle moves most. Resistance is
@@ -1988,17 +2048,18 @@
                 copper at 50&nbsp;Hz the skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor
                 has a radius of only 4.1&nbsp;mm.
               </p>
-              <p class="formula"><span>Skin effect, IEC 60287-1-1</span>x<sub>s</sub>² = (8πf / R′) × 10⁻⁷&nbsp;&nbsp;&nbsp;y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)</p>
+              <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
-                Run the numbers and the resistance rise at 50&nbsp;Hz is <strong>0.08&nbsp;%</strong> for
-                0&nbsp;AWG and less than 0.01&nbsp;% for everything below 4&nbsp;AWG. Ampacity scales as
+                Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
+                dominates once you leave mains frequency. Together they come to <strong>0.3&nbsp;%</strong>
+                at 50&nbsp;Hz for 0&nbsp;AWG and far less for everything thinner. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
                 spread between one manufacturer's datasheet and another's. Publishing separate DC and AC
                 columns would be inventing precision that is not there.
               </p>
               <p>
                 It does start to matter higher up. At 400&nbsp;Hz — aircraft and some drive systems —
-                0&nbsp;AWG picks up 4.7&nbsp;%, which is why the calculator takes a frequency rather than
+                0&nbsp;AWG picks up 17&nbsp;%, which is why the calculator takes a frequency rather than
                 assuming mains. The published fit holds to x<sub>s</sub>&nbsp;≤&nbsp;2.8, roughly 1&nbsp;kHz
                 on the largest gauge here; above that the calculator flags its own result as indicative.
               </p>
@@ -2118,7 +2179,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "mm²", "uHz": "Hz", "unitResistDc": "mΩ/m (DC)", "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m · {u} V {m}", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted out and back, now scaled by the power factor. Ampacity is unchanged from DC: at 50–60 Hz the skin effect is under 0.1% even at 0 AWG.", "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way run, and the three phase conductors are exactly the ≤3 conductors case in the table."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG conductor, so the AC resistance rise stays under 0.1%.", "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase conductors are the ≤3 conductors case. What changes is the voltage drop, not the current the copper can carry."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
+      const I18N = {"uArea": "mm²", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted out and back, now scaled by the power factor. Ampacity is unchanged from DC: at 50–60 Hz the skin effect is under 0.1% even at 0 AWG.", "ac3": "<strong>Three-phase AC.</strong> Drop is √3·I·R·L line-to-line over the one-way run, and the three phase conductors are exactly the ≤3 conductors case in the table."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG conductor, so the AC resistance rise stays under 0.1%.", "ac3": "These figures apply unchanged to three-phase AC at 50–60 Hz, and the three phase conductors are the ≤3 conductors case. What changes is the voltage drop, not the current the copper can carry."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
       const LOCALE = "en-US";
 
       const wireRows = [
@@ -2203,16 +2264,32 @@
       // for solid and ordinary stranded round conductors; ys is the fractional
       // increase in resistance. The published fit holds for xs ≤ 2.8, which for
       // 0 AWG runs out around 1 kHz — hence the frequency input's cap.
+      // Proximity effect too: neighbouring conductors distort each other's
+      // current distribution, and above mains frequency it dominates the skin
+      // term. (dc/s)² is fixed at 0.64, the usual figure for insulated
+      // conductors lying against each other.
+      const PROXIMITY_SPACING = 0.64;
+
       function skinEffect(area, frequency) {
-        if (!(area > 0) || !(frequency > 0)) return { ys: 0, xs: 0, valid: true };
+        if (!(area > 0) || !(frequency > 0)) return { ys: 0, yp: 0, total: 0, valid: true };
         const rdc = COPPER_RESISTIVITY / area;
         const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
         const xs4 = xs2 * xs2;
-        return {
-          ys: xs4 / (192 + 0.8 * xs4),
-          xs: Math.sqrt(xs2),
-          valid: Math.sqrt(xs2) <= 2.8
-        };
+        const ys = xs4 / (192 + 0.8 * xs4);
+        const yp =
+          ys * PROXIMITY_SPACING *
+          (0.312 * PROXIMITY_SPACING + 1.18 / (ys + 0.27));
+        return { ys, yp, total: ys + yp, xs: Math.sqrt(xs2), valid: Math.sqrt(xs2) <= 2.8 };
+      }
+
+      // What the conductor can actually deliver, which is where the modes really
+      // separate: 112 A is 2.7 kW on 24 V DC and 77.6 kW on 400 V three-phase.
+      function formatPower(watts) {
+        if (!(watts > 0)) return "—";
+        if (watts < 1000) return fixed(watts, 0) + " " + I18N.uWatt;
+        const kilowatts = watts / 1000;
+        const digits = kilowatts >= 100 ? 0 : kilowatts >= 10 ? 1 : 2;
+        return fixed(kilowatts, digits) + " " + I18N.uKilowatt;
       }
 
       function equivalentAwg(area) {
@@ -2262,9 +2339,9 @@
           const tr = tableBody.querySelector('[data-gauge="' + CSS.escape(row.gauge) + '"]');
           if (!tr) return;
 
-          const skin = alternating ? skinEffect(row.area, frequency) : { ys: 0 };
-          const derate = 1 / Math.sqrt(1 + skin.ys);
-          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.ys);
+          const skin = alternating ? skinEffect(row.area, frequency) : { total: 0 };
+          const derate = 1 / Math.sqrt(1 + skin.total);
+          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.total);
 
           const set = (selector, text) => {
             const cell = tr.querySelector(selector);
@@ -2284,14 +2361,22 @@
             ? (0.03 * voltage) / (runFactor * rated * resistance * appliedPowerFactor)
             : 0;
           set(".js-len", metres > 0 ? formatLength(metres) : "—");
+
+          // The headline difference between the modes: the same amps buy wildly
+          // different power depending on voltage and whether there is a √3.
+          const powerFactorForMode = threePhase ? Math.sqrt(3) : 1;
+          set(".js-p", formatPower(voltage * rated * powerFactorForMode * appliedPowerFactor));
         });
 
         $("thResistUnit").textContent = alternating
           ? I18N.unitResistAc.replace("{f}", formatNumber(frequency, 0))
           : I18N.unitResistDc;
+        $("thPowerUnit").textContent = I18N.unitPower
+          .replace("{u}", formatNumber(voltage, 0))
+          .replace("{m}", I18N.modeTag[mode]);
         $("thLengthUnit").textContent = I18N.unitLength
           .replace("{u}", formatNumber(voltage, 0))
-          .replace("{m}", I18N.modeShort[mode]);
+          .replace("{m}", I18N.modeTag[mode]);
       }
 
       function clearSelection() {
@@ -2366,9 +2451,9 @@
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
         const alternating = mode !== "dc";
-        const skin = alternating ? skinEffect(area, frequency) : { ys: 0, xs: 0, valid: true };
-        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.ys);
-        const skinDerate = 1 / Math.sqrt(1 + skin.ys);
+        const skin = alternating ? skinEffect(area, frequency) : { total: 0, xs: 0, valid: true };
+        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.total);
+        const skinDerate = 1 / Math.sqrt(1 + skin.total);
 
         result60.ampacity *= skinDerate;
         result200.ampacity *= skinDerate;
@@ -2404,7 +2489,7 @@
         // As a ratio this reads "×1" at mains frequency, which tells the reader
         // nothing. The percentage rise over DC does: +0.002% versus +4.7%.
         $("skinResult").textContent = alternating
-          ? "+" + formatNumber(skin.ys * 100, 3) + "%"
+          ? "+" + formatNumber(skin.total * 100, 2) + "%"
           : "—";
         $("ampacity60Context").textContent = result60.context;
         $("ampacity200Context").textContent = result200.context;
