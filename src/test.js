@@ -2,13 +2,16 @@ const fs = require("fs");
 const { JSDOM } = require("jsdom");
 
 let failures = 0;
+let total = 0;
 function checkClose(label, actual, expected, tol) {
+  total++;
   const ok = Math.abs(actual - expected) <= tol;
   if (!ok) failures++;
   console.log(`  ${ok ? "PASS" : "FAIL"}  ${label}: ${actual}${ok ? "" : `  (expected ~${expected})`}`);
 }
 
 function check(label, actual, expected) {
+  total++;
   const ok = String(actual) === String(expected);
   if (!ok) failures++;
   console.log(`  ${ok ? "PASS" : "FAIL"}  ${label}: ${actual}${ok ? "" : `  (expected ${expected})`}`);
@@ -17,7 +20,10 @@ function check(label, actual, expected) {
 async function run(file, label, expect) {
   console.log(`\n== ${label} ==`);
   const html = fs.readFileSync(file, "utf8");
-  const dom = new JSDOM(html, { runScripts: "dangerously", pretendToBeVisual: true });
+  const dom = new JSDOM(html, {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua/awg-to-amps",
+  });
   const { document } = dom.window;
   const $ = (id) => document.getElementById(id);
 
@@ -49,7 +55,7 @@ async function run(file, label, expect) {
   check("area after reset", $("areaResult").textContent, expect.area);
 }
 
-(async () => {
+async function runBasics() {
   await run("../site/_pages/awg-to-amps.html", "EN", {
     area: "8.29 mm²",
     gauge: "≈ 8 AWG",
@@ -62,9 +68,7 @@ async function run(file, label, expect) {
     status: "У межах обох режимів",
     drop: "0,295 В",
   });
-  console.log(failures ? `\n${failures} FAILURES` : "\nAll checks passed.");
-  process.exit(failures ? 1 : 0);
-})();
+}
 
 // ---------------------------------------------------------------------------
 // DC / AC mode switching
@@ -73,6 +77,7 @@ async function runModes(file, label, expect) {
   console.log(`\n== ${label}: current mode ==`);
   const dom = new JSDOM(fs.readFileSync(file, "utf8"), {
     runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua/awg-to-amps",
   });
   const { document } = dom.window;
   const $ = (id) => document.getElementById(id);
@@ -213,11 +218,78 @@ async function runModes(file, label, expect) {
 }
 
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function runUrl(file, label, expect) {
+  console.log(`\n== ${label}: shareable URL ==`);
+  const path = (w) => w.location.href.replace("https://66ton99.org.ua", "");
+  const base = expect.path;
+
+  // 1. state travels into the URL
+  const dom = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base,
+  });
+  const d = dom.window.document;
+  const w = dom.window;
+  const $ = (id) => d.getElementById(id);
+  const pick = (v) => {
+    d.querySelector(`input[name="currentMode"][value="${v}"]`).checked = true;
+    $("modeBar").dispatchEvent(new w.Event("change", { bubbles: true }));
+  };
+  const set = (id, v) => {
+    $(id).value = v;
+    $(id).dispatchEvent(new w.Event("input", { bubbles: true }));
+  };
+
+  check("defaults leave the URL clean", path(w), base);
+  pick("ac3");
+  check("mode reaches the URL immediately", path(w), base + "?mode=ac3&u=400");
+  set("loadCurrent", "50");
+  await wait(500);
+  check("calculator inputs reach the URL", path(w).includes("a=50"), true);
+  check("only non-defaults are written", path(w).includes("d=0.08"), false);
+  pick("dc");
+  check("returning to DC drops mode and voltage", path(w), base + "?a=50");
+  $("resetButton").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  await wait(500);
+  check("reset restores a clean URL", path(w), base);
+
+  // 2. the URL is honoured on arrival
+  const shared = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?mode=ac3&n=4208&u=400&a=50&f=400",
+  });
+  const s2 = shared.window.document;
+  const g2 = (id) => s2.getElementById(id);
+  check("shared link restores mode", s2.querySelector("input[name=currentMode]:checked").value, "ac3");
+  check("shared link restores strands", g2("strandCount").value, "4208");
+  check("shared link restores voltage", g2("systemVoltage").value, "400");
+  check("shared link restores frequency", g2("frequency").value, "400");
+  check("shared link opens the optional section", g2("optionalChecks").open, true);
+  check("shared link recalculates", g2("areaResult").textContent.startsWith(expect.area), true);
+
+  // 3. parameters must not spawn a second indexable URL
+  check("canonical ignores the query string",
+        s2.querySelector('link[rel=canonical]').href, "https://66ton99.org.ua" + base);
+}
+
+// One entry point. There used to be two, and the first one's process.exit()
+// killed the second mid-run — silently, because the exit code was still 0.
 (async () => {
+  await runBasics();
+  await runUrl("../site/_pages/awg-to-amps.html", "EN",
+    { path: "/awg-to-amps", area: "21.15" });
+  await runUrl("../site/_pages/uk-awg-to-amps.html", "UK",
+    { path: "/uk/awg-to-amps", area: "21,15" });
   await runModes("../site/_pages/awg-to-amps.html", "EN",
     { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A" });
   await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
     { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт", ac1Zero: "111,8 А" });
-  console.log(failures ? `\n${failures} FAILURES` : "\nAll mode checks passed.");
+  console.log(
+    failures
+      ? `\n${failures} of ${total} checks FAILED`
+      : `\nAll ${total} checks passed.`
+  );
   process.exit(failures ? 1 : 0);
 })();

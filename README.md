@@ -148,8 +148,34 @@ Reactance is neglected throughout — at these cross-sections and run lengths it
 is below the uncertainty in the resistance, but that assumption breaks on long
 three-phase runs in conduit.
 
-Mode is stored in `localStorage`, not in the URL, so it does not create
-crawlable duplicates of the page.
+## Shareable links
+
+Mode and every calculator input are reflected in the query string, so a
+configuration can be sent to someone else. There is a copy-link button next to
+Calculate.
+
+```
+/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400
+```
+
+Rules that keep this from turning into an SEO problem or a mess:
+
+- **Only non-defaults are written.** A page in its default state has a clean URL,
+  and Reset returns it to one. `mode` disappears on DC; frequency and power
+  factor are omitted outside the AC modes.
+- **The canonical link is static and ignores the query string**, so parameter
+  variants consolidate onto the clean URL rather than being indexed separately.
+  There is a test asserting this for both languages.
+- **Query string, not hash**, because the hash already carries the in-page
+  anchors (`#chart`, `#faq`, …).
+- **`replaceState`, debounced 350 ms.** Browsers rate-limit history writes —
+  Safari throws above 100 in 30 seconds — and typing in a field would otherwise
+  trip it. No history entries are created, so Back still leaves the page.
+- Arriving with optional parameters opens the optional section, so the values in
+  the link are visible rather than hidden behind a collapsed `<details>`.
+
+`localStorage` still holds the mode as a fallback for visitors arriving without
+parameters; an explicit URL always wins over it.
 
 ## SEO notes
 

@@ -553,6 +553,7 @@ EN = {
     "L_LOAD": "Load current / A",
     "L_AMB": "Ambient / °C",
     "BTN_CALC": "Calculate",
+    "BTN_COPY": "Copy link",
     "BTN_RESET": "Reset",
     "RESULTS_TITLE": "Result / system readout",
     "M_AREA": "Calculated area",
@@ -592,6 +593,7 @@ EN = {
     "I18N": json.dumps(
         {
             "uArea": "mm²",
+            "copied": "Copied",
             "uHz": "Hz",
             "unitResistDc": "mΩ/m · DC",
             "modeTag": {
@@ -1057,6 +1059,7 @@ UK = {
     "L_LOAD": "Струм навантаження / А",
     "L_AMB": "Довкілля / °C",
     "BTN_CALC": "Розрахувати",
+    "BTN_COPY": "Копіювати", 
     "BTN_RESET": "Скинути",
     "RESULTS_TITLE": "Результат / показники",
     "M_AREA": "Розрахований переріз",
@@ -1096,6 +1099,7 @@ UK = {
     "I18N": json.dumps(
         {
             "uArea": "мм²",
+            "copied": "\u0421\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e",
             "uHz": "\u0413\u0446",
             "unitResistDc": "мОм/м · пост.",
             "modeTag": {

@@ -960,6 +960,7 @@
 
       .actions {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         margin-top: 18px;
       }
@@ -1863,6 +1864,7 @@
 
                 <div class="actions">
                   <button class="button" type="submit">Calculate</button>
+                  <button class="button secondary" type="button" id="copyLink">Copy link</button>
                   <button class="button secondary" type="button" id="resetButton">Reset</button>
                 </div>
               </form>
@@ -2198,7 +2200,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "mm²", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.30% on 0 AWG at 50 Hz, 0.05% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.", "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 50 Hz that is 0.30% on 0 AWG and less than 0.05% below 4 AWG — which is why most rows read identically to DC.", "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded conductors instead of two. The free-air columns describe a single isolated conductor and are unchanged."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
+      const I18N = {"uArea": "mm²", "copied": "Copied", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.30% on 0 AWG at 50 Hz, 0.05% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.", "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 50 Hz that is 0.30% on 0 AWG and less than 0.05% below 4 AWG — which is why most rows read identically to DC.", "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded conductors instead of two. The free-air columns describe a single isolated conductor and are unchanged."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
       const LOCALE = "en-US";
 
       const wireRows = [
@@ -2252,6 +2254,23 @@
       // larger than the skin effect and applies at any frequency.
       const PHASE_FACTOR = { dc: 1, ac1: 1, ac3: 0.915 };
       let lastMode = "dc";
+
+      // Shareable state. Query parameters rather than the hash, because the hash
+      // is already carrying the in-page anchors (#chart, #faq, …). The canonical
+      // link is a fixed absolute URL, so parameter variants consolidate onto the
+      // clean one and no duplicates get indexed.
+      const FIELD_PARAM = {
+        strandCount: "n",
+        strandDiameter: "d",
+        installation: "i",
+        systemVoltage: "u",
+        oneWayLength: "l",
+        loadCurrent: "a",
+        ambient: "t",
+        frequency: "f",
+        powerFactor: "pf"
+      };
+      const OPTIONAL_FIELDS = ["systemVoltage", "oneWayLength", "loadCurrent", "ambient", "frequency", "powerFactor"];
 
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
@@ -2567,6 +2586,7 @@
           $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
         }
 
+        scheduleUrlWrite();
         renderTableForMode({
           mode,
           frequency,
@@ -2578,6 +2598,97 @@
 
       // The mode radios sit outside the form, so they need their own wiring and
       // survive a form reset — the mode is a page-wide setting, not an input.
+      const FIELD_DEFAULTS = {};
+
+      function captureDefaults() {
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          FIELD_DEFAULTS[id] = $(id).value;
+        });
+      }
+
+      function writeUrl() {
+        const params = new URLSearchParams();
+        const mode = currentMode();
+        if (mode !== "dc") params.set("mode", mode);
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          // frequency and power factor mean nothing on DC, so leave them out
+          if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
+          const value = $(id).value;
+          if (value !== FIELD_DEFAULTS[id]) params.set(FIELD_PARAM[id], value);
+        });
+        const query = params.toString();
+        try {
+          history.replaceState(null, "", location.pathname + (query ? "?" + query : "") + location.hash);
+        } catch (error) {
+          /* some embedding contexts forbid history writes; sharing degrades, page does not */
+        }
+      }
+
+      // Browsers rate-limit replaceState, so do not call it on every keystroke.
+      let urlTimer = null;
+      function scheduleUrlWrite() {
+        clearTimeout(urlTimer);
+        urlTimer = setTimeout(writeUrl, 350);
+      }
+
+      function readUrl() {
+        const params = new URLSearchParams(location.search);
+        let restored = false;
+
+        const mode = params.get("mode");
+        if (mode && Object.prototype.hasOwnProperty.call(MODE_VOLTAGE, mode)) {
+          const input = document.querySelector(
+            'input[name="currentMode"][value="' + CSS.escape(mode) + '"]'
+          );
+          if (input) {
+            input.checked = true;
+            restored = true;
+          }
+        }
+
+        let optionalTouched = false;
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          const value = params.get(FIELD_PARAM[id]);
+          if (value === null) return;
+          $(id).value = value;
+          restored = true;
+          if (OPTIONAL_FIELDS.includes(id)) optionalTouched = true;
+        });
+
+        // A link that carries optional values should arrive with them on screen.
+        if (optionalTouched) optionalChecks.open = true;
+        return restored;
+      }
+
+      function copyLink() {
+        const button = $("copyLink");
+        writeUrl();
+        const done = () => {
+          const original = button.dataset.label || button.textContent;
+          button.dataset.label = original;
+          button.textContent = I18N.copied;
+          clearTimeout(button.dataset.timer);
+          button.dataset.timer = setTimeout(() => {
+            button.textContent = button.dataset.label;
+          }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(location.href).then(done, () => {});
+          return;
+        }
+        const scratch = document.createElement("input");
+        scratch.value = location.href;
+        document.body.appendChild(scratch);
+        scratch.select();
+        try {
+          document.execCommand("copy");
+          done();
+        } catch (error) {
+          /* nothing sensible left to try; the address bar already shows the link */
+        }
+        scratch.remove();
+      }
+
       function currentMode() {
         const checked = document.querySelector('input[name="currentMode"]:checked');
         return checked ? checked.value : "dc";
@@ -2609,6 +2720,7 @@
           /* storage blocked; the toggle still works for this page view */
         }
         calculate();
+        writeUrl();
       }
 
       function restoreMode() {
@@ -2646,8 +2758,10 @@
       });
       $("resetButton").addEventListener("click", resetForm);
       $("modeBar").addEventListener("change", applyMode);
+      $("copyLink").addEventListener("click", copyLink);
+      captureDefaults();
       syncOptionalResults();
-      restoreMode();
+      if (!readUrl()) restoreMode();
       applyMode();
     </script>
 

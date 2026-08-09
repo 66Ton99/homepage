@@ -727,6 +727,7 @@
 
       .actions {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         margin-top: 18px;
       }
@@ -1437,6 +1438,7 @@
 
                 <div class="actions">
                   <button class="button" type="submit">{{BTN_CALC}}</button>
+                  <button class="button secondary" type="button" id="copyLink">{{BTN_COPY}}</button>
                   <button class="button secondary" type="button" id="resetButton">{{BTN_RESET}}</button>
                 </div>
               </form>
@@ -1566,6 +1568,23 @@
       // larger than the skin effect and applies at any frequency.
       const PHASE_FACTOR = { dc: 1, ac1: 1, ac3: 0.915 };
       let lastMode = "dc";
+
+      // Shareable state. Query parameters rather than the hash, because the hash
+      // is already carrying the in-page anchors (#chart, #faq, …). The canonical
+      // link is a fixed absolute URL, so parameter variants consolidate onto the
+      // clean one and no duplicates get indexed.
+      const FIELD_PARAM = {
+        strandCount: "n",
+        strandDiameter: "d",
+        installation: "i",
+        systemVoltage: "u",
+        oneWayLength: "l",
+        loadCurrent: "a",
+        ambient: "t",
+        frequency: "f",
+        powerFactor: "pf"
+      };
+      const OPTIONAL_FIELDS = ["systemVoltage", "oneWayLength", "loadCurrent", "ambient", "frequency", "powerFactor"];
 
       const $ = (id) => document.getElementById(id);
       const form = $("calcForm");
@@ -1881,6 +1900,7 @@
           $("calcMessage").innerHTML += " " + I18N.msgSkinRange;
         }
 
+        scheduleUrlWrite();
         renderTableForMode({
           mode,
           frequency,
@@ -1892,6 +1912,97 @@
 
       // The mode radios sit outside the form, so they need their own wiring and
       // survive a form reset — the mode is a page-wide setting, not an input.
+      const FIELD_DEFAULTS = {};
+
+      function captureDefaults() {
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          FIELD_DEFAULTS[id] = $(id).value;
+        });
+      }
+
+      function writeUrl() {
+        const params = new URLSearchParams();
+        const mode = currentMode();
+        if (mode !== "dc") params.set("mode", mode);
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          // frequency and power factor mean nothing on DC, so leave them out
+          if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
+          const value = $(id).value;
+          if (value !== FIELD_DEFAULTS[id]) params.set(FIELD_PARAM[id], value);
+        });
+        const query = params.toString();
+        try {
+          history.replaceState(null, "", location.pathname + (query ? "?" + query : "") + location.hash);
+        } catch (error) {
+          /* some embedding contexts forbid history writes; sharing degrades, page does not */
+        }
+      }
+
+      // Browsers rate-limit replaceState, so do not call it on every keystroke.
+      let urlTimer = null;
+      function scheduleUrlWrite() {
+        clearTimeout(urlTimer);
+        urlTimer = setTimeout(writeUrl, 350);
+      }
+
+      function readUrl() {
+        const params = new URLSearchParams(location.search);
+        let restored = false;
+
+        const mode = params.get("mode");
+        if (mode && Object.prototype.hasOwnProperty.call(MODE_VOLTAGE, mode)) {
+          const input = document.querySelector(
+            'input[name="currentMode"][value="' + CSS.escape(mode) + '"]'
+          );
+          if (input) {
+            input.checked = true;
+            restored = true;
+          }
+        }
+
+        let optionalTouched = false;
+        Object.keys(FIELD_PARAM).forEach((id) => {
+          const value = params.get(FIELD_PARAM[id]);
+          if (value === null) return;
+          $(id).value = value;
+          restored = true;
+          if (OPTIONAL_FIELDS.includes(id)) optionalTouched = true;
+        });
+
+        // A link that carries optional values should arrive with them on screen.
+        if (optionalTouched) optionalChecks.open = true;
+        return restored;
+      }
+
+      function copyLink() {
+        const button = $("copyLink");
+        writeUrl();
+        const done = () => {
+          const original = button.dataset.label || button.textContent;
+          button.dataset.label = original;
+          button.textContent = I18N.copied;
+          clearTimeout(button.dataset.timer);
+          button.dataset.timer = setTimeout(() => {
+            button.textContent = button.dataset.label;
+          }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(location.href).then(done, () => {});
+          return;
+        }
+        const scratch = document.createElement("input");
+        scratch.value = location.href;
+        document.body.appendChild(scratch);
+        scratch.select();
+        try {
+          document.execCommand("copy");
+          done();
+        } catch (error) {
+          /* nothing sensible left to try; the address bar already shows the link */
+        }
+        scratch.remove();
+      }
+
       function currentMode() {
         const checked = document.querySelector('input[name="currentMode"]:checked');
         return checked ? checked.value : "dc";
@@ -1923,6 +2034,7 @@
           /* storage blocked; the toggle still works for this page view */
         }
         calculate();
+        writeUrl();
       }
 
       function restoreMode() {
@@ -1960,8 +2072,10 @@
       });
       $("resetButton").addEventListener("click", resetForm);
       $("modeBar").addEventListener("change", applyMode);
+      $("copyLink").addEventListener("click", copyLink);
+      captureDefaults();
       syncOptionalResults();
-      restoreMode();
+      if (!readUrl()) restoreMode();
       applyMode();
     </script>
 
