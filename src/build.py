@@ -46,6 +46,10 @@ def fmt_area(area, decimal_sep):
     return text.replace(".", decimal_sep)
 
 
+def fmt_amps(amps, decimal_sep):
+    return f"{amps:.1f}".replace(".", decimal_sep)
+
+
 def fmt_resistance(milliohm, decimal_sep):
     """Resistance in mΩ/m spans 0.33 to 343 across the table, so the number of
     decimals has to follow the magnitude. Mirrored exactly in the page's JS, or
@@ -104,10 +108,10 @@ def build_tbody(lang):
             f'                    <th scope="row"><button type="button" class="row-btn" '
             f'aria-label="{aria.format(g=gauge)}">{gauge} <span class="unit">AWG</span></button></th>\n'
             f"                    <td>{fmt_area(area, sep)}</td>\n"
-            f'                    <td class="js-b60">{b60} {amp}</td>\n'
-            f'                    <td class="js-f60">{f60} {amp}</td>\n'
-            f'                    <td class="js-b200">{b200} {amp}</td>\n'
-            f'                    <td class="js-f200">{f200} {amp}</td>\n'
+            f'                    <td class="js-b60">{fmt_amps(b60, sep)} {amp}</td>\n'
+            f'                    <td class="js-f60">{fmt_amps(f60, sep)} {amp}</td>\n'
+            f'                    <td class="js-b200">{fmt_amps(b200, sep)} {amp}</td>\n'
+            f'                    <td class="js-f200">{fmt_amps(f200, sep)} {amp}</td>\n'
             f'                    <td class="js-r">{resistance}</td>\n'
             f'                    <td class="js-len">{length}</td>\n'
             f'                    <td class="js-p">'
@@ -385,8 +389,12 @@ EN_CONTENT = f"""            <section id="how-to-read">
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
                 Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
-                dominates once you leave mains frequency. Together they come to <strong>0.3&nbsp;%</strong>
-                at 50&nbsp;Hz for 0&nbsp;AWG and far less for everything thinner. Ampacity scales as
+                dominates once you leave mains frequency. Together they come to <strong>0.30&nbsp;%</strong>
+                at 50&nbsp;Hz for 0&nbsp;AWG, 0.05&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
+                This is the entire difference between DC and single-phase AC here: both have two loaded
+                conductors, and unarmoured low-voltage wire has no sheath or dielectric losses to add. The
+                table shows a decimal place so you can see it on the gauges where it exists — 0&nbsp;AWG
+                goes from 112.0&nbsp;A to 111.8&nbsp;A — and read as identical where it genuinely is. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
                 spread between one manufacturer's datasheet and another's. So the frequency term alone would not justify a
                 separate AC column; the conductor count is what does.
@@ -605,16 +613,12 @@ EN = {
             "modeNote": {
                 "dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, "
                 "out and back.",
-                "ac1": "<strong>Single-phase AC.</strong> Two conductors, so the drop is still counted "
-                "out and back, now scaled by the power factor. Ampacity is unchanged from DC: at "
-                "50–60 Hz the skin effect is under 0.1% even at 0 AWG.",
+                "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.30% on 0 AWG at 50 Hz, 0.05% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.",
                 "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run.",
             },
             "tableModeNote": {
                 "dc": "These figures are for direct current.",
-                "ac1": "These figures apply unchanged to single-phase AC at 50–60 Hz: the skin depth in "
-                "copper is about 9.4 mm at 50 Hz, far larger than the 4.1 mm radius of even a 0 AWG "
-                "conductor, so the AC resistance rise stays under 0.1%.",
+                "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 50 Hz that is 0.30% on 0 AWG and less than 0.05% below 4 AWG — which is why most rows read identically to DC.",
                 "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded "
                 "conductors instead of two. The free-air columns describe a single isolated conductor "
                 "and are unchanged.",
@@ -888,8 +892,13 @@ UK_CONTENT = f"""            <section id="how-to-read">
               <p class="formula"><span>Скін-ефект і ефект близькості, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0,312 (d/s)² + 1,18 / (y<sub>s</sub> + 0,27)]</span></p>
               <p>
                 Враховано обидва ефекти — скін-ефект і ефект близькості сусідніх жил, який переважає одразу
-                поза мережевою частотою. Разом вони дають <strong>0,3&nbsp;%</strong> на 50&nbsp;Гц для
-                0&nbsp;AWG і значно менше для всього тоншого. Допустимий струм
+                поза мережевою частотою. Разом вони дають <strong>0,30&nbsp;%</strong> на 50&nbsp;Гц для
+                0&nbsp;AWG, 0,05&nbsp;% для 4&nbsp;AWG і нічого вимірного для тоншого. Це і є вся різниця
+                між постійним і однофазним змінним струмом тут: обидва мають дві навантажені жили, а в
+                неброньованого низьковольтного дроту немає ані втрат в оболонці, ані діелектричних. У
+                таблиці показано десяткову частку, щоб цю різницю було видно там, де вона є — 0&nbsp;AWG
+                переходить зі 112,0&nbsp;А на 111,8&nbsp;А — і щоб рядки читались однаково там, де вона
+                справді нульова. Допустимий струм
                 масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
                 значно менше за розбіжність між даташитами двох виробників. Тож сама лише частота не виправдала б окремої колонки для
                 змінного струму; її виправдовує кількість жил.

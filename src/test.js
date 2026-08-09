@@ -179,13 +179,18 @@ async function runModes(file, label, expect) {
   check("0 AWG in-cable on DC", dcB60.toFixed(0), "112");
 
   pick("ac1");
-  check("single-phase matches DC (both are 2 loaded conductors)",
-        cellNum("0", "js-b60").toFixed(0), dcB60.toFixed(0));
+  // Same two loaded conductors as DC, so no conductor-count derate - but skin
+  // and proximity still cost 0.30% on 0 AWG, and that must be visible.
+  check("single-phase shows the AC penalty on 0 AWG", cell("0", "js-b60"), expect.ac1Zero);
+  check("single-phase differs from DC", cellNum("0", "js-b60") < dcB60, true);
+  check("single-phase is within 0.5% of DC", (dcB60 - cellNum("0", "js-b60")) / dcB60 < 0.005, true);
+  check("nothing measurable at 8 AWG", cellNum("8", "js-b60").toFixed(1), "35.0");
 
   pick("ac3");
   check("three-phase derates the in-cable column", cellNum("0", "js-b60").toFixed(0), "102");
   check("three-phase derates 200 C too", cellNum("0", "js-b200").toFixed(0), "205");
-  check("free air is a lone conductor, unchanged", cellNum("0", "js-f60").toFixed(0), dcF60.toFixed(0));
+  // free air must not pick up the conductor-count factor, only the AC penalty
+  check("free air escapes the 3-phase derate", (dcF60 - cellNum("0", "js-f60")) / dcF60 < 0.005, true);
   checkClose("small gauges derate too", cellNum("22", "js-b60"), 4.6, 0.1);
 
   // ---- the same amps buy very different power per mode ----
@@ -210,9 +215,9 @@ async function runModes(file, label, expect) {
 
 (async () => {
   await runModes("../site/_pages/awg-to-amps.html", "EN",
-    { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W" });
+    { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A" });
   await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
-    { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт" });
+    { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт", ac1Zero: "111,8 А" });
   console.log(failures ? `\n${failures} FAILURES` : "\nAll mode checks passed.");
   process.exit(failures ? 1 : 0);
 })();

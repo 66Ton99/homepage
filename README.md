@@ -96,12 +96,15 @@ here. 0 AWG reads 112 A on DC and single-phase, 102 A on three-phase. The
 free-air columns describe one isolated conductor, the same object in every mode,
 so they do not move.
 
-**Frequency is the small effect.** Skin and proximity are computed per
-IEC 60287-1-1 (proximity dominates above mains frequency) and together come to
-just 0.3 % at 50 Hz for 0 AWG. The derate is real rather than hardcoded, so it
-shows up where it exists: at 400 Hz that same conductor drops another 8 %. On
-its own the frequency term would not justify a separate AC column — the
-conductor count is what does.
+**Frequency is the small effect, and it is the whole of DC vs single-phase.**
+Both have two loaded conductors, so no conductor-count derate applies, and
+unarmoured low-voltage wire has neither sheath nor dielectric losses. That
+leaves skin and proximity, computed per IEC 60287-1-1: 0.30 % at 50 Hz on
+0 AWG, 0.05 % at 4 AWG, nothing measurable below. Ampacity is printed to one
+decimal so that difference is visible where it exists (112.0 A → 111.8 A) rather
+than being rounded away — the earlier integer display made the toggle look inert
+between those two modes. Raise the frequency and it stops being subtle: 0 AWG
+loses 8 % by 400 Hz.
 
 **The maximum-load column is the honest answer to "the current is different on
 AC".** Amperes are amperes — copper does not care where the heat came from — but

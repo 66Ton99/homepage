@@ -1696,7 +1696,10 @@
            ["b200", "bundle200", true], ["f200", "free200", false]]
             .forEach(([cls, key, bundled]) => {
               const value = row[key] * derate * (bundled ? PHASE_FACTOR[mode] : 1);
-              set(".js-" + cls, formatNumber(value, value < 10 ? 1 : 0) + " " + I18N.uAmp);
+              // Always one decimal. The AC penalty on the largest gauges is a few
+              // tenths of a percent, and rounding to whole amps hid it entirely,
+              // making the toggle look inert between DC and single-phase.
+              set(".js-" + cls, fixed(value, 1) + " " + I18N.uAmp);
             });
 
           set(".js-r", formatResistance(resistance * 1000));
