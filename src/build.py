@@ -82,6 +82,50 @@ def material_options(lang):
     return "\n".join(out)
 
 
+# Insulation, by the conductor temperature it permits. That rating is the only
+# thing insulation contributes to ampacity here; its thermal resistance matters
+# too, but that needs a wall thickness datasheets rarely make comparable.
+#
+# Ampacity at a different rating scales as sqrt((T-30)/(1+alpha*(T-20))): heat
+# leaves as dT while heat arrives as I^2*R, and R itself climbs with T. Checked
+# against NEC 310.16, where 90/60 C ratios run 1.333-1.360 for 10 AWG and up
+# against 1.347 predicted.
+#
+# Silicone 200 C is the reference at exactly 1.000, so the published 200 C
+# columns stay untouched.
+INSULATIONS = [
+    ("pvc70",   70,  "PVC",                 "ПВХ"),
+    ("thhn",    90,  "PVC/nylon, THHN",     "ПВХ/нейлон, THHN"),
+    ("xlpe",    90,  "XLPE / EPR",          "Зшитий поліетилен / EPR"),
+    ("pvc105", 105,  "PVC, heat-resistant", "ПВХ, термостійкий"),
+    ("etfe",   150,  "ETFE (Tefzel)",       "ETFE (Tefzel)"),
+    ("sil150", 150,  "Silicone",            "Силікон"),
+    ("sil180", 180,  "Silicone",            "Силікон"),
+    ("sil200", 200,  "Silicone",            "Силікон"),
+    ("fep",    200,  "FEP",                 "FEP"),
+    ("ptfe",   260,  "PTFE / PFA",          "PTFE / PFA"),
+]
+
+
+def insulation_json(lang):
+    data = {
+        key: {"c": celsius, "name": (en if lang == "en" else uk)}
+        for key, celsius, en, uk in INSULATIONS
+    }
+    return json.dumps(data, ensure_ascii=False)
+
+
+def insulation_options(lang):
+    custom = "Custom rating" if lang == "en" else "Власна температура"
+    out = [
+        f'                <option value="{key}"{" selected" if key == "sil200" else ""}>'
+        f'{(en if lang == "en" else uk)} · {celsius} °C</option>'
+        for key, celsius, en, uk in INSULATIONS
+    ]
+    out.append(f'                <option value="custom">{custom}</option>')
+    return "\n".join(out)
+
+
 INSTALL_KEYS = ["bundle", "free", "4-6", "7-9", "10-20", "21-30", "31-40", "41-plus"]
 
 
@@ -552,6 +596,77 @@ EN_CONTENT = f"""            <section id="how-to-read">
               </p>
             </section>
 
+            <section id="insulation">
+              <h2>Insulation</h2>
+              <p>
+                Insulation contributes one thing to ampacity: how hot it will let the conductor get. Copper
+                does not care — it is happy at 400&nbsp;°C. The plastic around it decides where you have to
+                stop, and that single number moves the high-temperature column of the table.
+              </p>
+              <p class="formula"><span>Ampacity at a different rating</span>I / I<sub>200</sub> = √( (T−30) / (1 + α(T−20)) ) ÷ √( 170 / (1 + α·180) )</p>
+              <p>
+                Heat leaves the conductor in proportion to ΔT while heat arrives as <em>I</em>²<em>R</em>,
+                and <em>R</em> itself climbs with temperature — which is why the gain from a hotter rating
+                is less than it first looks. Against NEC&nbsp;310.16 this predicts the 90&nbsp;°C to
+                60&nbsp;°C ratio as <strong>1.347</strong> where the published columns give 1.333 to 1.360
+                for 10&nbsp;AWG and larger. Silicone at 200&nbsp;°C is the reference at exactly 1.000, so
+                selecting it reproduces the published data untouched.
+              </p>
+
+              <h3>What the selector offers</h3>
+              <dl class="conv-list">
+                <div><dt>PVC</dt><dd>70 °C · ×0.579</dd></div>
+                <div><dt>PVC/nylon THHN</dt><dd>90 °C · ×0.687</dd></div>
+                <div><dt>XLPE / EPR</dt><dd>90 °C · ×0.687</dd></div>
+                <div><dt>PVC, heat-resistant</dt><dd>105 °C · ×0.751</dd></div>
+                <div><dt>ETFE (Tefzel)</dt><dd>150 °C · ×0.893</dd></div>
+                <div><dt>Silicone</dt><dd>180 °C · ×0.962</dd></div>
+                <div><dt>Silicone, FEP</dt><dd>200 °C · ×1.000</dd></div>
+                <div><dt>PTFE / PFA</dt><dd>260 °C · ×1.090</dd></div>
+              </dl>
+
+              <h3>The rule that catches people out</h3>
+              <p>
+                <strong>The whole circuit runs at the temperature of its weakest part, and that is almost
+                never the wire.</strong> A breaker terminal listed for 75&nbsp;°C caps the whole run at
+                75&nbsp;°C no matter what the insulation says — NEC&nbsp;110.14(C) makes this explicit, and
+                most equipment under 100&nbsp;A is listed at 60&nbsp;°C. Buying 200&nbsp;°C silicone and
+                sizing from its 200&nbsp;°C column, then landing it in a 75&nbsp;°C lug, is how connections
+                cook. This is exactly why the conservative 60&nbsp;°C column stays fixed in this table
+                regardless of what you select: for most real installations it is the number that governs.
+              </p>
+              <p>
+                The high-temperature rating buys you margin in a hot enclosure, survival next to an exhaust
+                or a heater, and the ability to run at full current when the ambient is already 80&nbsp;°C.
+                It does not license you to push more current through the same terminals.
+              </p>
+
+              <h3>Choosing between them</h3>
+              <p>
+                <strong>PVC</strong> is cheap, tough against abrasion and stiff in the cold; it softens
+                where it is hot and gives off hydrogen chloride in a fire, which is why LSZH compounds
+                replace it in tunnels and ships. <strong>XLPE</strong> is PVC's crosslinked cousin: same
+                price bracket, better heat, does not melt and flow. <strong>Silicone</strong> is the most
+                flexible thing on the list by a wide margin and survives 200&nbsp;°C, but it tears and
+                abrades easily, so it wants a sleeve wherever it can rub. <strong>PTFE and PFA</strong> are
+                the best electrically and thermally and shrug off almost every solvent, at several times
+                the price and with noticeably less flexibility. <strong>ETFE</strong> is the compromise the
+                aerospace world settled on: thin wall, tough, 150&nbsp;°C.
+              </p>
+
+              <h3>Two things this does not model</h3>
+              <p>
+                Wall thickness. A thick jacket is a thermal blanket, so two 90&nbsp;°C cables of different
+                construction do not carry the same current. Datasheets rarely publish thickness in a
+                comparable way, so only the rating is used here.
+              </p>
+              <p>
+                Voltage rating, which is a separate property entirely. 600&nbsp;V, 1&nbsp;kV and 3&nbsp;kV
+                versions of the same insulation share a temperature rating and differ only in wall. Check it
+                separately — nothing on this page tells you whether the insulation will hold your voltage.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG to mm² at a glance</h2>
               <p>
@@ -662,6 +777,12 @@ EN = {
     "AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact "
     "cable datasheet.",
     "MATERIALS": material_json("en"),
+    "INSULATIONS": insulation_json("en"),
+    "INSULATION_OPTIONS": insulation_options("en"),
+    "INSULATION_LABEL": "Insulation",
+    "TEMP_LABEL": "°C",
+    "INSULATION_NOTE": "<strong>Silicone, 200 °C.</strong> Conductor rating 200 °C, ampacity ×1.000 against the published silicone data.",
+
     "MATERIAL_OPTIONS": material_options("en"),
     "MATERIAL_LABEL": "Conductor material",
     "IACS_LABEL": "% IACS",
@@ -735,6 +856,7 @@ EN = {
             ("#how-to-read", "How to read the chart"),
             ("#how-it-works", "How the calculator works"),
             ("#materials", "Conductor materials"),
+            ("#insulation", "Insulation"),
             ("#conversions", "AWG to mm² conversions"),
             ("#faq", "Frequently asked questions"),
             ("#source", "Read the source"),
@@ -748,7 +870,10 @@ EN = {
             "uArea": "mm²",
             "copied": "Copied",
             "customMaterial": "Custom",
+            "customInsulation": "Custom",
+            "insulationNote": "<strong>{name}, {c} °C.</strong> Conductor rating {c} °C, ampacity ×{factor} against the published 200 °C silicone data.",
             "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ω·mm²/m, ampacity ×{factor} against annealed copper.",
+            "unitHighTemp": "°C / A",
             "uHz": "Hz",
             "unitResistDc": "mΩ/m · DC",
             "modeTag": {
@@ -1164,6 +1289,77 @@ UK_CONTENT = f"""            <section id="how-to-read">
               </p>
             </section>
 
+            <section id="insulation">
+              <h2>Ізоляція</h2>
+              <p>
+                Ізоляція додає до допустимого струму одну річ: наскільки гарячою вона дозволить стати жилі.
+                Міді байдуже — їй комфортно і за 400&nbsp;°C. Межу визначає пластик навколо, і саме це число
+                рухає високотемпературну колонку таблиці.
+              </p>
+              <p class="formula"><span>Струм за іншої робочої температури</span>I / I<sub>200</sub> = √( (T−30) / (1 + α(T−20)) ) ÷ √( 170 / (1 + α·180) )</p>
+              <p>
+                Тепло відводиться пропорційно ΔT, а надходить як <em>I</em>²<em>R</em>, причому сам
+                <em>R</em> зростає з температурою — тому виграш від вищої робочої температури менший, ніж
+                здається спершу. За NEC&nbsp;310.16 формула передбачає відношення 90&nbsp;°C до 60&nbsp;°C
+                як <strong>1,347</strong>, тоді як опубліковані колонки дають 1,333–1,360 для 10&nbsp;AWG і
+                товщих. Силікон 200&nbsp;°C — еталон із коефіцієнтом рівно 1,000, тож його вибір відтворює
+                опубліковані дані без змін.
+              </p>
+
+              <h3>Що пропонує селектор</h3>
+              <dl class="conv-list">
+                <div><dt>ПВХ</dt><dd>70 °C · ×0,579</dd></div>
+                <div><dt>ПВХ/нейлон THHN</dt><dd>90 °C · ×0,687</dd></div>
+                <div><dt>Зшитий ПЕ / EPR</dt><dd>90 °C · ×0,687</dd></div>
+                <div><dt>ПВХ термостійкий</dt><dd>105 °C · ×0,751</dd></div>
+                <div><dt>ETFE (Tefzel)</dt><dd>150 °C · ×0,893</dd></div>
+                <div><dt>Силікон</dt><dd>180 °C · ×0,962</dd></div>
+                <div><dt>Силікон, FEP</dt><dd>200 °C · ×1,000</dd></div>
+                <div><dt>PTFE / PFA</dt><dd>260 °C · ×1,090</dd></div>
+              </dl>
+
+              <h3>Правило, на якому найчастіше помиляються</h3>
+              <p>
+                <strong>Усе коло працює за температурою свого найслабшого місця, і це майже ніколи не
+                дріт.</strong> Клема автомата, сертифікована на 75&nbsp;°C, обмежує всю трасу 75&nbsp;°C
+                незалежно від того, що написано на ізоляції — NEC&nbsp;110.14(C) прямо це фіксує, а більшість
+                апаратів до 100&nbsp;А сертифіковані взагалі на 60&nbsp;°C. Купити силікон на 200&nbsp;°C,
+                порахувати за його колонкою 200&nbsp;°C, а потім затиснути в наконечник на 75&nbsp;°C — це
+                типовий шлях до згорілого з'єднання. Саме тому консервативна колонка 60&nbsp;°C у цій таблиці
+                лишається незмінною, що б ви не обрали: для більшості реальних установок керує саме вона.
+              </p>
+              <p>
+                Висока робоча температура дає запас у гарячому корпусі, живучість поруч із випуском чи
+                нагрівачем і можливість нести повний струм, коли довкола вже 80&nbsp;°C. Вона не дає права
+                проганяти більший струм через ті самі клеми.
+              </p>
+
+              <h3>Як обирати</h3>
+              <p>
+                <strong>ПВХ</strong> дешевий, стійкий до стирання й дубіє на морозі; розм'якшується там, де
+                гаряче, і виділяє хлористий водень під час пожежі — тому в тунелях і на суднах його заміняють
+                безгалогенні компаунди. <strong>Зшитий поліетилен</strong> — це той самий клас ціни, але
+                краще тримає температуру й не тече. <strong>Силікон</strong> — найгнучкіший у списку з великим
+                відривом і витримує 200&nbsp;°C, але легко ріжеться й протирається, тож потребує захисної
+                трубки скрізь, де може тертися. <strong>PTFE і PFA</strong> найкращі електрично й термічно і
+                байдужі майже до всіх розчинників — за кілька разів більшу ціну й помітно меншу гнучкість.
+                <strong>ETFE</strong> — компроміс, на якому зупинилась авіація: тонка стінка, міцний,
+                150&nbsp;°C.
+              </p>
+
+              <h3>Дві речі, яких тут не враховано</h3>
+              <p>
+                Товщина стінки. Товста оболонка — це тепловкривало, тож два кабелі на 90&nbsp;°C різної
+                конструкції несуть різний струм. Даташити рідко подають товщину в порівнюваному вигляді, тож
+                тут використано лише робочу температуру.
+              </p>
+              <p>
+                Номінальна напруга — зовсім окрема властивість. Версії однієї ізоляції на 600&nbsp;В,
+                1&nbsp;кВ і 3&nbsp;кВ мають однакову робочу температуру й різняться лише стінкою. Перевіряйте
+                її окремо — ніщо на цій сторінці не каже, чи витримає ізоляція вашу напругу.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG у мм² — коротко</h2>
               <p>
@@ -1274,6 +1470,12 @@ UK = {
     "AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом "
     "конкретного кабелю.",
     "MATERIALS": material_json("uk"),
+    "INSULATIONS": insulation_json("uk"),
+    "INSULATION_OPTIONS": insulation_options("uk"),
+    "INSULATION_LABEL": "Ізоляція",
+    "TEMP_LABEL": "°C",
+    "INSULATION_NOTE": "<strong>Силікон, 200 °C.</strong> Робоча температура жили 200 °C, струм ×1,000 відносно опублікованих даних для силікону.",
+
     "MATERIAL_OPTIONS": material_options("uk"),
     "MATERIAL_LABEL": "Матеріал жили",
     "IACS_LABEL": "% IACS",
@@ -1347,6 +1549,7 @@ UK = {
             ("#how-to-read", "Як читати таблицю"),
             ("#how-it-works", "Як працює калькулятор"),
             ("#materials", "Матеріали жили"),
+            ("#insulation", "Ізоляція"),
             ("#conversions", "AWG у мм²"),
             ("#faq", "Часті запитання"),
             ("#source", "Подивитися код"),
@@ -1360,7 +1563,10 @@ UK = {
             "uArea": "мм²",
             "copied": "\u0421\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e",
             "customMaterial": "Власна",
+            "customInsulation": "Власна",
+            "insulationNote": "<strong>{name}, {c} °C.</strong> Робоча температура жили {c} °C, струм ×{factor} відносно опублікованих даних для силікону 200 °C.",
             "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ом·мм²/м, струм ×{factor} відносно відпаленої міді.",
+            "unitHighTemp": "°C / А",
             "uHz": "\u0413\u0446",
             "unitResistDc": "мОм/м · пост.",
             "modeTag": {

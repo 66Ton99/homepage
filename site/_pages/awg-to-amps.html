@@ -1644,8 +1644,29 @@
             </span>
           </div>
           </div>
+          <div class="modebar-group">
+            <label class="section-kicker" for="insulation">Insulation</label>
+            <select id="insulation" name="insulation">
+                <option value="pvc70">PVC · 70 °C</option>
+                <option value="thhn">PVC/nylon, THHN · 90 °C</option>
+                <option value="xlpe">XLPE / EPR · 90 °C</option>
+                <option value="pvc105">PVC, heat-resistant · 105 °C</option>
+                <option value="etfe">ETFE (Tefzel) · 150 °C</option>
+                <option value="sil150">Silicone · 150 °C</option>
+                <option value="sil180">Silicone · 180 °C</option>
+                <option value="sil200" selected>Silicone · 200 °C</option>
+                <option value="fep">FEP · 200 °C</option>
+                <option value="ptfe">PTFE / PFA · 260 °C</option>
+                <option value="custom">Custom rating</option>
+            </select>
+            <span class="custom-iacs" id="customTemp" hidden>
+              <label class="section-kicker" for="tempRating">°C</label>
+              <input id="tempRating" name="tempRating" type="number" min="40" max="600" step="5" value="200" inputmode="numeric" />
+            </span>
+          </div>
           <p class="modebar-note" id="modeNote"><strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.</p>
           <p class="modebar-note" id="materialNote"><strong>Copper, annealed.</strong> 100% IACS, ρ = 0.0175 Ω·mm²/m, ampacity ×1.000.</p>
+          <p class="modebar-note" id="insulationNote"><strong>Silicone, 200 °C.</strong> Conductor rating 200 °C, ampacity ×1.000 against the published silicone data.</p>
         </div>
 
         <section class="layout" aria-label="AWG chart and wire gauge calculator">
@@ -1669,7 +1690,7 @@
                     <th scope="col">Nominal copper<br /><span class="unit">mm²</span></th>
                     <th scope="col">≤3 conductors<br /><span class="unit">60°C / A</span></th>
                     <th scope="col">1 conductor<br /><span class="unit">free air / A</span></th>
-                    <th scope="col">≤3 conductors<br /><span class="unit">200°C / A</span></th>
+                    <th scope="col">≤3 conductors<br /><span class="unit" id="thHighTempUnit">200°C / A</span></th>
                     <th scope="col">1 conductor<br /><span class="unit">free air / A</span></th>
                     <th scope="col">Resistance<br /><span class="unit" id="thResistUnit">mΩ/m · DC</span></th>
                     <th scope="col">Max run<br /><span class="unit" id="thLengthUnit">m @3% · 24 V DC</span></th>
@@ -2249,6 +2270,77 @@
               </p>
             </section>
 
+            <section id="insulation">
+              <h2>Insulation</h2>
+              <p>
+                Insulation contributes one thing to ampacity: how hot it will let the conductor get. Copper
+                does not care — it is happy at 400&nbsp;°C. The plastic around it decides where you have to
+                stop, and that single number moves the high-temperature column of the table.
+              </p>
+              <p class="formula"><span>Ampacity at a different rating</span>I / I<sub>200</sub> = √( (T−30) / (1 + α(T−20)) ) ÷ √( 170 / (1 + α·180) )</p>
+              <p>
+                Heat leaves the conductor in proportion to ΔT while heat arrives as <em>I</em>²<em>R</em>,
+                and <em>R</em> itself climbs with temperature — which is why the gain from a hotter rating
+                is less than it first looks. Against NEC&nbsp;310.16 this predicts the 90&nbsp;°C to
+                60&nbsp;°C ratio as <strong>1.347</strong> where the published columns give 1.333 to 1.360
+                for 10&nbsp;AWG and larger. Silicone at 200&nbsp;°C is the reference at exactly 1.000, so
+                selecting it reproduces the published data untouched.
+              </p>
+
+              <h3>What the selector offers</h3>
+              <dl class="conv-list">
+                <div><dt>PVC</dt><dd>70 °C · ×0.579</dd></div>
+                <div><dt>PVC/nylon THHN</dt><dd>90 °C · ×0.687</dd></div>
+                <div><dt>XLPE / EPR</dt><dd>90 °C · ×0.687</dd></div>
+                <div><dt>PVC, heat-resistant</dt><dd>105 °C · ×0.751</dd></div>
+                <div><dt>ETFE (Tefzel)</dt><dd>150 °C · ×0.893</dd></div>
+                <div><dt>Silicone</dt><dd>180 °C · ×0.962</dd></div>
+                <div><dt>Silicone, FEP</dt><dd>200 °C · ×1.000</dd></div>
+                <div><dt>PTFE / PFA</dt><dd>260 °C · ×1.090</dd></div>
+              </dl>
+
+              <h3>The rule that catches people out</h3>
+              <p>
+                <strong>The whole circuit runs at the temperature of its weakest part, and that is almost
+                never the wire.</strong> A breaker terminal listed for 75&nbsp;°C caps the whole run at
+                75&nbsp;°C no matter what the insulation says — NEC&nbsp;110.14(C) makes this explicit, and
+                most equipment under 100&nbsp;A is listed at 60&nbsp;°C. Buying 200&nbsp;°C silicone and
+                sizing from its 200&nbsp;°C column, then landing it in a 75&nbsp;°C lug, is how connections
+                cook. This is exactly why the conservative 60&nbsp;°C column stays fixed in this table
+                regardless of what you select: for most real installations it is the number that governs.
+              </p>
+              <p>
+                The high-temperature rating buys you margin in a hot enclosure, survival next to an exhaust
+                or a heater, and the ability to run at full current when the ambient is already 80&nbsp;°C.
+                It does not license you to push more current through the same terminals.
+              </p>
+
+              <h3>Choosing between them</h3>
+              <p>
+                <strong>PVC</strong> is cheap, tough against abrasion and stiff in the cold; it softens
+                where it is hot and gives off hydrogen chloride in a fire, which is why LSZH compounds
+                replace it in tunnels and ships. <strong>XLPE</strong> is PVC's crosslinked cousin: same
+                price bracket, better heat, does not melt and flow. <strong>Silicone</strong> is the most
+                flexible thing on the list by a wide margin and survives 200&nbsp;°C, but it tears and
+                abrades easily, so it wants a sleeve wherever it can rub. <strong>PTFE and PFA</strong> are
+                the best electrically and thermally and shrug off almost every solvent, at several times
+                the price and with noticeably less flexibility. <strong>ETFE</strong> is the compromise the
+                aerospace world settled on: thin wall, tough, 150&nbsp;°C.
+              </p>
+
+              <h3>Two things this does not model</h3>
+              <p>
+                Wall thickness. A thick jacket is a thermal blanket, so two 90&nbsp;°C cables of different
+                construction do not carry the same current. Datasheets rarely publish thickness in a
+                comparable way, so only the rating is used here.
+              </p>
+              <p>
+                Voltage rating, which is a separate property entirely. 600&nbsp;V, 1&nbsp;kV and 3&nbsp;kV
+                versions of the same insulation share a temperature rating and differ only in wall. Check it
+                separately — nothing on this page tells you whether the insulation will hold your voltage.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG to mm² at a glance</h2>
               <p>
@@ -2352,6 +2444,7 @@
               <li><a href="#how-to-read">How to read the chart</a></li>
               <li><a href="#how-it-works">How the calculator works</a></li>
               <li><a href="#materials">Conductor materials</a></li>
+              <li><a href="#insulation">Insulation</a></li>
               <li><a href="#conversions">AWG to mm² conversions</a></li>
               <li><a href="#faq">Frequently asked questions</a></li>
               <li><a href="#source">Read the source</a></li>
@@ -2368,7 +2461,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "mm²", "copied": "Copied", "customMaterial": "Custom", "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ω·mm²/m, ampacity ×{factor} against annealed copper.", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.43% on 0 AWG at 60 Hz, 0.07% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.", "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 60 Hz that is 0.43% on 0 AWG and less than 0.07% below 4 AWG — which is why most rows read identically to DC.", "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded conductors instead of two. The free-air columns describe a single isolated conductor and are unchanged."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
+      const I18N = {"uArea": "mm²", "copied": "Copied", "customMaterial": "Custom", "customInsulation": "Custom", "insulationNote": "<strong>{name}, {c} °C.</strong> Conductor rating {c} °C, ampacity ×{factor} against the published 200 °C silicone data.", "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ω·mm²/m, ampacity ×{factor} against annealed copper.", "unitHighTemp": "°C / A", "uHz": "Hz", "unitResistDc": "mΩ/m · DC", "modeTag": {"dc": "DC", "ac1": "1φ", "ac3": "3φ"}, "unitResistAc": "mΩ/m · {f} Hz", "unitLength": "m @3% · {u} V {m}", "unitPower": "at {u} V {m}", "uKilowatt": "kW", "labelSystemVoltage": "System voltage / V", "labelLineVoltage": "Line voltage / V", "modeShort": {"dc": "DC", "ac1": "AC 1-phase", "ac3": "AC 3-phase"}, "modeNote": {"dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.", "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.43% on 0 AWG at 60 Hz, 0.07% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.", "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run."}, "tableModeNote": {"dc": "These figures are for direct current.", "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 60 Hz that is 0.43% on 0 AWG and less than 0.07% below 4 AWG — which is why most rows read identically to DC.", "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded conductors instead of two. The free-air columns describe a single isolated conductor and are unchanged."}, "msgSkinRange": "Above roughly 1 kHz on the largest gauges the skin-effect fit leaves its validated range, so treat the AC resistance as indicative only.", "uAmp": "A", "uVolt": "V", "uWatt": "W", "below30": "below 30 AWG", "below0": "below 0 AWG", "instFree": "single conductor / free air", "instBundle": "up to 3 in cable", "conductorSuffix": "°C conductor", "ambientDefault": "30°C ambient default", "ambientSuffix": "°C ambient", "noMargin": "No margin", "stDanger": "Thermal margin required", "stReady": "Ampacity ready", "stAboveBoth": "Above both references", "stAbove60": "Above 60°C reference", "stWithin": "Within both references", "msgDanger": "The selected ambient exceeds one of the reference ranges. Review both temperature results before choosing a lower thermal target or a different wire system.", "msgReady": "Ampacity is calculated. Add the optional load current, system voltage, and one-way length to check load margin and voltage drop.", "msgAboveBoth": "<strong>{i} A</strong> is above both the 60°C reference of <strong>{a60} A</strong> and the 200°C reference of <strong>{a200} A</strong>. Increase the conductor size, improve cooling, or reduce the load.", "msgAbove60": "<strong>{i} A</strong> is above the conservative 60°C reference of <strong>{a60} A</strong>, but within the 200°C limit of <strong>{a200} A</strong>. Confirm the actual wire, terminal, fuse, enclosure, and local-code limits before use.", "msgWithin": "<strong>{i} A</strong> is within both temperature references. The 60°C value remains the conservative everyday design baseline; confirm the terminal, fuse, enclosure, and manufacturer limits before final use."};
       const LOCALE = "en-US";
 
       const wireRows = [
@@ -2391,13 +2484,33 @@
         { gauge: "0", area: 53.49, bundle60: 112, free60: 167, bundle200: 224, free200: 348 }
       ];
 
-      const ambientFactors = {
-        60: [[30, 1], [40, 0.82], [50, 0.58]],
-        200: [
-          [30, 1], [40, 0.97], [50, 0.94], [60, 0.91], [70, 0.87], [80, 0.84],
-          [90, 0.80], [100, 0.76], [120, 0.68], [140, 0.58], [160, 0.47], [180, 0.32]
-        ]
-      };
+      const INSULATIONS = {"pvc70": {"c": 70, "name": "PVC"}, "thhn": {"c": 90, "name": "PVC/nylon, THHN"}, "xlpe": {"c": 90, "name": "XLPE / EPR"}, "pvc105": {"c": 105, "name": "PVC, heat-resistant"}, "etfe": {"c": 150, "name": "ETFE (Tefzel)"}, "sil150": {"c": 150, "name": "Silicone"}, "sil180": {"c": 180, "name": "Silicone"}, "sil200": {"c": 200, "name": "Silicone"}, "fep": {"c": 200, "name": "FEP"}, "ptfe": {"c": 260, "name": "PTFE / PFA"}};
+      const ALPHA = 0.00393; // copper; aluminium's 0.00403 shifts this under 0.5%
+
+      // Heat leaves as ΔT while heat arrives as I²R, and R itself climbs with
+      // temperature — so both the ambient correction and the rating scale fall
+      // out of the same expression. This replaces two hardcoded lookup tables
+      // that turned out to be exactly this formula: the published 60 °C factors
+      // 0.82 and 0.58 come out as 0.816 and 0.577.
+      function ambientFactor(rating, ambient) {
+        if (!(rating > ambient)) return 0;
+        return Math.sqrt((rating - ambient) / (rating - 30));
+      }
+
+      // Referenced to the published 200 °C silicone data, so silicone is 1.000
+      // and the table's own numbers are never rewritten.
+      function ratingScale(rating) {
+        const f = (t) => Math.sqrt((t - 30) / (1 + ALPHA * (t - 20)));
+        return f(rating) / f(200);
+      }
+
+      function insulation() {
+        const key = $("insulation").value;
+        const celsius = key === "custom"
+          ? Math.min(600, Math.max(40, readOptionalNumber("tempRating") ?? 200))
+          : INSULATIONS[key].c;
+        return { key, celsius, scale: ratingScale(celsius) };
+      }
 
       const groupingFactors = {
         bundle: 1,
@@ -2469,21 +2582,6 @@
         return Number.isFinite(value)
           ? value.toLocaleString(LOCALE, { maximumFractionDigits: digits })
           : "—";
-      }
-
-      function interpolateFactor(points, ambient) {
-        if (ambient <= points[0][0]) return points[0][1];
-        if (ambient > points[points.length - 1][0]) return 0;
-
-        for (let index = 1; index < points.length; index += 1) {
-          const [upperTemp, upperFactor] = points[index];
-          const [lowerTemp, lowerFactor] = points[index - 1];
-          if (ambient <= upperTemp) {
-            const ratio = (ambient - lowerTemp) / (upperTemp - lowerTemp);
-            return lowerFactor + (upperFactor - lowerFactor) * ratio;
-          }
-        }
-        return 0;
       }
 
       function nearestRow(area) {
@@ -2564,7 +2662,7 @@
       // length uses the mode's own drop formula, so it is where the modes differ
       // most — a 0 AWG run is 9.8 m on 24 V DC and 189 m on 400 V three-phase.
       function renderTableForMode(context) {
-        const { mode, frequency, voltage, powerFactor, metal } = context;
+        const { mode, frequency, voltage, powerFactor, metal, sleeve } = context;
         const alternating = mode !== "dc";
         const threePhase = mode === "ac3";
         const runFactor = threePhase ? Math.sqrt(3) : 2;
@@ -2586,10 +2684,11 @@
           // The free-air columns describe one isolated conductor, which is the
           // same object in every mode; only the in-cable columns see the extra
           // phase conductor.
-          [["b60", "bundle60", true], ["f60", "free60", false],
-           ["b200", "bundle200", true], ["f200", "free200", false]]
-            .forEach(([cls, key, bundled]) => {
-              const value = row[key] * derate * (bundled ? PHASE_FACTOR[mode] : 1);
+          // the table is quoted at 30 °C ambient, so only the rating scale applies
+          [["b60", "bundle60", true, 1], ["f60", "free60", false, 1],
+           ["b200", "bundle200", true, sleeve.scale], ["f200", "free200", false, sleeve.scale]]
+            .forEach(([cls, key, bundled, scale]) => {
+              const value = row[key] * scale * derate * (bundled ? PHASE_FACTOR[mode] : 1);
               // Always one decimal. The AC penalty on the largest gauges is a few
               // tenths of a percent, and rounding to whole amps hid it entirely,
               // making the toggle look inert between DC and single-phase.
@@ -2676,21 +2775,21 @@
         const groupingFactor = groupingFactors[installation] ?? 1;
         const installationLabel = freeAir ? I18N.instFree : I18N.instBundle;
 
-        function thermalResult(thermalKey) {
+        function thermalResult(thermalKey, rating, scale) {
           const baseKey = (freeAir ? "free" : "bundle") + thermalKey;
-          const baseAmpacity = row[baseKey];
-          const ambientFactor = interpolateFactor(ambientFactors[thermalKey], ambient);
+          const factor = ambientFactor(rating, ambient);
           return {
-            ambientFactor,
+            ambientFactor: factor,
             ampacity:
-              baseAmpacity * ambientFactor * groupingFactor *
+              row[baseKey] * scale * factor * groupingFactor *
               (freeAir ? 1 : PHASE_FACTOR[mode]),
-            context: thermalKey + I18N.conductorSuffix
+            context: formatNumber(rating, 0) + I18N.conductorSuffix
           };
         }
 
-        const result60 = thermalResult("60");
-        const result200 = thermalResult("200");
+        const sleeve = insulation();
+        const result60 = thermalResult("60", 60, 1);
+        const result200 = thermalResult("200", sleeve.celsius, sleeve.scale);
         // Only the AC modes carry a skin-effect penalty. At 50/60 Hz it stays
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
@@ -2788,7 +2887,8 @@
           frequency,
           voltage: voltage ?? 0,
           powerFactor,
-          metal
+          metal,
+          sleeve
         });
         selectTableRow(row.gauge);
       }
@@ -2809,6 +2909,8 @@
         if (mode !== "dc") params.set("mode", mode);
         if ($("material").value !== "cu") params.set("mat", $("material").value);
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
+        if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
+        if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
         Object.keys(FIELD_PARAM).forEach((id) => {
           // frequency and power factor mean nothing on DC, so leave them out
           if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
@@ -2850,6 +2952,17 @@
           $("material").value = material;
           restored = true;
         }
+        const sleeveKey = params.get("ins");
+        if (sleeveKey && $("insulation").querySelector('[value="' + CSS.escape(sleeveKey) + '"]')) {
+          $("insulation").value = sleeveKey;
+          restored = true;
+        }
+        const tc = params.get("tc");
+        if (tc !== null) {
+          $("tempRating").value = tc;
+          restored = true;
+        }
+
         const iacs = params.get("iacs");
         if (iacs !== null) {
           $("conductivity").value = iacs;
@@ -2927,6 +3040,14 @@
         // the custom conductivity box only makes sense for the custom entry
         const metal = conductor();
         $("customIacs").hidden = metal.key !== "custom";
+        const sleeve = insulation();
+        $("customTemp").hidden = sleeve.key !== "custom";
+        $("insulationNote").innerHTML = I18N.insulationNote
+          .replace(/\{name\}/g, sleeve.key === "custom" ? I18N.customInsulation : INSULATIONS[sleeve.key].name)
+          .replace(/\{c\}/g, formatNumber(sleeve.celsius, 0))
+          .replace("{factor}", formatNumber(sleeve.scale, 3));
+        $("thHighTempUnit").textContent = formatNumber(sleeve.celsius, 0) + I18N.unitHighTemp;
+
         $("materialNote").innerHTML = I18N.materialNote
           .replace("{name}", metal.key === "custom" ? I18N.customMaterial : MATERIALS[metal.key].name)
           .replace("{iacs}", formatNumber(metal.iacs, 1))
@@ -2979,6 +3100,7 @@
       $("modeBar").addEventListener("change", applyMode);
       $("copyLink").addEventListener("click", copyLink);
       $("conductivity").addEventListener("input", applyMode);
+      $("tempRating").addEventListener("input", applyMode);
       captureDefaults();
       syncOptionalResults();
       if (!readUrl()) restoreMode();

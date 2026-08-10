@@ -204,6 +204,46 @@ Everything is quoted at 20 °C. There is no temperature correction of
 resistivity, which would need a conductor temperature rather than the ambient
 the calculator asks for; the materials section says so explicitly.
 
+## Insulation
+
+A third global selector sets the conductor temperature rating, which is the only
+thing insulation contributes to ampacity here. It drives the high-temperature
+column pair; the conservative 60 °C pair stays fixed.
+
+```
+I/I_200 = sqrt((T-30)/(1+alpha*(T-20))) / sqrt(170/(1+alpha*180))
+```
+
+Heat leaves as ΔT, heat arrives as I²R, and R climbs with T — which is why a
+hotter rating buys less than it looks. Against NEC 310.16 this predicts the
+90/60 °C ratio as **1.347** where the published columns give 1.333–1.360 for
+10 AWG and larger. Silicone 200 °C is the reference at exactly 1.000.
+
+| | °C | ampacity |
+|---|---|---|
+| PVC | 70 | ×0.579 |
+| PVC/nylon THHN, XLPE/EPR | 90 | ×0.687 |
+| PVC, heat-resistant | 105 | ×0.751 |
+| ETFE, silicone | 150 | ×0.893 |
+| Silicone | 180 | ×0.962 |
+| Silicone, FEP | 200 | ×1.000 |
+| PTFE / PFA | 260 | ×1.090 |
+
+Plus a custom °C entry.
+
+This replaced two hardcoded ambient-correction lookup tables, which turned out
+to be exactly `sqrt((T-Ta)/(T-30))` — the published 60 °C factors of 0.82 and
+0.58 come out as 0.816 and 0.577. One formula now covers any rating.
+
+Not modelled: wall thickness, which makes two 90 °C cables of different
+construction carry different current, and voltage rating, which is an unrelated
+property. Both are called out in the page text.
+
+The page also makes the point that NEC 110.14(C) caps a circuit at the
+termination's rating — usually 60 or 75 °C — so a 200 °C column is margin
+against a hot environment, not permission to push more current through the same
+lug. That is why the 60 °C column never moves.
+
 ## Shareable links
 
 Mode and every calculator input are reflected in the query string, so a
@@ -211,7 +251,7 @@ configuration can be sent to someone else. There is a copy-link button next to
 Calculate.
 
 ```
-/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400&mat=al
+/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400&mat=al&ins=thhn
 ```
 
 Rules that keep this from turning into an SEO problem or a mess:

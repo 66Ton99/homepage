@@ -1387,8 +1387,19 @@
             </span>
           </div>
           </div>
+          <div class="modebar-group">
+            <label class="section-kicker" for="insulation">{{INSULATION_LABEL}}</label>
+            <select id="insulation" name="insulation">
+{{INSULATION_OPTIONS}}
+            </select>
+            <span class="custom-iacs" id="customTemp" hidden>
+              <label class="section-kicker" for="tempRating">{{TEMP_LABEL}}</label>
+              <input id="tempRating" name="tempRating" type="number" min="40" max="600" step="5" value="200" inputmode="numeric" />
+            </span>
+          </div>
           <p class="modebar-note" id="modeNote">{{MODE_NOTE_DC}}</p>
           <p class="modebar-note" id="materialNote">{{MATERIAL_NOTE_CU}}</p>
+          <p class="modebar-note" id="insulationNote">{{INSULATION_NOTE}}</p>
         </div>
 
         <section class="layout" aria-label="{{LAYOUT_LABEL}}">
@@ -1412,7 +1423,7 @@
                     <th scope="col">{{TH_AREA}}<br /><span class="unit">{{U_MM2}}</span></th>
                     <th scope="col">{{TH_BUNDLE}}<br /><span class="unit">{{U_60}}</span></th>
                     <th scope="col">{{TH_SINGLE}}<br /><span class="unit">{{U_FREE}}</span></th>
-                    <th scope="col">{{TH_BUNDLE}}<br /><span class="unit">{{U_200}}</span></th>
+                    <th scope="col">{{TH_BUNDLE}}<br /><span class="unit" id="thHighTempUnit">{{U_200}}</span></th>
                     <th scope="col">{{TH_SINGLE}}<br /><span class="unit">{{U_FREE}}</span></th>
                     <th scope="col">{{TH_R}}<br /><span class="unit" id="thResistUnit">{{U_R_DC}}</span></th>
                     <th scope="col">{{TH_LEN}}<br /><span class="unit" id="thLengthUnit">{{U_LEN_DC}}</span></th>
@@ -1590,13 +1601,33 @@
         { gauge: "0", area: 53.49, bundle60: 112, free60: 167, bundle200: 224, free200: 348 }
       ];
 
-      const ambientFactors = {
-        60: [[30, 1], [40, 0.82], [50, 0.58]],
-        200: [
-          [30, 1], [40, 0.97], [50, 0.94], [60, 0.91], [70, 0.87], [80, 0.84],
-          [90, 0.80], [100, 0.76], [120, 0.68], [140, 0.58], [160, 0.47], [180, 0.32]
-        ]
-      };
+      const INSULATIONS = {{INSULATIONS}};
+      const ALPHA = 0.00393; // copper; aluminium's 0.00403 shifts this under 0.5%
+
+      // Heat leaves as ΔT while heat arrives as I²R, and R itself climbs with
+      // temperature — so both the ambient correction and the rating scale fall
+      // out of the same expression. This replaces two hardcoded lookup tables
+      // that turned out to be exactly this formula: the published 60 °C factors
+      // 0.82 and 0.58 come out as 0.816 and 0.577.
+      function ambientFactor(rating, ambient) {
+        if (!(rating > ambient)) return 0;
+        return Math.sqrt((rating - ambient) / (rating - 30));
+      }
+
+      // Referenced to the published 200 °C silicone data, so silicone is 1.000
+      // and the table's own numbers are never rewritten.
+      function ratingScale(rating) {
+        const f = (t) => Math.sqrt((t - 30) / (1 + ALPHA * (t - 20)));
+        return f(rating) / f(200);
+      }
+
+      function insulation() {
+        const key = $("insulation").value;
+        const celsius = key === "custom"
+          ? Math.min(600, Math.max(40, readOptionalNumber("tempRating") ?? 200))
+          : INSULATIONS[key].c;
+        return { key, celsius, scale: ratingScale(celsius) };
+      }
 
       const groupingFactors = {
         bundle: 1,
@@ -1668,21 +1699,6 @@
         return Number.isFinite(value)
           ? value.toLocaleString(LOCALE, { maximumFractionDigits: digits })
           : "—";
-      }
-
-      function interpolateFactor(points, ambient) {
-        if (ambient <= points[0][0]) return points[0][1];
-        if (ambient > points[points.length - 1][0]) return 0;
-
-        for (let index = 1; index < points.length; index += 1) {
-          const [upperTemp, upperFactor] = points[index];
-          const [lowerTemp, lowerFactor] = points[index - 1];
-          if (ambient <= upperTemp) {
-            const ratio = (ambient - lowerTemp) / (upperTemp - lowerTemp);
-            return lowerFactor + (upperFactor - lowerFactor) * ratio;
-          }
-        }
-        return 0;
       }
 
       function nearestRow(area) {
@@ -1763,7 +1779,7 @@
       // length uses the mode's own drop formula, so it is where the modes differ
       // most — a 0 AWG run is 9.8 m on 24 V DC and 189 m on 400 V three-phase.
       function renderTableForMode(context) {
-        const { mode, frequency, voltage, powerFactor, metal } = context;
+        const { mode, frequency, voltage, powerFactor, metal, sleeve } = context;
         const alternating = mode !== "dc";
         const threePhase = mode === "ac3";
         const runFactor = threePhase ? Math.sqrt(3) : 2;
@@ -1785,10 +1801,11 @@
           // The free-air columns describe one isolated conductor, which is the
           // same object in every mode; only the in-cable columns see the extra
           // phase conductor.
-          [["b60", "bundle60", true], ["f60", "free60", false],
-           ["b200", "bundle200", true], ["f200", "free200", false]]
-            .forEach(([cls, key, bundled]) => {
-              const value = row[key] * derate * (bundled ? PHASE_FACTOR[mode] : 1);
+          // the table is quoted at 30 °C ambient, so only the rating scale applies
+          [["b60", "bundle60", true, 1], ["f60", "free60", false, 1],
+           ["b200", "bundle200", true, sleeve.scale], ["f200", "free200", false, sleeve.scale]]
+            .forEach(([cls, key, bundled, scale]) => {
+              const value = row[key] * scale * derate * (bundled ? PHASE_FACTOR[mode] : 1);
               // Always one decimal. The AC penalty on the largest gauges is a few
               // tenths of a percent, and rounding to whole amps hid it entirely,
               // making the toggle look inert between DC and single-phase.
@@ -1875,21 +1892,21 @@
         const groupingFactor = groupingFactors[installation] ?? 1;
         const installationLabel = freeAir ? I18N.instFree : I18N.instBundle;
 
-        function thermalResult(thermalKey) {
+        function thermalResult(thermalKey, rating, scale) {
           const baseKey = (freeAir ? "free" : "bundle") + thermalKey;
-          const baseAmpacity = row[baseKey];
-          const ambientFactor = interpolateFactor(ambientFactors[thermalKey], ambient);
+          const factor = ambientFactor(rating, ambient);
           return {
-            ambientFactor,
+            ambientFactor: factor,
             ampacity:
-              baseAmpacity * ambientFactor * groupingFactor *
+              row[baseKey] * scale * factor * groupingFactor *
               (freeAir ? 1 : PHASE_FACTOR[mode]),
-            context: thermalKey + I18N.conductorSuffix
+            context: formatNumber(rating, 0) + I18N.conductorSuffix
           };
         }
 
-        const result60 = thermalResult("60");
-        const result200 = thermalResult("200");
+        const sleeve = insulation();
+        const result60 = thermalResult("60", 60, 1);
+        const result200 = thermalResult("200", sleeve.celsius, sleeve.scale);
         // Only the AC modes carry a skin-effect penalty. At 50/60 Hz it stays
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
@@ -1987,7 +2004,8 @@
           frequency,
           voltage: voltage ?? 0,
           powerFactor,
-          metal
+          metal,
+          sleeve
         });
         selectTableRow(row.gauge);
       }
@@ -2008,6 +2026,8 @@
         if (mode !== "dc") params.set("mode", mode);
         if ($("material").value !== "cu") params.set("mat", $("material").value);
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
+        if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
+        if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
         Object.keys(FIELD_PARAM).forEach((id) => {
           // frequency and power factor mean nothing on DC, so leave them out
           if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
@@ -2049,6 +2069,17 @@
           $("material").value = material;
           restored = true;
         }
+        const sleeveKey = params.get("ins");
+        if (sleeveKey && $("insulation").querySelector('[value="' + CSS.escape(sleeveKey) + '"]')) {
+          $("insulation").value = sleeveKey;
+          restored = true;
+        }
+        const tc = params.get("tc");
+        if (tc !== null) {
+          $("tempRating").value = tc;
+          restored = true;
+        }
+
         const iacs = params.get("iacs");
         if (iacs !== null) {
           $("conductivity").value = iacs;
@@ -2126,6 +2157,14 @@
         // the custom conductivity box only makes sense for the custom entry
         const metal = conductor();
         $("customIacs").hidden = metal.key !== "custom";
+        const sleeve = insulation();
+        $("customTemp").hidden = sleeve.key !== "custom";
+        $("insulationNote").innerHTML = I18N.insulationNote
+          .replace(/\{name\}/g, sleeve.key === "custom" ? I18N.customInsulation : INSULATIONS[sleeve.key].name)
+          .replace(/\{c\}/g, formatNumber(sleeve.celsius, 0))
+          .replace("{factor}", formatNumber(sleeve.scale, 3));
+        $("thHighTempUnit").textContent = formatNumber(sleeve.celsius, 0) + I18N.unitHighTemp;
+
         $("materialNote").innerHTML = I18N.materialNote
           .replace("{name}", metal.key === "custom" ? I18N.customMaterial : MATERIALS[metal.key].name)
           .replace("{iacs}", formatNumber(metal.iacs, 1))
@@ -2178,6 +2217,7 @@
       $("modeBar").addEventListener("change", applyMode);
       $("copyLink").addEventListener("click", copyLink);
       $("conductivity").addEventListener("input", applyMode);
+      $("tempRating").addEventListener("input", applyMode);
       captureDefaults();
       syncOptionalResults();
       if (!readUrl()) restoreMode();

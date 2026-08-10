@@ -215,6 +215,38 @@ async function runModes(file, label, expect) {
   check("back to copper restores the reference", cellNum("0", "js-b60").toFixed(1), "112.0");
   check("copper leaves the material out of the URL", dom.window.location.href.includes("mat="), false);
 
+  // ---- insulation sets the conductor temperature rating ----
+  const setIns = (v) => {
+    $("insulation").value = v;
+    $("modeBar").dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+  };
+  setMat("cu");
+  setIns("sil200");
+  check("silicone 200 is the reference", cellNum("0", "js-b200").toFixed(1), "224.0");
+  check("the 60 C column is not touched by insulation", cellNum("0", "js-b60").toFixed(1), "112.0");
+
+  setIns("thhn");
+  // sqrt((90-30)/(1+a*70)) / sqrt((200-30)/(1+a*180)) = 0.687
+  checkClose("90 C insulation scales to 0.687", cellNum("0", "js-b200") / 224, 0.687, 0.003);
+  check("header follows the rating", $("thHighTempUnit").textContent.startsWith("90"), true);
+
+  setIns("pvc70");
+  checkClose("70 C insulation scales to 0.579", cellNum("0", "js-b200") / 224, 0.579, 0.003);
+  check("a 70 C rating drops below the 60 C reference column",
+        cellNum("0", "js-b200") > cellNum("0", "js-b60"), true);
+
+  setIns("ptfe");
+  checkClose("260 C insulation scales to 1.090", cellNum("0", "js-b200") / 224, 1.090, 0.003);
+
+  setIns("custom");
+  check("custom shows the temperature box", $("customTemp").hidden, false);
+  $("tempRating").value = "200";
+  $("tempRating").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  check("custom 200 C equals silicone", cellNum("0", "js-b200").toFixed(1), "224.0");
+
+  setIns("sil200");
+  check("silicone leaves insulation out of the URL", dom.window.location.href.includes("ins="), false);
+
   // ---- three loaded conductors derate the in-cable columns ----
   pick("dc");
   $("frequency").value = expect.freq;
@@ -313,6 +345,14 @@ async function runUrl(file, label, expect) {
     url: "https://66ton99.org.ua" + base + "?mat=al",
   }).window.document;
   check("shared link restores the material", mat.getElementById("material").value, "al");
+
+  const ins = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?ins=thhn",
+  }).window.document;
+  check("shared link restores the insulation", ins.getElementById("insulation").value, "thhn");
+  check("shared link retitles the column",
+        ins.getElementById("thHighTempUnit").textContent.startsWith("90"), true);
   check("shared link applies it to the table",
         mat.querySelector('tr[data-gauge="0"] .js-b60').textContent, expect.alZero);
   check("shared link recalculates", g2("areaResult").textContent.startsWith(expect.area), true);
