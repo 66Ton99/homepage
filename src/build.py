@@ -274,15 +274,16 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 The ampacity columns are in amperes, and amperes are amperes: a conductor does not care
                 whether the heat came from DC or AC. What changes completely is what those amperes are
                 <em>worth</em>. The same 0&nbsp;AWG conductor at its 112&nbsp;A rating delivers
-                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>26&nbsp;kW</strong> on
-                230&nbsp;V single-phase, and <strong>78&nbsp;kW</strong> on 400&nbsp;V three-phase — a
-                factor of twenty-nine, from voltage and the √3.
+                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>13.4&nbsp;kW</strong> on
+                120&nbsp;V single-phase, and <strong>37&nbsp;kW</strong> on 208&nbsp;V three-phase — a
+                factor of fourteen, from voltage and the √3. On a 230/400&nbsp;V system the spread is
+                wider still, at twenty-nine.
               </p>
               <p>
                 Read the other way round, that is the number most people actually want: for a given load,
                 the current you must carry is wildly different between DC and AC, and the copper you need
                 follows the current, not the watts. A 3&nbsp;kW load is 125&nbsp;A at 24&nbsp;V DC and
-                4.3&nbsp;A at 400&nbsp;V three-phase.
+                8.3&nbsp;A at 208&nbsp;V three-phase.
               </p>
 
               <h3>Resistance and maximum run</h3>
@@ -294,8 +295,8 @@ EN_CONTENT = f"""            <section id="how-to-read">
               </p>
               <p>
                 That last column is worth staring at. The same 0&nbsp;AWG conductor is good for
-                <strong>9.8&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>189&nbsp;m</strong> on
-                400&nbsp;V three-phase — a factor of nineteen, from voltage and the √3 alone, with the
+                <strong>9.8&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>107&nbsp;m</strong> on
+                208&nbsp;V three-phase — a factor of eleven, from voltage and the √3 alone, with the
                 copper completely unchanged. Ampacity is rarely what limits a long run; voltage drop is.
               </p>
 
@@ -382,15 +383,15 @@ EN_CONTENT = f"""            <section id="how-to-read">
               </p>
               <p>
                 <strong>Frequency is the small one</strong>, at least at mains. Alternating current pushes
-                charge toward the conductor surface, so resistance rises — but in copper at 50&nbsp;Hz the
-                skin depth is about 9.4&nbsp;mm, while even a 0&nbsp;AWG conductor has a radius of only
+                charge toward the conductor surface, so resistance rises — but in copper at 60&nbsp;Hz the
+                skin depth is about 8.5&nbsp;mm, while even a 0&nbsp;AWG conductor has a radius of only
                 4.1&nbsp;mm.
               </p>
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
                 Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
-                dominates once you leave mains frequency. Together they come to <strong>0.30&nbsp;%</strong>
-                at 50&nbsp;Hz for 0&nbsp;AWG, 0.05&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
+                dominates once you leave mains frequency. Together they come to <strong>0.43&nbsp;%</strong>
+                at 60&nbsp;Hz for 0&nbsp;AWG, 0.07&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
                 This is the entire difference between DC and single-phase AC here: both have two loaded
                 conductors, and unarmoured low-voltage wire has no sheath or dielectric losses to add. The
                 table shows a decimal place so you can see it on the gauges where it exists — 0&nbsp;AWG
@@ -516,6 +517,8 @@ EN = {
     "touch-safe or connector-safe operating targets. More than three conductors require further derating. "
     "AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact "
     "cable datasheet.",
+    "MODE_VOLTAGE": "{ dc: 24, ac1: 120, ac3: 208 }",
+    "DEF_FREQ": "60",
     "MODE_LEGEND": "Current type",
     "MODE_DC": "DC",
     "MODE_AC1": "AC 1-phase",
@@ -546,7 +549,7 @@ EN = {
         }
     ),
     "OPT_TITLE": "Optional checks",
-    "OPT_NOTE": "Defaults: 24 V · 2 m · 35 A · 30°C",
+    "OPT_NOTE": "Defaults: 24 V · 2 m · 35 A · 30°C · 60 Hz",
     "OPTIONAL": "optional",
     "L_VOLT": "System voltage / V",
     "L_LEN": "One-way length / m",
@@ -615,12 +618,12 @@ EN = {
             "modeNote": {
                 "dc": "<strong>Direct current.</strong> Voltage drop is counted over the full loop, "
                 "out and back.",
-                "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.30% on 0 AWG at 50 Hz, 0.05% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.",
+                "ac1": "<strong>Single-phase AC.</strong> Two loaded conductors, same as DC, so the only difference is skin and proximity loss: 0.43% on 0 AWG at 60 Hz, 0.07% at 4 AWG, nothing measurable below that. Raise the frequency to see it — 0 AWG loses 8% by 400 Hz.",
                 "ac3": "<strong>Three-phase AC.</strong> Three current-carrying conductors share the cable, so the in-cable columns carry the IEC 60364-5-52 factor of 0.915 against the 2-conductor case. Drop is √3·I·R·L line-to-line over the one-way run.",
             },
             "tableModeNote": {
                 "dc": "These figures are for direct current.",
-                "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 50 Hz that is 0.30% on 0 AWG and less than 0.05% below 4 AWG — which is why most rows read identically to DC.",
+                "ac1": "Single-phase has two loaded conductors, exactly like DC, so no conductor-count derate applies. Only skin and proximity loss separate the two, and at 60 Hz that is 0.43% on 0 AWG and less than 0.07% below 4 AWG — which is why most rows read identically to DC.",
                 "ac3": "The in-cable columns carry the IEC 60364-5-52 factor of 0.915 for three loaded "
                 "conductors instead of two. The free-air columns describe a single isolated conductor "
                 "and are unchanged.",
@@ -1022,6 +1025,8 @@ UK = {
     "дотику чи для клем робочі значення. Понад три жили потребують додаткового зниження струму. Рядки "
     "AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом "
     "конкретного кабелю.",
+    "MODE_VOLTAGE": "{ dc: 24, ac1: 230, ac3: 400 }",
+    "DEF_FREQ": "50",
     "MODE_LEGEND": "\u0420\u0456\u0434 \u0441\u0442\u0440\u0443\u043c\u0443",
     "MODE_DC": "\u041f\u043e\u0441\u0442\u0456\u0439\u043d\u0438\u0439",
     "MODE_AC1": "\u0417\u043c\u0456\u043d\u043d\u0438\u0439 1\u0444",
@@ -1052,7 +1057,7 @@ UK = {
         }
     ),
     "OPT_TITLE": "Додаткові перевірки",
-    "OPT_NOTE": "За замовчуванням: 24 В · 2 м · 35 А · 30°C",
+    "OPT_NOTE": "За замовчуванням: 24 В · 2 м · 35 А · 30°C · 50 Гц",
     "OPTIONAL": "необов'язково",
     "L_VOLT": "Напруга системи / В",
     "L_LEN": "Довжина в один бік / м",

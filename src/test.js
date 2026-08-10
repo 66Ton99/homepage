@@ -139,7 +139,7 @@ async function runModes(file, label, expect) {
   pick("dc");
   // the 400 Hz block above left the frequency set; put it back to mains so the
   // baseline rows are not carrying a skin-effect derate
-  $("frequency").value = "50";
+  $("frequency").value = expect.freq;
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   $("strandCount").value = "1650";
   $("strandCount").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
@@ -150,11 +150,11 @@ async function runModes(file, label, expect) {
   checkClose("22 AWG DC run @3% on 24 V", cellNum("22", "js-len"), 1.3, 0.1);
 
   pick("ac3");   // voltage should follow the mode to 400 V
-  check("voltage follows the mode", $("systemVoltage").value, "400");
+  check("voltage follows the mode", $("systemVoltage").value, expect.v3);
   // the run gets *longer* on three-phase: the rated current it must hold is lower
-  checkClose("0 AWG 3-phase run @3% on 400 V", cellNum("0", "js-len"), 206.7, 1);
-  checkClose("22 AWG 3-phase run @3% on 400 V", cellNum("22", "js-len"), 28.2, 0.5);
-  check("length header names the mode", $("thLengthUnit").textContent.includes("400"), true);
+  checkClose("0 AWG 3-phase run @3%", cellNum("0", "js-len"), expect.run3, 1);
+  checkClose("22 AWG 3-phase run @3%", cellNum("22", "js-len"), expect.run3small, 0.5);
+  check("length header names the voltage", $("thLengthUnit").textContent.includes(expect.v3), true);
 
   // a voltage the reader typed must survive a mode change
   $("systemVoltage").value = "48";
@@ -177,7 +177,7 @@ async function runModes(file, label, expect) {
 
   // ---- three loaded conductors derate the in-cable columns ----
   pick("dc");
-  $("frequency").value = "50";
+  $("frequency").value = expect.freq;
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   const dcB60 = cellNum("0", "js-b60");
   const dcF60 = cellNum("0", "js-f60");
@@ -200,7 +200,7 @@ async function runModes(file, label, expect) {
 
   // ---- the same amps buy very different power per mode ----
   pick("dc");
-  $("frequency").value = "50";
+  $("frequency").value = expect.freq;
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   $("systemVoltage").value = "24";
   $("systemVoltage").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
@@ -208,13 +208,13 @@ async function runModes(file, label, expect) {
   check("small gauges are quoted in watts", cell("30", "js-p").includes(expect.watt), true);
 
   pick("ac1");
-  check("voltage follows to 230 V", $("systemVoltage").value, "230");
-  checkClose("0 AWG delivers ~25.8 kW on 230 V 1-phase", cellNum("0", "js-p"), 25.8, 0.2);
+  check("voltage follows to mains single-phase", $("systemVoltage").value, expect.v1);
+  checkClose("0 AWG delivers the 1-phase power", cellNum("0", "js-p"), expect.p1, 0.2);
 
   pick("ac3");
   // 112 A x 0.915 = 102.5 A carried into the power column
-  checkClose("0 AWG delivers ~71 kW on 400 V 3-phase", cellNum("0", "js-p"), 71.0, 0.5);
-  check("power header names the mode", $("thPowerUnit").textContent.includes("400"), true);
+  checkClose("0 AWG delivers the 3-phase power", cellNum("0", "js-p"), expect.p3, 0.5);
+  check("power header names the voltage", $("thPowerUnit").textContent.includes(expect.v3), true);
 }
 
 
@@ -244,7 +244,7 @@ async function runUrl(file, label, expect) {
 
   check("defaults leave the URL clean", path(w), base);
   pick("ac3");
-  check("mode reaches the URL immediately", path(w), base + "?mode=ac3&u=400");
+  check("mode reaches the URL immediately", path(w), base + "?mode=ac3&u=" + expect.v3);
   set("loadCurrent", "50");
   await wait(500);
   check("calculator inputs reach the URL", path(w).includes("a=50"), true);
@@ -287,13 +287,17 @@ async function runUrl(file, label, expect) {
 (async () => {
   await runBasics();
   await runUrl("../site/_pages/awg-to-amps.html", "EN",
-    { path: "/awg-to-amps", area: "21.15" });
+    { path: "/awg-to-amps", area: "21.15", v3: "208" });
   await runUrl("../site/_pages/uk-awg-to-amps.html", "UK",
-    { path: "/uk/awg-to-amps", area: "21,15" });
+    { path: "/uk/awg-to-amps", area: "21,15", v3: "400" });
   await runModes("../site/_pages/awg-to-amps.html", "EN",
-    { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A" });
+    { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A",
+      v1: "120", v3: "208", freq: "60",
+      run3: 107.2, run3small: 14.7, p1: 13.4, p3: 36.8 });
   await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
-    { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт", ac1Zero: "111,8 А" });
+    { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт", ac1Zero: "111,8 А",
+      v1: "230", v3: "400", freq: "50",
+      run3: 206.7, run3small: 28.2, p1: 25.7, p3: 70.9 });
   console.log(
     failures
       ? `\n${failures} of ${total} checks FAILED`

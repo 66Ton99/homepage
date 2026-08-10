@@ -122,14 +122,26 @@ mode's own drop formula — which is where DC and three-phase genuinely diverge:
 | 0 AWG | in-cable 60 °C | voltage | max run @3 % | max load |
 |---|---|---|---|---|
 | DC | 112 A | 24 V | 9.8 m | 2.7 kW |
-| AC 1-phase | 112 A | 230 V | 94 m | 26 kW |
-| AC 3-phase | 102 A | 400 V | 207 m | 71 kW |
+| AC 1-phase | 112 A | 120 / 230 V | 49 / 94 m | 13 / 26 kW |
+| AC 3-phase | 102 A | 208 / 400 V | 107 / 207 m | 37 / 71 kW |
 
 The three-phase run comes out *longer* despite the √3, because the current it
 has to hold is lower.
 
-The system voltage follows the mode (24 / 230 / 400 V) unless the reader has
-typed their own, which is never overwritten.
+The system voltage follows the mode unless the reader has typed their own, which
+is never overwritten. Defaults are regional, set per language in `build.py`:
+
+| | DC | 1-phase | 3-phase | frequency |
+|---|---|---|---|---|
+| English | 24 V | 120 V | 208 V | 60 Hz |
+| Ukrainian | 24 V | 230 V | 400 V | 50 Hz |
+
+Both are the standards-current nominals rather than the colloquial older ones —
+120 V per ANSI C84.1 rather than "110", and 230/400 V per IEC 60038 rather than
+"220/380". Each pair is internally consistent, since the three-phase figure is
+√3 times the single-phase one. The prose in each language quotes numbers worked
+out at its own defaults, and the tests carry a regional expectation set for the
+same reason.
 
 **Voltage drop in the calculator:**
 

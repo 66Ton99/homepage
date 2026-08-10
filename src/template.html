@@ -1426,7 +1426,7 @@
                     </div>
                     <div class="field ac-only" hidden>
                       <label for="frequency">{{L_FREQ}}</label>
-                      <input id="frequency" name="frequency" type="number" min="0" max="1000" step="1" value="50" placeholder="50" inputmode="numeric" />
+                      <input id="frequency" name="frequency" type="number" min="0" max="1000" step="1" value="{{DEF_FREQ}}" placeholder="{{DEF_FREQ}}" inputmode="numeric" />
                     </div>
                     <div class="field ac-only" hidden>
                       <label for="powerFactor">{{L_PF}}</label>
@@ -1557,7 +1557,7 @@
 
       const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
       const MODE_KEY = "awg-current-mode";
-      const MODE_VOLTAGE = { dc: 24, ac1: 230, ac3: 400 };
+      const MODE_VOLTAGE = {{MODE_VOLTAGE}};
 
       // Three-phase puts three current-carrying conductors in the cable where DC
       // and single-phase put two, so the same copper has to shed 1.5x the heat
