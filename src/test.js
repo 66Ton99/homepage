@@ -175,6 +175,46 @@ async function runModes(file, label, expect) {
   pick("dc");
   check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.327");
 
+  // ---- conductor material ----
+  const setMat = (v) => {
+    $("material").value = v;
+    $("modeBar").dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+  };
+  pick("dc");
+  setMat("cu");
+  const cuAmps = cellNum("0", "js-b60");
+  const cuOhms = cellNum("0", "js-r");
+  // capture the run under whatever voltage the earlier checks left set, rather
+  // than assuming the default
+  const cuRun = cellNum("0", "js-len");
+  check("copper is the reference", cuAmps.toFixed(1), "112.0");
+
+  setMat("al");
+  // I goes as sqrt(conductivity); 61.2% IACS predicts 0.782, and NEC 310.16
+  // gives 0.774 averaged over 6 AWG to 4/0
+  checkClose("aluminium carries ~78% of copper", cellNum("0", "js-b60") / cuAmps, 0.782, 0.002);
+  checkClose("aluminium resistance is 1/0.612 of copper", cellNum("0", "js-r") / cuOhms, 1 / 0.612, 0.01);
+  check("aluminium shortens the run", cellNum("0", "js-len") < cuRun, true);
+
+  setMat("cusn");
+  checkClose("tinning costs about 2%", cellNum("0", "js-b60") / cuAmps, 0.980, 0.002);
+
+  setMat("ccs");
+  checkClose("copper-clad steel is ~55%", cellNum("0", "js-b60") / cuAmps, 0.548, 0.003);
+
+  setMat("custom");
+  check("custom shows the conductivity box", $("customIacs").hidden, false);
+  $("conductivity").value = "50";
+  $("conductivity").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  checkClose("50% IACS gives 1/sqrt(2) of copper", cellNum("0", "js-b60") / cuAmps, Math.SQRT1_2, 0.003);
+  $("conductivity").value = "5000";
+  $("conductivity").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  check("absurd conductivity is clamped", cellNum("0", "js-b60") / cuAmps < 1.06, true);
+
+  setMat("cu");
+  check("back to copper restores the reference", cellNum("0", "js-b60").toFixed(1), "112.0");
+  check("copper leaves the material out of the URL", dom.window.location.href.includes("mat="), false);
+
   // ---- three loaded conductors derate the in-cable columns ----
   pick("dc");
   $("frequency").value = expect.freq;
@@ -267,6 +307,14 @@ async function runUrl(file, label, expect) {
   check("shared link restores voltage", g2("systemVoltage").value, "400");
   check("shared link restores frequency", g2("frequency").value, "400");
   check("shared link opens the optional section", g2("optionalChecks").open, true);
+
+  const mat = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?mat=al",
+  }).window.document;
+  check("shared link restores the material", mat.getElementById("material").value, "al");
+  check("shared link applies it to the table",
+        mat.querySelector('tr[data-gauge="0"] .js-b60').textContent, expect.alZero);
   check("shared link recalculates", g2("areaResult").textContent.startsWith(expect.area), true);
 
   // a conductor of exactly 0 AWG computes to about -0.0006 and must not be
@@ -287,9 +335,9 @@ async function runUrl(file, label, expect) {
 (async () => {
   await runBasics();
   await runUrl("../site/_pages/awg-to-amps.html", "EN",
-    { path: "/awg-to-amps", area: "21.15", v3: "208" });
+    { path: "/awg-to-amps", area: "21.15", v3: "208", alZero: "87.6 A" });
   await runUrl("../site/_pages/uk-awg-to-amps.html", "UK",
-    { path: "/uk/awg-to-amps", area: "21,15", v3: "400" });
+    { path: "/uk/awg-to-amps", area: "21,15", v3: "400", alZero: "87,6 А" });
   await runModes("../site/_pages/awg-to-amps.html", "EN",
     { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A",
       v1: "120", v3: "208", freq: "60",

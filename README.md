@@ -160,6 +160,50 @@ Reactance is neglected throughout — at these cross-sections and run lengths it
 is below the uncertainty in the resistance, but that assumption breaks on long
 three-phase runs in conduit.
 
+## Conductor material
+
+A second global selector sets the conductor metal. AWG is a geometric size, so
+the cross-section never changes — ampacity, resistance, maximum run and maximum
+load all do.
+
+Everything derives from one number, conductivity on the IACS scale where
+annealed copper is 100 %:
+
+```
+rho   = 0.0175 * 100/iacs          # copper stays exactly where it was
+I/I_Cu = sqrt(iacs/100)            # same geometry, same rise, so I²R is fixed
+```
+
+The square-root law is not a rule of thumb. Against NEC 310.16 the
+aluminium-to-copper ratio averages **0.774** from 6 AWG to 4/0, where
+sqrt(0.612) predicts **0.782** — agreement to about 1 %.
+
+| | % IACS | ampacity |
+|---|---|---|
+| Silver | 105 | ×1.025 |
+| Copper, annealed | 100 | ×1.000 |
+| Copper, silver-plated | 100 | ×1.000 |
+| Copper, tinned | 96 | ×0.980 |
+| Copper, nickel-plated | 95 | ×0.975 |
+| Copper-clad aluminium | 61.5 | ×0.784 |
+| Aluminium 1350 | 61.2 | ×0.782 |
+| Aluminium alloy 8000 | 61 | ×0.781 |
+| Copper-clad steel | 30 | ×0.548 |
+
+Plus a custom % IACS entry, which is the honest way to take a figure straight
+off a datasheet. The plated coppers are approximate — the penalty depends on
+coating thickness relative to strand diameter, and 96 % for tin assumes about a
+micron on a 0.08 mm strand.
+
+Copper is defined as ρ = 0.0175 Ω·mm²/m, which is what the page always used:
+about 1.5 % above the 0.017241 solid-wire IACS reference, the usual allowance
+for the helical lay of a stranded conductor. Selecting copper therefore leaves
+every previously published number untouched.
+
+Everything is quoted at 20 °C. There is no temperature correction of
+resistivity, which would need a conductor temperature rather than the ambient
+the calculator asks for; the materials section says so explicitly.
+
 ## Shareable links
 
 Mode and every calculator input are reflected in the query string, so a
@@ -167,7 +211,7 @@ configuration can be sent to someone else. There is a copy-link button next to
 Calculate.
 
 ```
-/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400
+/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400&mat=al
 ```
 
 Rules that keep this from turning into an SEO problem or a mess:

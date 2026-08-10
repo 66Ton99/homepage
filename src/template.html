@@ -361,6 +361,47 @@
         box-shadow: 12px 12px 0 var(--shadow);
       }
 
+      .modebar-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+      }
+
+      .modebar select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        outline: none;
+        background: rgba(13, 14, 14, 0.72);
+        padding: 7px 10px;
+        color: var(--accent);
+        font-size: 13px;
+      }
+
+      .modebar select:hover,
+      .modebar select:focus {
+        border-color: var(--accent-soft);
+      }
+
+      .custom-iacs {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .custom-iacs input {
+        width: 90px;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        outline: none;
+        background: rgba(13, 14, 14, 0.72);
+        padding: 7px 9px;
+        color: var(--accent);
+        font-size: 13px;
+      }
+
       .modeswitch {
         display: inline-flex;
         border: 1px solid var(--line);
@@ -412,7 +453,7 @@
       }
 
       .modebar-note {
-        flex: 1 1 320px;
+        flex: 1 1 100%;
         margin: 0;
         color: var(--muted);
         font-family: var(--mono);
@@ -1318,9 +1359,10 @@
           </div>
         </section>
 
-        <div class="modebar" id="modeBar" role="radiogroup" aria-labelledby="modeBarLabel">
+        <div class="modebar" id="modeBar">
+          <div class="modebar-group" role="radiogroup" aria-labelledby="modeBarLabel">
           <span class="section-kicker" id="modeBarLabel">{{MODE_LEGEND}}</span>
-          <div class="modeswitch">
+          <div class="modeswitch" id="modeSwitch">
             <label>
               <input type="radio" name="currentMode" value="dc" checked />
               <span>{{MODE_DC}}</span>
@@ -1334,7 +1376,19 @@
               <span>{{MODE_AC3}}</span>
             </label>
           </div>
+          <div class="modebar-group">
+            <label class="section-kicker" for="material">{{MATERIAL_LABEL}}</label>
+            <select id="material" name="material">
+{{MATERIAL_OPTIONS}}
+            </select>
+            <span class="custom-iacs" id="customIacs" hidden>
+              <label class="section-kicker" for="conductivity">{{IACS_LABEL}}</label>
+              <input id="conductivity" name="conductivity" type="number" min="5" max="110" step="0.1" value="100" inputmode="decimal" />
+            </span>
+          </div>
+          </div>
           <p class="modebar-note" id="modeNote">{{MODE_NOTE_DC}}</p>
+          <p class="modebar-note" id="materialNote">{{MATERIAL_NOTE_CU}}</p>
         </div>
 
         <section class="layout" aria-label="{{LAYOUT_LABEL}}">
@@ -1555,7 +1609,25 @@
         "41-plus": 0.35
       };
 
-      const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
+      // Annealed copper, stranded, at 20 °C. About 1.5% above the 0.017241
+      // solid-wire IACS reference — the usual allowance for the strand lay.
+      const COPPER_RESISTIVITY = 0.0175;
+      const MATERIALS = {{MATERIALS}};
+
+      // Same geometry, same permitted temperature rise, so I²R is fixed and the
+      // current goes as the inverse square root of resistivity.
+      function conductor() {
+        const key = $("material").value;
+        const iacs = key === "custom"
+          ? Math.min(110, Math.max(5, readOptionalNumber("conductivity") ?? 100))
+          : MATERIALS[key].iacs;
+        return {
+          key,
+          iacs,
+          resistivity: COPPER_RESISTIVITY * (100 / iacs),
+          ampacityFactor: Math.sqrt(iacs / 100)
+        };
+      }
       const MODE_KEY = "awg-current-mode";
       const MODE_VOLTAGE = {{MODE_VOLTAGE}};
 
@@ -1629,9 +1701,9 @@
       // conductors lying against each other.
       const PROXIMITY_SPACING = 0.64;
 
-      function skinEffect(area, frequency) {
+      function skinEffect(area, frequency, resistivity) {
         if (!(area > 0) || !(frequency > 0)) return { ys: 0, yp: 0, total: 0, valid: true };
-        const rdc = COPPER_RESISTIVITY / area;
+        const rdc = resistivity / area;
         const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
         const xs4 = xs2 * xs2;
         const ys = xs4 / (192 + 0.8 * xs4);
@@ -1691,7 +1763,7 @@
       // length uses the mode's own drop formula, so it is where the modes differ
       // most — a 0 AWG run is 9.8 m on 24 V DC and 189 m on 400 V three-phase.
       function renderTableForMode(context) {
-        const { mode, frequency, voltage, powerFactor } = context;
+        const { mode, frequency, voltage, powerFactor, metal } = context;
         const alternating = mode !== "dc";
         const threePhase = mode === "ac3";
         const runFactor = threePhase ? Math.sqrt(3) : 2;
@@ -1701,9 +1773,9 @@
           const tr = tableBody.querySelector('[data-gauge="' + CSS.escape(row.gauge) + '"]');
           if (!tr) return;
 
-          const skin = alternating ? skinEffect(row.area, frequency) : { total: 0 };
-          const derate = 1 / Math.sqrt(1 + skin.total);
-          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.total);
+          const skin = alternating ? skinEffect(row.area, frequency, metal.resistivity) : { total: 0 };
+          const derate = (1 / Math.sqrt(1 + skin.total)) * metal.ampacityFactor;
+          const resistance = (metal.resistivity / row.area) * (1 + skin.total);
 
           const set = (selector, text) => {
             const cell = tr.querySelector(selector);
@@ -1822,9 +1894,10 @@
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
         const alternating = mode !== "dc";
-        const skin = alternating ? skinEffect(area, frequency) : { total: 0, xs: 0, valid: true };
-        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.total);
-        const skinDerate = 1 / Math.sqrt(1 + skin.total);
+        const metal = conductor();
+        const skin = alternating ? skinEffect(area, frequency, metal.resistivity) : { total: 0, xs: 0, valid: true };
+        const copperResistance = (metal.resistivity / area) * (1 + skin.total);
+        const skinDerate = (1 / Math.sqrt(1 + skin.total)) * metal.ampacityFactor;
 
         result60.ampacity *= skinDerate;
         result200.ampacity *= skinDerate;
@@ -1913,7 +1986,8 @@
           mode,
           frequency,
           voltage: voltage ?? 0,
-          powerFactor
+          powerFactor,
+          metal
         });
         selectTableRow(row.gauge);
       }
@@ -1932,6 +2006,8 @@
         const params = new URLSearchParams();
         const mode = currentMode();
         if (mode !== "dc") params.set("mode", mode);
+        if ($("material").value !== "cu") params.set("mat", $("material").value);
+        if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         Object.keys(FIELD_PARAM).forEach((id) => {
           // frequency and power factor mean nothing on DC, so leave them out
           if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
@@ -1966,6 +2042,17 @@
             input.checked = true;
             restored = true;
           }
+        }
+
+        const material = params.get("mat");
+        if (material && $("material").querySelector('[value="' + CSS.escape(material) + '"]')) {
+          $("material").value = material;
+          restored = true;
+        }
+        const iacs = params.get("iacs");
+        if (iacs !== null) {
+          $("conductivity").value = iacs;
+          restored = true;
         }
 
         let optionalTouched = false;
@@ -2035,6 +2122,15 @@
         });
         $("voltageLabel").textContent = mode === "ac3" ? I18N.labelLineVoltage : I18N.labelSystemVoltage;
         $("modeNote").innerHTML = I18N.modeNote[mode];
+
+        // the custom conductivity box only makes sense for the custom entry
+        const metal = conductor();
+        $("customIacs").hidden = metal.key !== "custom";
+        $("materialNote").innerHTML = I18N.materialNote
+          .replace("{name}", metal.key === "custom" ? I18N.customMaterial : MATERIALS[metal.key].name)
+          .replace("{iacs}", formatNumber(metal.iacs, 1))
+          .replace("{rho}", formatNumber(metal.resistivity, 5))
+          .replace("{factor}", formatNumber(metal.ampacityFactor, 3));
         $("tableModeNote").innerHTML = I18N.tableModeNote[mode];
         try {
           localStorage.setItem(MODE_KEY, mode);
@@ -2081,6 +2177,7 @@
       $("resetButton").addEventListener("click", resetForm);
       $("modeBar").addEventListener("change", applyMode);
       $("copyLink").addEventListener("click", copyLink);
+      $("conductivity").addEventListener("input", applyMode);
       captureDefaults();
       syncOptionalResults();
       if (!readUrl()) restoreMode();

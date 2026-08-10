@@ -189,6 +189,13 @@
           "@type": "PropertyValue",
           "name": "Maximum transmissible load",
           "unitText": "W"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Conductor conductivity",
+          "unitText": "% IACS",
+          "minValue": 30,
+          "maxValue": 105
         }
       ]
     },
@@ -254,6 +261,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Пучок затримує тепло, тож кожна жила в групі витримує менше. Типові коефіцієнти: 80&nbsp;% для 4–6 струмопровідних жил, 70&nbsp;% для 7–9, 50&nbsp;% для 10–20, 45&nbsp;% для 21–30, 40&nbsp;% для 31–40 і 35&nbsp;% далі. Температура довкілля знижує струм додатково, і два коефіцієнти перемножуються. Жили, що ніколи не працюють одночасно, а також нейтралі у збалансованому колі, зазвичай до групи не зараховуються."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Чи можна користуватися цією таблицею для алюмінієвого дроту?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Так — перемкніть матеріал жили, і всі колонки перерахуються. Алюміній із провідністю 61,2&nbsp;% IACS несе близько 78&nbsp;% струму міді того самого перерізу, бо допустимий струм змінюється як корінь із провідності. Тому щоб зрівнятися з мідною жилою, потрібно у 1,64 раза більше площі — приблизно два кроки AWG угору. Арифметика тут найпростіше: алюміній тече під тиском затиску, окислюється на повітрі й розширюється від нагріву сильніше за мідь, тож потребує клем, сертифікованих для алюмінію, антиоксидної пасти й динамометричного ключа. Мідно-алюмінієвий провід поводиться електрично так само, але з'єднується як мідь, а мідно-сталевий із 30&nbsp;% IACS призначений для міцності та високих частот, а не для потужності."
           }
         },
         {
@@ -594,6 +609,47 @@
         box-shadow: 12px 12px 0 var(--shadow);
       }
 
+      .modebar-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+      }
+
+      .modebar select {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        outline: none;
+        background: rgba(13, 14, 14, 0.72);
+        padding: 7px 10px;
+        color: var(--accent);
+        font-size: 13px;
+      }
+
+      .modebar select:hover,
+      .modebar select:focus {
+        border-color: var(--accent-soft);
+      }
+
+      .custom-iacs {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .custom-iacs input {
+        width: 90px;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        outline: none;
+        background: rgba(13, 14, 14, 0.72);
+        padding: 7px 9px;
+        color: var(--accent);
+        font-size: 13px;
+      }
+
       .modeswitch {
         display: inline-flex;
         border: 1px solid var(--line);
@@ -645,7 +701,7 @@
       }
 
       .modebar-note {
-        flex: 1 1 320px;
+        flex: 1 1 100%;
         margin: 0;
         color: var(--muted);
         font-family: var(--mono);
@@ -1551,9 +1607,10 @@
           </div>
         </section>
 
-        <div class="modebar" id="modeBar" role="radiogroup" aria-labelledby="modeBarLabel">
+        <div class="modebar" id="modeBar">
+          <div class="modebar-group" role="radiogroup" aria-labelledby="modeBarLabel">
           <span class="section-kicker" id="modeBarLabel">Рід струму</span>
-          <div class="modeswitch">
+          <div class="modeswitch" id="modeSwitch">
             <label>
               <input type="radio" name="currentMode" value="dc" checked />
               <span>Постійний</span>
@@ -1567,7 +1624,28 @@
               <span>Змінний 3ф</span>
             </label>
           </div>
+          <div class="modebar-group">
+            <label class="section-kicker" for="material">Матеріал жили</label>
+            <select id="material" name="material">
+                <option value="cu">Мідь, відпалена · 100% IACS</option>
+                <option value="cusn">Мідь, луджена · 96% IACS</option>
+                <option value="cuag">Мідь, посріблена · 100% IACS</option>
+                <option value="cuni">Мідь, нікельована · 95% IACS</option>
+                <option value="al">Алюміній 1350 · 61.2% IACS</option>
+                <option value="al8000">Алюмінієвий сплав 8000 · 61% IACS</option>
+                <option value="cca">Мідно-алюмінієвий (CCA) · 61.5% IACS</option>
+                <option value="ccs">Мідно-сталевий (CCS) · 30% IACS</option>
+                <option value="ag">Срібло · 105% IACS</option>
+                <option value="custom">Власна провідність</option>
+            </select>
+            <span class="custom-iacs" id="customIacs" hidden>
+              <label class="section-kicker" for="conductivity">% IACS</label>
+              <input id="conductivity" name="conductivity" type="number" min="5" max="110" step="0.1" value="100" inputmode="decimal" />
+            </span>
+          </div>
+          </div>
           <p class="modebar-note" id="modeNote"><strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.</p>
+          <p class="modebar-note" id="materialNote"><strong>Мідь, відпалена.</strong> 100% IACS, ρ = 0,0175 Ом·мм²/м, струм ×1,000.</p>
         </div>
 
         <section class="layout" aria-label="Таблиця AWG і калькулятор перерізу">
@@ -2086,6 +2164,91 @@
               </p>
             </section>
 
+            <section id="materials">
+              <h2>Матеріали жили</h2>
+              <p>
+                AWG — це геометричний розмір, тож переріз у таблиці однаковий для будь-якого металу.
+                Змінюється те, який струм цей переріз витримає і скільки напруги на ньому впаде. Обидва
+                випливають з одного числа — питомої провідності за шкалою IACS, де відпалена мідь дорівнює
+                100&nbsp;%.
+              </p>
+              <p class="formula"><span>Струм відносно міді</span>I / I<sub>Cu</sub> = √(σ / σ<sub>Cu</sub>)<span
+                style="margin-top:10px">Опір відносно міді</span>R / R<sub>Cu</sub> = σ<sub>Cu</sub> / σ</p>
+              <p>
+                Однакова геометрія й однаковий допустимий перегрів означають, що <em>I</em>²<em>R</em>
+                фіксоване, тож струм змінюється як обернений корінь із питомого опору. Це не емпіричне
+                правило: за NEC&nbsp;310.16 відношення алюмінію до міді в середньому становить
+                <strong>0,774</strong> від 6&nbsp;AWG до 4/0, тоді як √0,612 передбачає
+                <strong>0,782</strong>.
+              </p>
+
+              <h3>Що пропонує селектор</h3>
+              <dl class="conv-list">
+                <div><dt>Мідь</dt><dd>100% IACS · ×1,000</dd></div>
+                <div><dt>Срібло</dt><dd>105% IACS · ×1,025</dd></div>
+                <div><dt>Луджена мідь</dt><dd>96% IACS · ×0,980</dd></div>
+                <div><dt>Нікельована</dt><dd>95% IACS · ×0,975</dd></div>
+                <div><dt>Алюміній 1350</dt><dd>61,2% IACS · ×0,782</dd></div>
+                <div><dt>Сплав 8000</dt><dd>61% IACS · ×0,781</dd></div>
+                <div><dt>Мідно-алюмінієвий</dt><dd>61,5% IACS · ×0,784</dd></div>
+                <div><dt>Мідно-сталевий</dt><dd>30% IACS · ×0,548</dd></div>
+              </dl>
+              <p>
+                Усе інше вводиться як власний відсоток IACS — це чесний спосіб врахувати даташит, який подає
+                власну цифру.
+              </p>
+
+              <h3>Покриття міді</h3>
+              <p>
+                Покриття потрібне заради середовища, а не заради провідності. Олово захищає від корозії й
+                зберігає змочуваність припоєм; нікель витримує понад 200&nbsp;°C, де олово давно розплавилось
+                би; срібло — для високих частот, де струм іде поверхнею. Втрата невелика й залежить від
+                товщини шару відносно жилки: на жилці 0,08&nbsp;мм мікрон олова займає близько 5&nbsp;% площі
+                й проводить на рівні 15&nbsp;% від міді — звідси й береться 96&nbsp;%. На товщих жилках менше.
+                Срібне покриття на опорі постійному струму практично не позначається, бо основа лишається
+                мідною.
+              </p>
+
+              <h3>Алюміній і чого він коштує</h3>
+              <p>
+                Алюміній несе близько 78&nbsp;% струму міді того самого розміру, тож щоб зрівнятися з мідною
+                жилою, потрібно <strong>у 1,64 раза більше площі — приблизно два кроки AWG угору</strong>. На
+                довгих трасах він однаково вигідний: за однакової провідності важить близько третини й коштує
+                значно менше.
+              </p>
+              <p>
+                Проблема ніколи не в металі — вона в з'єднанні. Алюміній тече під тиском затиску, тож клема,
+                затягнута торік, сьогодні може бути слабкою; він миттєво вкривається ізолювальним оксидом на
+                повітрі; і розширюється від нагріву приблизно на 40&nbsp;% сильніше за мідь, розхитуючи себе
+                кожним циклом нагрівання. Алюмінієва проводка в житлових колах заробила свою репутацію в
+                1960–70-х саме через це. Використовуйте клеми, сертифіковані для алюмінію, наносьте
+                антиоксидну пасту, затягуйте моментом, зазначеним на з'єднувачі, і ніколи не з'єднуйте голий
+                алюміній з голою міддю у вологому місці — гальванічна пара з'їдає алюміній.
+              </p>
+              <p>
+                Тонкожильний силіконовий дріт, про який ця сторінка здебільшого й розповідає, з алюмінію не
+                роблять: він не витримує циклів згинання.
+              </p>
+
+              <h3>Біметалеві жили</h3>
+              <p>
+                Мідно-алюмінієвий провід (CCA) — це алюміній у мідній оболонці, зазвичай 10&nbsp;% за
+                об'ємом. Він з'єднується як мідь, а проводить як алюміній, і це прийнятний компроміс — біда в
+                тому, що його часто продають <em>як</em> мідь. Зачистіть зразок: осердя буде сріблястим.
+                Мідно-сталевий (CCS) — зовсім інша річ, 30&nbsp;% IACS, зроблений заради механічної міцності
+                та поверхневої провідності на високих частотах, а не заради потужності; магніт визначає його
+                миттєво.
+              </p>
+
+              <h3>Одне застереження щодо температури</h3>
+              <p>
+                Усі числа тут наведено для 20&nbsp;°C. Жила, що реально працює за 60&nbsp;°C, має приблизно на
+                16&nbsp;% більший опір, а температурний коефіцієнт алюмінію (0,00403/K) трохи гірший за мідний
+                (0,00393/K). Для падіння напруги в гарячому колі додайте цей запас самостійно — калькулятор
+                цього не робить, бо для цього потрібна температура жили, а не довкілля.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG у мм² — коротко</h2>
               <p>
@@ -2145,6 +2308,10 @@
                 <div class="faq-a"><p>Пучок затримує тепло, тож кожна жила в групі витримує менше. Типові коефіцієнти: 80&nbsp;% для 4–6 струмопровідних жил, 70&nbsp;% для 7–9, 50&nbsp;% для 10–20, 45&nbsp;% для 21–30, 40&nbsp;% для 31–40 і 35&nbsp;% далі. Температура довкілля знижує струм додатково, і два коефіцієнти перемножуються. Жили, що ніколи не працюють одночасно, а також нейтралі у збалансованому колі, зазвичай до групи не зараховуються.</p></div>
               </details>
               <details class="faq-item">
+                <summary class="faq-q"><h3>Чи можна користуватися цією таблицею для алюмінієвого дроту?</h3></summary>
+                <div class="faq-a"><p>Так — перемкніть матеріал жили, і всі колонки перерахуються. Алюміній із провідністю 61,2&nbsp;% IACS несе близько 78&nbsp;% струму міді того самого перерізу, бо допустимий струм змінюється як корінь із провідності. Тому щоб зрівнятися з мідною жилою, потрібно у 1,64 раза більше площі — приблизно два кроки AWG угору. Арифметика тут найпростіше: алюміній тече під тиском затиску, окислюється на повітрі й розширюється від нагріву сильніше за мідь, тож потребує клем, сертифікованих для алюмінію, антиоксидної пасти й динамометричного ключа. Мідно-алюмінієвий провід поводиться електрично так само, але з'єднується як мідь, а мідно-сталевий із 30&nbsp;% IACS призначений для міцності та високих частот, а не для потужності.</p></div>
+              </details>
+              <details class="faq-item">
                 <summary class="faq-q"><h3>Чи змінюється допустимий струм між постійним і змінним струмом?</h3></summary>
                 <div class="faq-a"><p>На мережевій частоті — практично ні. Змінний струм витісняється до поверхні жили, але глибина скін-шару в міді становить близько 9,4&nbsp;мм на 50&nbsp;Гц і 8,5&nbsp;мм на 60&nbsp;Гц, тоді як жила 0&nbsp;AWG має радіус лише 4,1&nbsp;мм. За IEC&nbsp;60287 приріст опору виходить 0,08&nbsp;% для 0&nbsp;AWG і менше за 0,01&nbsp;% для всього, тоншого за 4&nbsp;AWG, тож та сама таблиця слугує і для постійного, і для однофазного, і для трифазного струму. Рід струму справді змінює падіння напруги: дві жили туди й назад для постійного та однофазного, √3 між лініями для трифазного, плюс cos&nbsp;φ. Скін-ефект варто рахувати лише від сотень герців — тому калькулятор і питає частоту.</p></div>
               </details>
@@ -2184,6 +2351,7 @@
               <li><a href="#calculator">Калькулятор перерізу</a></li>
               <li><a href="#how-to-read">Як читати таблицю</a></li>
               <li><a href="#how-it-works">Як працює калькулятор</a></li>
+              <li><a href="#materials">Матеріали жили</a></li>
               <li><a href="#conversions">AWG у мм²</a></li>
               <li><a href="#faq">Часті запитання</a></li>
               <li><a href="#source">Подивитися код</a></li>
@@ -2200,7 +2368,7 @@
     </div>
 
     <script>
-      const I18N = {"uArea": "мм²", "copied": "Скопійовано", "uHz": "Гц", "unitResistDc": "мОм/м · пост.", "modeTag": {"dc": "пост.", "ac1": "1ф", "ac3": "3ф"}, "unitResistAc": "мОм/м · {f} Гц", "unitLength": "м @3% · {u} В {m}", "unitPower": "на {u} В {m}", "uKilowatt": "кВт", "labelSystemVoltage": "Напруга системи / В", "labelLineVoltage": "Лінійна напруга / В", "modeShort": {"dc": "постійний", "ac1": "змінний 1ф", "ac3": "змінний 3ф"}, "modeNote": {"dc": "<strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.", "ac1": "<strong>Однофазний змінний.</strong> Жили дві, тож падіння все ще рахується туди й назад, але з поправкою на cos φ. Допустимий струм такий самий, як для постійного: на 50–60 Гц скін-ефект менший за 0,1 % навіть для 0 AWG.", "ac3": "<strong>Трифазний змінний.</strong> Падіння дорівнює √3·I·R·L між лініями на довжині в один бік, а три фазні жили — це рівно випадок «≤3 жили» із таблиці."}, "tableModeNote": {"dc": "Ці значення наведено для постійного струму.", "ac1": "Ці значення без змін діють і для однофазного змінного струму 50–60 Гц: глибина скін-шару в міді — близько 9,4 мм на 50 Гц, що набагато більше за радіус 4,1 мм навіть у жили 0 AWG, тож приріст опору лишається меншим за 0,1 %.", "ac3": "Колонки «у кабелі» знижено на коефіцієнт 0,915 за IEC 60364-5-52: три струмопровідні жили гріють кабель сильніше за дві. Колонки вільного повітря описують одну жилу і не змінюються."}, "msgSkinRange": "Понад приблизно 1 кГц на найбільших калібрах формула скін-ефекту виходить за межі перевіреного діапазону, тож опір на ЗС вважайте орієнтовним.", "uAmp": "А", "uVolt": "В", "uWatt": "Вт", "below30": "менше 30 AWG", "below0": "більше 0 AWG", "instFree": "одна жила / вільне повітря", "instBundle": "до 3 жил у кабелі", "conductorSuffix": "°C провідник", "ambientDefault": "довкілля 30°C (типово)", "ambientSuffix": "°C довкілля", "noMargin": "Немає запасу", "stDanger": "Потрібен тепловий запас", "stReady": "Струм розраховано", "stAboveBoth": "Вище обох режимів", "stAbove60": "Вище режиму 60°C", "stWithin": "У межах обох режимів", "msgDanger": "Задана температура довкілля виходить за межі одного з довідкових діапазонів. Перегляньте обидва температурні результати, перш ніж обирати нижчий тепловий режим або іншу кабельну систему.", "msgReady": "Допустимий струм розраховано. Додайте струм навантаження, напругу системи та довжину в один бік, щоб перевірити запас і падіння напруги.", "msgAboveBoth": "<strong>{i} А</strong> перевищує і режим 60°C (<strong>{a60} А</strong>), і режим 200°C (<strong>{a200} А</strong>). Збільште переріз, покращте охолодження або зменште навантаження.", "msgAbove60": "<strong>{i} А</strong> перевищує консервативний режим 60°C (<strong>{a60} А</strong>), але вкладається в межу 200°C (<strong>{a200} А</strong>). Перевірте конкретний дріт, клеми, запобіжник, корпус і місцеві норми перед застосуванням.", "msgWithin": "<strong>{i} А</strong> вкладається в обидва температурні режими. Значення 60°C залишається консервативною щоденною базою; перед остаточним застосуванням перевірте клеми, запобіжник, корпус і обмеження виробника."};
+      const I18N = {"uArea": "мм²", "copied": "Скопійовано", "customMaterial": "Власна", "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ом·мм²/м, струм ×{factor} відносно відпаленої міді.", "uHz": "Гц", "unitResistDc": "мОм/м · пост.", "modeTag": {"dc": "пост.", "ac1": "1ф", "ac3": "3ф"}, "unitResistAc": "мОм/м · {f} Гц", "unitLength": "м @3% · {u} В {m}", "unitPower": "на {u} В {m}", "uKilowatt": "кВт", "labelSystemVoltage": "Напруга системи / В", "labelLineVoltage": "Лінійна напруга / В", "modeShort": {"dc": "постійний", "ac1": "змінний 1ф", "ac3": "змінний 3ф"}, "modeNote": {"dc": "<strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.", "ac1": "<strong>Однофазний змінний.</strong> Жили дві, тож падіння все ще рахується туди й назад, але з поправкою на cos φ. Допустимий струм такий самий, як для постійного: на 50–60 Гц скін-ефект менший за 0,1 % навіть для 0 AWG.", "ac3": "<strong>Трифазний змінний.</strong> Падіння дорівнює √3·I·R·L між лініями на довжині в один бік, а три фазні жили — це рівно випадок «≤3 жили» із таблиці."}, "tableModeNote": {"dc": "Ці значення наведено для постійного струму.", "ac1": "Ці значення без змін діють і для однофазного змінного струму 50–60 Гц: глибина скін-шару в міді — близько 9,4 мм на 50 Гц, що набагато більше за радіус 4,1 мм навіть у жили 0 AWG, тож приріст опору лишається меншим за 0,1 %.", "ac3": "Колонки «у кабелі» знижено на коефіцієнт 0,915 за IEC 60364-5-52: три струмопровідні жили гріють кабель сильніше за дві. Колонки вільного повітря описують одну жилу і не змінюються."}, "msgSkinRange": "Понад приблизно 1 кГц на найбільших калібрах формула скін-ефекту виходить за межі перевіреного діапазону, тож опір на ЗС вважайте орієнтовним.", "uAmp": "А", "uVolt": "В", "uWatt": "Вт", "below30": "менше 30 AWG", "below0": "більше 0 AWG", "instFree": "одна жила / вільне повітря", "instBundle": "до 3 жил у кабелі", "conductorSuffix": "°C провідник", "ambientDefault": "довкілля 30°C (типово)", "ambientSuffix": "°C довкілля", "noMargin": "Немає запасу", "stDanger": "Потрібен тепловий запас", "stReady": "Струм розраховано", "stAboveBoth": "Вище обох режимів", "stAbove60": "Вище режиму 60°C", "stWithin": "У межах обох режимів", "msgDanger": "Задана температура довкілля виходить за межі одного з довідкових діапазонів. Перегляньте обидва температурні результати, перш ніж обирати нижчий тепловий режим або іншу кабельну систему.", "msgReady": "Допустимий струм розраховано. Додайте струм навантаження, напругу системи та довжину в один бік, щоб перевірити запас і падіння напруги.", "msgAboveBoth": "<strong>{i} А</strong> перевищує і режим 60°C (<strong>{a60} А</strong>), і режим 200°C (<strong>{a200} А</strong>). Збільште переріз, покращте охолодження або зменште навантаження.", "msgAbove60": "<strong>{i} А</strong> перевищує консервативний режим 60°C (<strong>{a60} А</strong>), але вкладається в межу 200°C (<strong>{a200} А</strong>). Перевірте конкретний дріт, клеми, запобіжник, корпус і місцеві норми перед застосуванням.", "msgWithin": "<strong>{i} А</strong> вкладається в обидва температурні режими. Значення 60°C залишається консервативною щоденною базою; перед остаточним застосуванням перевірте клеми, запобіжник, корпус і обмеження виробника."};
       const LOCALE = "uk-UA";
 
       const wireRows = [
@@ -2242,7 +2410,25 @@
         "41-plus": 0.35
       };
 
-      const COPPER_RESISTIVITY = 0.0175; // Ω·mm²/m at 20 °C
+      // Annealed copper, stranded, at 20 °C. About 1.5% above the 0.017241
+      // solid-wire IACS reference — the usual allowance for the strand lay.
+      const COPPER_RESISTIVITY = 0.0175;
+      const MATERIALS = {"cu": {"iacs": 100.0, "name": "Мідь, відпалена"}, "cusn": {"iacs": 96.0, "name": "Мідь, луджена"}, "cuag": {"iacs": 100.0, "name": "Мідь, посріблена"}, "cuni": {"iacs": 95.0, "name": "Мідь, нікельована"}, "al": {"iacs": 61.2, "name": "Алюміній 1350"}, "al8000": {"iacs": 61.0, "name": "Алюмінієвий сплав 8000"}, "cca": {"iacs": 61.5, "name": "Мідно-алюмінієвий (CCA)"}, "ccs": {"iacs": 30.0, "name": "Мідно-сталевий (CCS)"}, "ag": {"iacs": 105.0, "name": "Срібло"}};
+
+      // Same geometry, same permitted temperature rise, so I²R is fixed and the
+      // current goes as the inverse square root of resistivity.
+      function conductor() {
+        const key = $("material").value;
+        const iacs = key === "custom"
+          ? Math.min(110, Math.max(5, readOptionalNumber("conductivity") ?? 100))
+          : MATERIALS[key].iacs;
+        return {
+          key,
+          iacs,
+          resistivity: COPPER_RESISTIVITY * (100 / iacs),
+          ampacityFactor: Math.sqrt(iacs / 100)
+        };
+      }
       const MODE_KEY = "awg-current-mode";
       const MODE_VOLTAGE = { dc: 24, ac1: 230, ac3: 400 };
 
@@ -2316,9 +2502,9 @@
       // conductors lying against each other.
       const PROXIMITY_SPACING = 0.64;
 
-      function skinEffect(area, frequency) {
+      function skinEffect(area, frequency, resistivity) {
         if (!(area > 0) || !(frequency > 0)) return { ys: 0, yp: 0, total: 0, valid: true };
-        const rdc = COPPER_RESISTIVITY / area;
+        const rdc = resistivity / area;
         const xs2 = ((8 * Math.PI * frequency) / rdc) * 1e-7;
         const xs4 = xs2 * xs2;
         const ys = xs4 / (192 + 0.8 * xs4);
@@ -2378,7 +2564,7 @@
       // length uses the mode's own drop formula, so it is where the modes differ
       // most — a 0 AWG run is 9.8 m on 24 V DC and 189 m on 400 V three-phase.
       function renderTableForMode(context) {
-        const { mode, frequency, voltage, powerFactor } = context;
+        const { mode, frequency, voltage, powerFactor, metal } = context;
         const alternating = mode !== "dc";
         const threePhase = mode === "ac3";
         const runFactor = threePhase ? Math.sqrt(3) : 2;
@@ -2388,9 +2574,9 @@
           const tr = tableBody.querySelector('[data-gauge="' + CSS.escape(row.gauge) + '"]');
           if (!tr) return;
 
-          const skin = alternating ? skinEffect(row.area, frequency) : { total: 0 };
-          const derate = 1 / Math.sqrt(1 + skin.total);
-          const resistance = (COPPER_RESISTIVITY / row.area) * (1 + skin.total);
+          const skin = alternating ? skinEffect(row.area, frequency, metal.resistivity) : { total: 0 };
+          const derate = (1 / Math.sqrt(1 + skin.total)) * metal.ampacityFactor;
+          const resistance = (metal.resistivity / row.area) * (1 + skin.total);
 
           const set = (selector, text) => {
             const cell = tr.querySelector(selector);
@@ -2509,9 +2695,10 @@
         // under 0.1% even for 0 AWG, so ampacity barely moves; it only becomes
         // visible in the hundreds of hertz.
         const alternating = mode !== "dc";
-        const skin = alternating ? skinEffect(area, frequency) : { total: 0, xs: 0, valid: true };
-        const copperResistance = (COPPER_RESISTIVITY / area) * (1 + skin.total);
-        const skinDerate = 1 / Math.sqrt(1 + skin.total);
+        const metal = conductor();
+        const skin = alternating ? skinEffect(area, frequency, metal.resistivity) : { total: 0, xs: 0, valid: true };
+        const copperResistance = (metal.resistivity / area) * (1 + skin.total);
+        const skinDerate = (1 / Math.sqrt(1 + skin.total)) * metal.ampacityFactor;
 
         result60.ampacity *= skinDerate;
         result200.ampacity *= skinDerate;
@@ -2600,7 +2787,8 @@
           mode,
           frequency,
           voltage: voltage ?? 0,
-          powerFactor
+          powerFactor,
+          metal
         });
         selectTableRow(row.gauge);
       }
@@ -2619,6 +2807,8 @@
         const params = new URLSearchParams();
         const mode = currentMode();
         if (mode !== "dc") params.set("mode", mode);
+        if ($("material").value !== "cu") params.set("mat", $("material").value);
+        if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         Object.keys(FIELD_PARAM).forEach((id) => {
           // frequency and power factor mean nothing on DC, so leave them out
           if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
@@ -2653,6 +2843,17 @@
             input.checked = true;
             restored = true;
           }
+        }
+
+        const material = params.get("mat");
+        if (material && $("material").querySelector('[value="' + CSS.escape(material) + '"]')) {
+          $("material").value = material;
+          restored = true;
+        }
+        const iacs = params.get("iacs");
+        if (iacs !== null) {
+          $("conductivity").value = iacs;
+          restored = true;
         }
 
         let optionalTouched = false;
@@ -2722,6 +2923,15 @@
         });
         $("voltageLabel").textContent = mode === "ac3" ? I18N.labelLineVoltage : I18N.labelSystemVoltage;
         $("modeNote").innerHTML = I18N.modeNote[mode];
+
+        // the custom conductivity box only makes sense for the custom entry
+        const metal = conductor();
+        $("customIacs").hidden = metal.key !== "custom";
+        $("materialNote").innerHTML = I18N.materialNote
+          .replace("{name}", metal.key === "custom" ? I18N.customMaterial : MATERIALS[metal.key].name)
+          .replace("{iacs}", formatNumber(metal.iacs, 1))
+          .replace("{rho}", formatNumber(metal.resistivity, 5))
+          .replace("{factor}", formatNumber(metal.ampacityFactor, 3));
         $("tableModeNote").innerHTML = I18N.tableModeNote[mode];
         try {
           localStorage.setItem(MODE_KEY, mode);
@@ -2768,6 +2978,7 @@
       $("resetButton").addEventListener("click", resetForm);
       $("modeBar").addEventListener("change", applyMode);
       $("copyLink").addEventListener("click", copyLink);
+      $("conductivity").addEventListener("input", applyMode);
       captureDefaults();
       syncOptionalResults();
       if (!readUrl()) restoreMode();

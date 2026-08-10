@@ -34,6 +34,54 @@ ROWS = [
     ("0", 53.49, 112, 167, 224, 348),
 ]
 
+
+# Conductor materials, by conductivity on the IACS scale (annealed copper = 100%).
+#
+# Resistivity is derived as COPPER_RESISTIVITY x 100/iacs, which keeps copper at
+# exactly the 0.0175 the page has always used — about 1.5% above the 0.017241
+# solid-wire IACS reference, the usual allowance for the helical lay of a
+# stranded conductor.
+#
+# Ampacity scales as sqrt(iacs/100): identical geometry and an identical
+# permitted temperature rise mean I^2*R is fixed, so current goes as the inverse
+# square root of resistivity. Checked against NEC 310.16, where the aluminium to
+# copper ratio averages 0.774 from 6 AWG to 4/0 against sqrt(0.612) = 0.782
+# predicted — agreement to about 1%.
+#
+# The plated coppers are approximate: the figure depends on coating thickness
+# and strand diameter. Tin at 96% assumes a ~1 um layer on a 0.08 mm strand,
+# where tin occupies about 5% of the area and conducts at 15% of copper.
+MATERIALS = [
+    ("cu",     100.0, "Copper, annealed",      "Мідь, відпалена"),
+    ("cusn",    96.0, "Copper, tinned",        "Мідь, луджена"),
+    ("cuag",   100.0, "Copper, silver-plated", "Мідь, посріблена"),
+    ("cuni",    95.0, "Copper, nickel-plated", "Мідь, нікельована"),
+    ("al",      61.2, "Aluminium 1350",        "Алюміній 1350"),
+    ("al8000",  61.0, "Aluminium alloy 8000",  "Алюмінієвий сплав 8000"),
+    ("cca",     61.5, "Copper-clad aluminium", "Мідно-алюмінієвий (CCA)"),
+    ("ccs",     30.0, "Copper-clad steel",     "Мідно-сталевий (CCS)"),
+    ("ag",     105.0, "Silver",                "Срібло"),
+]
+
+
+def material_json(lang):
+    data = {
+        key: {"iacs": iacs, "name": (en if lang == "en" else uk)}
+        for key, iacs, en, uk in MATERIALS
+    }
+    return json.dumps(data, ensure_ascii=False)
+
+
+def material_options(lang):
+    custom = "Custom conductivity" if lang == "en" else "Власна провідність"
+    out = [
+        f'                <option value="{key}">{(en if lang == "en" else uk)} · {iacs:g}% IACS</option>'
+        for key, iacs, en, uk in MATERIALS
+    ]
+    out.append(f'                <option value="custom">{custom}</option>')
+    return "\n".join(out)
+
+
 INSTALL_KEYS = ["bundle", "free", "4-6", "7-9", "10-20", "21-30", "31-40", "41-plus"]
 
 
@@ -223,6 +271,17 @@ EN_FAQ = [
         "circuit, usually do not count towards the group.</p>",
     ),
     (
+        "Can I use this chart for aluminium wire?",
+        "<p>Yes — switch the conductor material and every column recalculates. Aluminium at 61.2&nbsp;% "
+        "IACS carries about 78&nbsp;% of copper's current at the same cross-section, because ampacity "
+        "follows the square root of conductivity. Matching a copper conductor therefore takes 1.64 times "
+        "the area, roughly two AWG sizes up. The arithmetic is the easy part: aluminium creeps under "
+        "clamping pressure, oxidises on contact with air and expands more than copper when hot, so it "
+        "needs terminals listed for aluminium, anti-oxidant compound and a torque wrench. Copper-clad "
+        "aluminium behaves the same electrically while terminating like copper, and copper-clad steel at "
+        "30&nbsp;% IACS is for strength and RF, not for power.</p>",
+    ),
+    (
         "Does the ampacity change between DC and AC?",
         "<p>Not meaningfully at mains frequency. Alternating current crowds toward the conductor "
         "surface, but the skin depth in copper is about 9.4&nbsp;mm at 50&nbsp;Hz and 8.5&nbsp;mm at "
@@ -408,6 +467,91 @@ EN_CONTENT = f"""            <section id="how-to-read">
               </p>
             </section>
 
+            <section id="materials">
+              <h2>Conductor materials</h2>
+              <p>
+                AWG is a geometric size, so the cross-section in the table is the same whatever the metal
+                is. What changes is how much current that cross-section can carry and how much voltage it
+                drops. Both follow from one number — conductivity, quoted on the IACS scale where annealed
+                copper is 100&nbsp;%.
+              </p>
+              <p class="formula"><span>Ampacity against copper</span>I / I<sub>Cu</sub> = √(σ / σ<sub>Cu</sub>)<span
+                style="margin-top:10px">Resistance against copper</span>R / R<sub>Cu</sub> = σ<sub>Cu</sub> / σ</p>
+              <p>
+                Identical geometry and an identical permitted temperature rise mean <em>I</em>²<em>R</em> is
+                fixed, so current goes as the inverse square root of resistivity. That is not a rule of
+                thumb: against NEC&nbsp;310.16 the aluminium-to-copper ratio averages <strong>0.774</strong>
+                from 6&nbsp;AWG to 4/0, where √0.612 predicts <strong>0.782</strong>.
+              </p>
+
+              <h3>What the selector offers</h3>
+              <dl class="conv-list">
+                <div><dt>Copper</dt><dd>100% IACS · ×1.000</dd></div>
+                <div><dt>Silver</dt><dd>105% IACS · ×1.025</dd></div>
+                <div><dt>Tinned copper</dt><dd>96% IACS · ×0.980</dd></div>
+                <div><dt>Nickel-plated</dt><dd>95% IACS · ×0.975</dd></div>
+                <div><dt>Aluminium 1350</dt><dd>61.2% IACS · ×0.782</dd></div>
+                <div><dt>Alloy 8000</dt><dd>61% IACS · ×0.781</dd></div>
+                <div><dt>Copper-clad alu</dt><dd>61.5% IACS · ×0.784</dd></div>
+                <div><dt>Copper-clad steel</dt><dd>30% IACS · ×0.548</dd></div>
+              </dl>
+              <p>
+                Anything else goes in as a custom % IACS, which is the honest way to handle a datasheet
+                that quotes its own figure.
+              </p>
+
+              <h3>Plated coppers</h3>
+              <p>
+                Plating is about the environment, not conduction. Tin resists corrosion and keeps solder
+                wetting; nickel survives past 200&nbsp;°C where tin has long melted; silver is for RF, where
+                current rides the surface. The penalty is small and depends on how thick the coating is
+                relative to the strand: on a 0.08&nbsp;mm strand a micron of tin occupies roughly 5&nbsp;% of
+                the area and conducts at 15&nbsp;% of copper, which is where the 96&nbsp;% figure comes from.
+                On thicker strands it is less. Silver plating does not change DC resistance measurably,
+                since the bulk is still copper.
+              </p>
+
+              <h3>Aluminium, and what it costs you</h3>
+              <p>
+                Aluminium carries about 78&nbsp;% of copper's current at the same size, so matching a copper
+                conductor takes <strong>1.64× the area — roughly two AWG sizes up</strong>. It is still worth
+                it on long runs, because it is around a third of the weight for the same conductance and
+                much cheaper.
+              </p>
+              <p>
+                The catch is never the metal, it is the joint. Aluminium creeps under clamping pressure, so
+                a terminal that was tight last year may not be now; it grows an insulating oxide the moment
+                it meets air; and it expands about 40&nbsp;% more than copper with temperature, working
+                itself loose through every heating cycle. Aluminium branch circuits earned their reputation
+                in the 1960s and 70s for exactly this. Use terminals listed for aluminium, apply
+                anti-oxidant compound, torque to the figure on the connector, and never put bare aluminium
+                against bare copper in a damp place — the galvanic pair eats the aluminium.
+              </p>
+              <p>
+                Fine-stranded silicone wire, which is what this page is mostly about, is not made in
+                aluminium: it does not survive the flex cycles.
+              </p>
+
+              <h3>Copper-clad conductors</h3>
+              <p>
+                Copper-clad aluminium is aluminium with a copper skin, typically 10&nbsp;% by volume. It
+                terminates like copper and conducts like aluminium, which is a reasonable trade — the
+                problem is that it is frequently sold <em>as</em> copper. Strip a sample: the core is
+                silver-coloured. Copper-clad steel is a different animal at 30&nbsp;% IACS, made for
+                mechanical strength and RF skin conduction, not for carrying power; a magnet identifies it
+                instantly.
+              </p>
+
+              <h3>One caveat on temperature</h3>
+              <p>
+                Every figure here is at 20&nbsp;°C. A conductor actually running at 60&nbsp;°C has around
+                16&nbsp;% more resistance, and aluminium's temperature coefficient (0.00403/K) is slightly
+                worse than copper's (0.00393/K). For voltage drop on a hot circuit, add that margin
+                yourself — the calculator does not, because it would need a conductor temperature rather
+                than an ambient one.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG to mm² at a glance</h2>
               <p>
@@ -517,6 +661,11 @@ EN = {
     "touch-safe or connector-safe operating targets. More than three conductors require further derating. "
     "AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact "
     "cable datasheet.",
+    "MATERIALS": material_json("en"),
+    "MATERIAL_OPTIONS": material_options("en"),
+    "MATERIAL_LABEL": "Conductor material",
+    "IACS_LABEL": "% IACS",
+    "MATERIAL_NOTE_CU": "<strong>Copper, annealed.</strong> 100% IACS, ρ = 0.0175 Ω·mm²/m, ampacity ×1.000.",
     "MODE_VOLTAGE": "{ dc: 24, ac1: 120, ac3: 208 }",
     "DEF_FREQ": "60",
     "MODE_LEGEND": "Current type",
@@ -585,6 +734,7 @@ EN = {
             ("#calculator", "Wire gauge calculator"),
             ("#how-to-read", "How to read the chart"),
             ("#how-it-works", "How the calculator works"),
+            ("#materials", "Conductor materials"),
             ("#conversions", "AWG to mm² conversions"),
             ("#faq", "Frequently asked questions"),
             ("#source", "Read the source"),
@@ -597,6 +747,8 @@ EN = {
         {
             "uArea": "mm²",
             "copied": "Copied",
+            "customMaterial": "Custom",
+            "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ω·mm²/m, ampacity ×{factor} against annealed copper.",
             "uHz": "Hz",
             "unitResistDc": "mΩ/m · DC",
             "modeTag": {
@@ -728,6 +880,17 @@ UK_FAQ = [
         "для 31–40 і 35&nbsp;% далі. Температура довкілля знижує струм додатково, і два коефіцієнти "
         "перемножуються. Жили, що ніколи не працюють одночасно, а також нейтралі у збалансованому колі, "
         "зазвичай до групи не зараховуються.</p>",
+    ),
+    (
+        "Чи можна користуватися цією таблицею для алюмінієвого дроту?",
+        "<p>Так — перемкніть матеріал жили, і всі колонки перерахуються. Алюміній із провідністю "
+        "61,2&nbsp;% IACS несе близько 78&nbsp;% струму міді того самого перерізу, бо допустимий струм "
+        "змінюється як корінь із провідності. Тому щоб зрівнятися з мідною жилою, потрібно у 1,64 раза "
+        "більше площі — приблизно два кроки AWG угору. Арифметика тут найпростіше: алюміній тече під "
+        "тиском затиску, окислюється на повітрі й розширюється від нагріву сильніше за мідь, тож потребує "
+        "клем, сертифікованих для алюмінію, антиоксидної пасти й динамометричного ключа. Мідно-алюмінієвий "
+        "провід поводиться електрично так само, але з'єднується як мідь, а мідно-сталевий із 30&nbsp;% "
+        "IACS призначений для міцності та високих частот, а не для потужності.</p>",
     ),
     (
         "Чи змінюється допустимий струм між постійним і змінним струмом?",
@@ -916,6 +1079,91 @@ UK_CONTENT = f"""            <section id="how-to-read">
               </p>
             </section>
 
+            <section id="materials">
+              <h2>Матеріали жили</h2>
+              <p>
+                AWG — це геометричний розмір, тож переріз у таблиці однаковий для будь-якого металу.
+                Змінюється те, який струм цей переріз витримає і скільки напруги на ньому впаде. Обидва
+                випливають з одного числа — питомої провідності за шкалою IACS, де відпалена мідь дорівнює
+                100&nbsp;%.
+              </p>
+              <p class="formula"><span>Струм відносно міді</span>I / I<sub>Cu</sub> = √(σ / σ<sub>Cu</sub>)<span
+                style="margin-top:10px">Опір відносно міді</span>R / R<sub>Cu</sub> = σ<sub>Cu</sub> / σ</p>
+              <p>
+                Однакова геометрія й однаковий допустимий перегрів означають, що <em>I</em>²<em>R</em>
+                фіксоване, тож струм змінюється як обернений корінь із питомого опору. Це не емпіричне
+                правило: за NEC&nbsp;310.16 відношення алюмінію до міді в середньому становить
+                <strong>0,774</strong> від 6&nbsp;AWG до 4/0, тоді як √0,612 передбачає
+                <strong>0,782</strong>.
+              </p>
+
+              <h3>Що пропонує селектор</h3>
+              <dl class="conv-list">
+                <div><dt>Мідь</dt><dd>100% IACS · ×1,000</dd></div>
+                <div><dt>Срібло</dt><dd>105% IACS · ×1,025</dd></div>
+                <div><dt>Луджена мідь</dt><dd>96% IACS · ×0,980</dd></div>
+                <div><dt>Нікельована</dt><dd>95% IACS · ×0,975</dd></div>
+                <div><dt>Алюміній 1350</dt><dd>61,2% IACS · ×0,782</dd></div>
+                <div><dt>Сплав 8000</dt><dd>61% IACS · ×0,781</dd></div>
+                <div><dt>Мідно-алюмінієвий</dt><dd>61,5% IACS · ×0,784</dd></div>
+                <div><dt>Мідно-сталевий</dt><dd>30% IACS · ×0,548</dd></div>
+              </dl>
+              <p>
+                Усе інше вводиться як власний відсоток IACS — це чесний спосіб врахувати даташит, який подає
+                власну цифру.
+              </p>
+
+              <h3>Покриття міді</h3>
+              <p>
+                Покриття потрібне заради середовища, а не заради провідності. Олово захищає від корозії й
+                зберігає змочуваність припоєм; нікель витримує понад 200&nbsp;°C, де олово давно розплавилось
+                би; срібло — для високих частот, де струм іде поверхнею. Втрата невелика й залежить від
+                товщини шару відносно жилки: на жилці 0,08&nbsp;мм мікрон олова займає близько 5&nbsp;% площі
+                й проводить на рівні 15&nbsp;% від міді — звідси й береться 96&nbsp;%. На товщих жилках менше.
+                Срібне покриття на опорі постійному струму практично не позначається, бо основа лишається
+                мідною.
+              </p>
+
+              <h3>Алюміній і чого він коштує</h3>
+              <p>
+                Алюміній несе близько 78&nbsp;% струму міді того самого розміру, тож щоб зрівнятися з мідною
+                жилою, потрібно <strong>у 1,64 раза більше площі — приблизно два кроки AWG угору</strong>. На
+                довгих трасах він однаково вигідний: за однакової провідності важить близько третини й коштує
+                значно менше.
+              </p>
+              <p>
+                Проблема ніколи не в металі — вона в з'єднанні. Алюміній тече під тиском затиску, тож клема,
+                затягнута торік, сьогодні може бути слабкою; він миттєво вкривається ізолювальним оксидом на
+                повітрі; і розширюється від нагріву приблизно на 40&nbsp;% сильніше за мідь, розхитуючи себе
+                кожним циклом нагрівання. Алюмінієва проводка в житлових колах заробила свою репутацію в
+                1960–70-х саме через це. Використовуйте клеми, сертифіковані для алюмінію, наносьте
+                антиоксидну пасту, затягуйте моментом, зазначеним на з'єднувачі, і ніколи не з'єднуйте голий
+                алюміній з голою міддю у вологому місці — гальванічна пара з'їдає алюміній.
+              </p>
+              <p>
+                Тонкожильний силіконовий дріт, про який ця сторінка здебільшого й розповідає, з алюмінію не
+                роблять: він не витримує циклів згинання.
+              </p>
+
+              <h3>Біметалеві жили</h3>
+              <p>
+                Мідно-алюмінієвий провід (CCA) — це алюміній у мідній оболонці, зазвичай 10&nbsp;% за
+                об'ємом. Він з'єднується як мідь, а проводить як алюміній, і це прийнятний компроміс — біда в
+                тому, що його часто продають <em>як</em> мідь. Зачистіть зразок: осердя буде сріблястим.
+                Мідно-сталевий (CCS) — зовсім інша річ, 30&nbsp;% IACS, зроблений заради механічної міцності
+                та поверхневої провідності на високих частотах, а не заради потужності; магніт визначає його
+                миттєво.
+              </p>
+
+              <h3>Одне застереження щодо температури</h3>
+              <p>
+                Усі числа тут наведено для 20&nbsp;°C. Жила, що реально працює за 60&nbsp;°C, має приблизно на
+                16&nbsp;% більший опір, а температурний коефіцієнт алюмінію (0,00403/K) трохи гірший за мідний
+                (0,00393/K). Для падіння напруги в гарячому колі додайте цей запас самостійно — калькулятор
+                цього не робить, бо для цього потрібна температура жили, а не довкілля.
+              </p>
+            </section>
+
             <section id="conversions">
               <h2>AWG у мм² — коротко</h2>
               <p>
@@ -1025,6 +1273,11 @@ UK = {
     "дотику чи для клем робочі значення. Понад три жили потребують додаткового зниження струму. Рядки "
     "AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом "
     "конкретного кабелю.",
+    "MATERIALS": material_json("uk"),
+    "MATERIAL_OPTIONS": material_options("uk"),
+    "MATERIAL_LABEL": "Матеріал жили",
+    "IACS_LABEL": "% IACS",
+    "MATERIAL_NOTE_CU": "<strong>Мідь, відпалена.</strong> 100% IACS, ρ = 0,0175 Ом·мм²/м, струм ×1,000.",
     "MODE_VOLTAGE": "{ dc: 24, ac1: 230, ac3: 400 }",
     "DEF_FREQ": "50",
     "MODE_LEGEND": "\u0420\u0456\u0434 \u0441\u0442\u0440\u0443\u043c\u0443",
@@ -1093,6 +1346,7 @@ UK = {
             ("#calculator", "Калькулятор перерізу"),
             ("#how-to-read", "Як читати таблицю"),
             ("#how-it-works", "Як працює калькулятор"),
+            ("#materials", "Матеріали жили"),
             ("#conversions", "AWG у мм²"),
             ("#faq", "Часті запитання"),
             ("#source", "Подивитися код"),
@@ -1105,6 +1359,8 @@ UK = {
         {
             "uArea": "мм²",
             "copied": "\u0421\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e",
+            "customMaterial": "Власна",
+            "materialNote": "<strong>{name}.</strong> {iacs}% IACS, ρ = {rho} Ом·мм²/м, струм ×{factor} відносно відпаленої міді.",
             "uHz": "\u0413\u0446",
             "unitResistDc": "мОм/м · пост.",
             "modeTag": {
@@ -1289,6 +1545,13 @@ def build_jsonld(cfg, faq_items):
                     "@type": "PropertyValue",
                     "name": "Maximum transmissible load",
                     "unitText": "W",
+                },
+                {
+                    "@type": "PropertyValue",
+                    "name": "Conductor conductivity",
+                    "unitText": "% IACS",
+                    "minValue": 30,
+                    "maxValue": 105,
                 },
             ],
         },
