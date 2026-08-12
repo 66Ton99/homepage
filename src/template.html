@@ -1862,15 +1862,35 @@
         return Number.isFinite(value) ? value : null;
       }
 
-      function loadTablePreset(gauge) {
-        const row = wireRows.find((item) => item.gauge === gauge);
-        if (!row) return;
-
+      // The representative 0.08 mm construction for a table row: how many
+      // strands of the default diameter it takes to reach that gauge's area.
+      function presetStrandCount(row) {
         const strandArea = Math.PI * Math.pow(defaultStrandDiameter, 2) / 4;
-        const strandCount = Math.max(1, Math.round(row.area / strandArea));
-        $("strandCount").value = strandCount;
+        return Math.max(1, Math.round(row.area / strandArea));
+      }
+
+      function applyTablePreset(gauge) {
+        const row = wireRows.find((item) => item.gauge === gauge);
+        if (!row) return false;
+        $("strandCount").value = presetStrandCount(row);
         $("strandDiameter").value = defaultStrandDiameter.toFixed(2);
-        calculate();
+        return true;
+      }
+
+      function loadTablePreset(gauge) {
+        if (applyTablePreset(gauge)) calculate();
+      }
+
+      // What the reader picked was a gauge, not a strand count, and the link
+      // should say so: ?awg=20 rather than ?n=103. Derived rather than
+      // remembered, so it survives Back, Reset and a hand-typed construction
+      // that happens to land on a preset — either way the link restores the
+      // exact same state.
+      function selectedPresetGauge() {
+        if ($("strandDiameter").value !== defaultStrandDiameter.toFixed(2)) return null;
+        const count = $("strandCount").value.trim();
+        const row = wireRows.find((item) => String(presetStrandCount(item)) === count);
+        return row ? row.gauge : null;
       }
 
       function calculate(event) {
@@ -2038,9 +2058,13 @@
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
         if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
+        const presetGauge = selectedPresetGauge();
+        if (presetGauge !== null) params.set("awg", presetGauge);
         Object.keys(FIELD_PARAM).forEach((id) => {
           // frequency and power factor mean nothing on DC, so leave them out
           if (mode === "dc" && (id === "frequency" || id === "powerFactor")) return;
+          // the gauge already carries the construction
+          if (presetGauge !== null && (id === "strandCount" || id === "strandDiameter")) return;
           const value = $(id).value;
           if (value !== FIELD_DEFAULTS[id]) params.set(FIELD_PARAM[id], value);
         });
@@ -2098,6 +2122,11 @@
           $("conductivity").value = iacs;
           restored = true;
         }
+
+        // Before the field loop, so an explicit n / d in the same link still
+        // wins over the gauge's representative construction.
+        const gauge = params.get("awg");
+        if (gauge !== null && applyTablePreset(gauge)) restored = true;
 
         let optionalTouched = false;
         Object.keys(FIELD_PARAM).forEach((id) => {

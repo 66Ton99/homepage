@@ -330,6 +330,19 @@ async function runUrl(file, label, expect) {
   await wait(500);
   check("reset restores a clean URL", path(w), base);
 
+  // a gauge picked from the table travels as a gauge, not as a strand count
+  d.querySelector('tr[data-gauge="20"] .row-btn')
+    .dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  await wait(500);
+  check("a table pick writes the gauge", path(w), base + "?awg=20");
+  check("the gauge replaces the construction", path(w).includes("n="), false);
+  set("strandCount", "120");
+  await wait(500);
+  check("a hand-typed construction drops back to strands", path(w), base + "?n=120");
+  $("resetButton").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  await wait(500);
+  check("the default construction is not a preset", path(w), base);
+
   // 2. a mode remembered from a previous visit must not rewrite the address bar
   const remembered = new JSDOM(fs.readFileSync(file, "utf8"), {
     runScripts: "dangerously", pretendToBeVisual: true,
@@ -355,6 +368,29 @@ async function runUrl(file, label, expect) {
   check("shared link restores voltage", g2("systemVoltage").value, "400");
   check("shared link restores frequency", g2("frequency").value, "400");
   check("shared link opens the optional section", g2("optionalChecks").open, true);
+
+  const picked = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?awg=20",
+  }).window.document;
+  check("a gauge link restores the construction", picked.getElementById("strandCount").value, "103");
+  check("a gauge link keeps the default strand diameter",
+        picked.getElementById("strandDiameter").value, "0.08");
+  check("a gauge link selects the row", picked.querySelector("tr.is-selected").dataset.gauge, "20");
+
+  const explicit = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?awg=20&n=4208",
+  }).window.document;
+  check("an explicit strand count outranks the gauge",
+        explicit.getElementById("strandCount").value, "4208");
+
+  const bogus = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base + "?awg=99",
+  }).window.document;
+  check("a gauge that is not in the table is ignored",
+        bogus.getElementById("strandCount").value, "1650");
 
   const mat = new JSDOM(fs.readFileSync(file, "utf8"), {
     runScripts: "dangerously", pretendToBeVisual: true,

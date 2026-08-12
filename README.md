@@ -267,7 +267,7 @@ configuration can be sent to someone else. There is a copy-link button next to
 Calculate.
 
 ```
-/awg-to-amps?mode=ac3&n=4208&u=400&a=50&f=400&mat=al&ins=thhn
+/awg-to-amps?mode=ac3&awg=4&u=400&a=50&f=400&mat=al&ins=thhn
 ```
 
 Rules that keep this from turning into an SEO problem or a mess:
@@ -285,14 +285,19 @@ Rules that keep this from turning into an SEO problem or a mess:
   trip it. No history entries are created, so Back still leaves the page.
 - Arriving with optional parameters opens the optional section, so the values in
   the link are visible rather than hidden behind a collapsed `<details>`.
-
-`localStorage` still holds the mode as a fallback for visitors arriving without
-parameters; an explicit URL always wins over it.
-
 - **The load pass never writes.** URL writing is armed only after the initial
   render, so a restored mode stays out of the address bar: arriving at a clean
   `/uk/awg-to-amps` with `ac3` remembered leaves the URL clean while still
   showing three-phase. Only the reader's own changes shape the query string.
+- **A gauge picked from the table travels as a gauge**: `?awg=20`, not
+  `?n=103`. The strand count is only how that gauge is expressed in the
+  calculator's own units, and `103` means nothing to the person opening the
+  link. It is derived at write time — whenever the construction matches a row's
+  representative 0.08 mm build, the link says `awg`; type your own strand count
+  and it goes back to `n`. An explicit `n` in a link outranks `awg`.
+
+`localStorage` still holds the mode as a fallback for visitors arriving without
+parameters; an explicit URL always wins over it.
 
 ## SEO notes
 
