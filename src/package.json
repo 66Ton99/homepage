@@ -1,0 +1,12 @@
+{
+  "name": "homepage-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Test harness for the static site. test.js loads the built pages from ../site with jsdom and runs their own JavaScript.",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "jsdom": "30.0.1"
+  }
+}

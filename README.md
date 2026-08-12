@@ -1,5 +1,7 @@
 # 66ton99.org.ua
 
+[![CI](https://github.com/66Ton99/homepage/actions/workflows/ci.yml/badge.svg)](https://github.com/66Ton99/homepage/actions/workflows/ci.yml)
+
 Static site served by nginx on the OCI edge VM.
 
 ## Layout
@@ -49,7 +51,7 @@ cd src
 python3 build.py        # AWG pages + robots.txt + sitemap.xml
 python3 build_home.py   # homepages
 python3 make_og.py      # ../site/og-*.png
-npm install --no-save jsdom && node test.js
+npm install && npm test # jsdom checks against the pages just built
 ```
 
 Edit content in `src/build.py`, never in `site/_pages/*.html` — those are build
@@ -76,7 +78,14 @@ indicative for fine-stranded silicone wire rather than taken from one
 authoritative table.
 
 Edit `src/build.py`, never `site/_pages/*.html` — those are build output. Run
-`python3 build.py && node test.js` before opening a pull request.
+`python3 build.py && npm test` before opening a pull request.
+
+`.github/workflows/ci.yml` runs on every commit on every branch and on every
+pull request. It rebuilds the pages, fails if the committed `site/` differs from
+what the generators produce — the deploy is a plain rsync of `site/`, so a stale
+build here is a stale site — and then runs the jsdom suite against the pages it
+just built. `make_og.py` is not in CI: it needs Pillow and fonts, and its output
+only changes when the cards are redesigned.
 
 ## The DC / AC toggle
 
