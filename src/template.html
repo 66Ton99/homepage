@@ -1398,7 +1398,7 @@
             </span>
           </div>
           <p class="modebar-note" id="modeNote">{{MODE_NOTE_DC}}</p>
-          <p class="modebar-note" id="materialNote">{{MATERIAL_NOTE_CU}}</p>
+          <p class="modebar-note" id="materialNote">{{MATERIAL_NOTE_DEFAULT}}</p>
           <p class="modebar-note" id="insulationNote">{{INSULATION_NOTE}}</p>
         </div>
 
@@ -1483,7 +1483,7 @@
                     </div>
                     <div class="field">
                       <label for="loadCurrent">{{L_LOAD}} <span class="optional-tag">{{OPTIONAL}}</span></label>
-                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="35" placeholder="35" inputmode="decimal" />
+                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="30" placeholder="30" inputmode="decimal" />
                     </div>
                     <div class="field">
                       <label for="ambient">{{L_AMB}} <span class="optional-tag">{{OPTIONAL}}</span></label>
@@ -1644,6 +1644,9 @@
       // solid-wire IACS reference — the usual allowance for the strand lay.
       const COPPER_RESISTIVITY = 0.0175;
       const MATERIALS = {{MATERIALS}};
+      // Matches the selected option in the markup, so the URL only carries a
+      // material when the reader has actually changed it.
+      const DEFAULT_MATERIAL = "{{DEFAULT_MATERIAL}}";
 
       // Same geometry, same permitted temperature rise, so I²R is fixed and the
       // current goes as the inverse square root of resistivity.
@@ -2020,11 +2023,18 @@
         });
       }
 
+      // Nothing touches the address bar until the reader has actually changed
+      // something. The first pass runs with a mode restored from localStorage,
+      // and rewriting the URL for it turned a clean shared link into
+      // ?mode=ac3&u=400 the moment the page loaded.
+      let urlWritable = false;
+
       function writeUrl() {
+        if (!urlWritable) return;
         const params = new URLSearchParams();
         const mode = currentMode();
         if (mode !== "dc") params.set("mode", mode);
-        if ($("material").value !== "cu") params.set("mat", $("material").value);
+        if ($("material").value !== DEFAULT_MATERIAL) params.set("mat", $("material").value);
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
         if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
@@ -2045,6 +2055,9 @@
       // Browsers rate-limit replaceState, so do not call it on every keystroke.
       let urlTimer = null;
       function scheduleUrlWrite() {
+        // The init pass schedules one of these too, and its timer would fire
+        // after the flag flips; drop it here rather than 350 ms later.
+        if (!urlWritable) return;
         clearTimeout(urlTimer);
         urlTimer = setTimeout(writeUrl, 350);
       }
@@ -2222,6 +2235,9 @@
       syncOptionalResults();
       if (!readUrl()) restoreMode();
       applyMode();
+      // The reader arrived at whatever URL they arrived at; from here on, their
+      // own changes are what shape it.
+      urlWritable = true;
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>

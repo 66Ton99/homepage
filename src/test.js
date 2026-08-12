@@ -60,13 +60,13 @@ async function runBasics() {
     area: "8.29 mm²",
     gauge: "≈ 8 AWG",
     status: "Within both references",
-    drop: "0.295 V",
+    drop: "0.264 V",
   });
   await run("../site/_pages/uk-awg-to-amps.html", "UK", {
     area: "8,29 мм²",
     gauge: "≈ 8 AWG",
     status: "У межах обох режимів",
-    drop: "0,295 В",
+    drop: "0,264 В",
   });
 }
 
@@ -125,7 +125,7 @@ async function runModes(file, label, expect) {
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   const highF = parseFloat($("skinResult").textContent.replace(",", ".").replace(/[^\d.]/g, ""));
   // skin + proximity together, per IEC 60287
-  checkClose("0 AWG at 400 Hz raises resistance ~16.6%", highF, 16.6, 0.2);
+  checkClose("0 AWG at 400 Hz raises resistance ~15.5%", highF, 15.5, 0.2);
 
   pick("dc");
   check("back to DC hides AC fields", document.querySelector(".ac-only").hidden, true);
@@ -145,8 +145,8 @@ async function runModes(file, label, expect) {
   $("strandCount").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   $("systemVoltage").value = "24";
   $("systemVoltage").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-  check("0 AWG DC resistance", cellNum("0", "js-r").toFixed(3), "0.327");
-  checkClose("0 AWG DC run @3% on 24 V", cellNum("0", "js-len"), 9.8, 0.1);
+  check("0 AWG DC resistance", cellNum("0", "js-r").toFixed(3), "0.341");
+  checkClose("0 AWG DC run @3% on 24 V", cellNum("0", "js-len"), 9.6, 0.1);
   checkClose("22 AWG DC run @3% on 24 V", cellNum("22", "js-len"), 1.3, 0.1);
 
   pick("ac3");   // voltage should follow the mode to 400 V
@@ -167,13 +167,13 @@ async function runModes(file, label, expect) {
   $("frequency").value = "400";
   $("frequency").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
   // 400 Hz skin+proximity on top of the three-phase conductor-count factor
-  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "95");
+  check("0 AWG ampacity derated at 400 Hz", cellNum("0", "js-b60").toFixed(0), "93");
   check("22 AWG ampacity unchanged at 400 Hz", cellNum("22", "js-b60").toFixed(0), "5");
-  checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.381, 0.003);
+  checkClose("0 AWG AC resistance at 400 Hz", cellNum("0", "js-r"), 0.393, 0.003);
   check("resistance header names the frequency", $("thResistUnit").textContent.includes("400"), true);
 
   pick("dc");
-  check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.327");
+  check("back to DC restores resistance", cellNum("0", "js-r").toFixed(3), "0.341");
 
   // ---- conductor material ----
   const setMat = (v) => {
@@ -213,7 +213,10 @@ async function runModes(file, label, expect) {
 
   setMat("cu");
   check("back to copper restores the reference", cellNum("0", "js-b60").toFixed(1), "112.0");
-  check("copper leaves the material out of the URL", dom.window.location.href.includes("mat="), false);
+  check("copper is not the default, so it reaches the URL", dom.window.location.href.includes("mat=cu&") || dom.window.location.href.endsWith("mat=cu"), true);
+  setMat("cusn");
+  check("tinned copper is the default and leaves the URL clean", dom.window.location.href.includes("mat="), false);
+  setMat("cu");
 
   // ---- insulation sets the conductor temperature rating ----
   const setIns = (v) => {
@@ -327,7 +330,20 @@ async function runUrl(file, label, expect) {
   await wait(500);
   check("reset restores a clean URL", path(w), base);
 
-  // 2. the URL is honoured on arrival
+  // 2. a mode remembered from a previous visit must not rewrite the address bar
+  const remembered = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua" + base,
+    beforeParse(win) {
+      win.localStorage.setItem("awg-current-mode", "ac3");
+    },
+  });
+  await wait(500);
+  check("a remembered mode is applied",
+        remembered.window.document.querySelector("input[name=currentMode]:checked").value, "ac3");
+  check("a remembered mode leaves the URL clean", path(remembered.window), base);
+
+  // 3. the URL is honoured on arrival
   const shared = new JSDOM(fs.readFileSync(file, "utf8"), {
     runScripts: "dangerously", pretendToBeVisual: true,
     url: "https://66ton99.org.ua" + base + "?mode=ac3&n=4208&u=400&a=50&f=400",
@@ -381,11 +397,11 @@ async function runUrl(file, label, expect) {
   await runModes("../site/_pages/awg-to-amps.html", "EN",
     { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A",
       v1: "120", v3: "208", freq: "60",
-      run3: 107.2, run3small: 14.7, p1: 13.4, p3: 36.8 });
+      run3: 105.3, run3small: 14.4, p1: 13.4, p3: 36.8 });
   await runModes("../site/_pages/uk-awg-to-amps.html", "UK",
     { skin50: "+0,01%", lineLabel: "Лінійна напруга / В", watt: "Вт", ac1Zero: "111,8 А",
       v1: "230", v3: "400", freq: "50",
-      run3: 206.7, run3small: 28.2, p1: 25.7, p3: 70.9 });
+      run3: 202.5, run3small: 27.6, p1: 25.7, p3: 70.9 });
   console.log(
     failures
       ? `\n${failures} of ${total} checks FAILED`

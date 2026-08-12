@@ -63,6 +63,13 @@ MATERIALS = [
     ("ag",     105.0, "Silver",                "Срібло"),
 ]
 
+# What the selector starts on, and therefore what the server-rendered table has
+# to be computed for. Tinned copper, because that is what fine-stranded silicone
+# lead wire actually is; the published ROWS above are the annealed-copper
+# reference the whole model is built on, so the default view carries the 96%
+# IACS penalty like any other material.
+DEFAULT_MATERIAL = "cusn"
+
 
 def material_json(lang):
     data = {
@@ -75,7 +82,8 @@ def material_json(lang):
 def material_options(lang):
     custom = "Custom conductivity" if lang == "en" else "Власна провідність"
     out = [
-        f'                <option value="{key}">{(en if lang == "en" else uk)} · {iacs:g}% IACS</option>'
+        f'                <option value="{key}"{" selected" if key == DEFAULT_MATERIAL else ""}>'
+        f'{(en if lang == "en" else uk)} · {iacs:g}% IACS</option>'
         for key, iacs, en, uk in MATERIALS
     ]
     out.append(f'                <option value="custom">{custom}</option>')
@@ -132,6 +140,11 @@ INSTALL_KEYS = ["bundle", "free", "4-6", "7-9", "10-20", "21-30", "31-40", "41-p
 COPPER_RESISTIVITY = 0.0175  # Ω·mm²/m at 20 °C
 DEFAULT_VOLTAGE = {"dc": 24, "ac1": 230, "ac3": 400}
 
+# The default conductor, mirrored from MATERIALS so the two cannot drift.
+DEFAULT_IACS = next(iacs for key, iacs, _en, _uk in MATERIALS if key == DEFAULT_MATERIAL)
+DEFAULT_RESISTIVITY = COPPER_RESISTIVITY * (100 / DEFAULT_IACS)
+DEFAULT_AMPACITY_FACTOR = (DEFAULT_IACS / 100) ** 0.5
+
 
 def fmt_area(area, decimal_sep):
     text = f"{area:.3f}" if area < 10 else f"{area:.2f}"
@@ -173,7 +186,7 @@ def fmt_power(watts, decimal_sep, unit_w, unit_kw):
 
 def max_run_length(area, current, voltage, run_factor, power_factor=1.0):
     """Longest one-way run that keeps the drop within 3% at the rated current."""
-    resistance = COPPER_RESISTIVITY / area
+    resistance = DEFAULT_RESISTIVITY / area
     return (0.03 * voltage) / (run_factor * current * resistance * power_factor)
 
 
@@ -188,10 +201,13 @@ def build_tbody(lang):
     watt = "W" if lang == "en" else "Вт"
     kilowatt = "kW" if lang == "en" else "кВт"
     out = []
-    # Server-rendered in the DC state at 24 V, matching the page defaults, so a
-    # crawler sees real numbers and the JS re-render produces identical text.
-    for gauge, area, b60, f60, b200, f200 in ROWS:
-        resistance = fmt_resistance(COPPER_RESISTIVITY / area * 1000, sep)
+    # Server-rendered in the DC state at 24 V on the default conductor, matching
+    # the page defaults, so a crawler sees real numbers and the JS re-render
+    # produces identical text.
+    factor = DEFAULT_AMPACITY_FACTOR
+    for gauge, area, b60_ref, f60_ref, b200_ref, f200_ref in ROWS:
+        b60, f60, b200, f200 = (value * factor for value in (b60_ref, f60_ref, b200_ref, f200_ref))
+        resistance = fmt_resistance(DEFAULT_RESISTIVITY / area * 1000, sep)
         length = fmt_length(
             max_run_length(area, b60, DEFAULT_VOLTAGE["dc"], 2), sep
         )
@@ -255,9 +271,10 @@ def quicknav(items):
 EN_FAQ = [
     (
         "How many amps can each AWG wire size carry?",
-        "<p>For copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in the "
-        "chart above gives roughly 8&nbsp;A for 18&nbsp;AWG, 14&nbsp;A for 14&nbsp;AWG, 26&nbsp;A for "
-        "10&nbsp;AWG, 35&nbsp;A for 8&nbsp;AWG, 62&nbsp;A for 4&nbsp;AWG and 112&nbsp;A for 0&nbsp;AWG "
+        "<p>For tinned copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in "
+        "the chart above gives roughly 7.8&nbsp;A for 18&nbsp;AWG, 13.7&nbsp;A for 14&nbsp;AWG, "
+        "25.5&nbsp;A for 10&nbsp;AWG, 34.3&nbsp;A for 8&nbsp;AWG, 60.7&nbsp;A for 4&nbsp;AWG and "
+        "109.7&nbsp;A for 0&nbsp;AWG "
         "with up to three current-carrying conductors in a cable. A single conductor in free air runs "
         "cooler and carries more. High-temperature silicone wire rated to 200&nbsp;°C carries roughly "
         "twice the conservative figure, but only if every terminal, fuse and connector in the circuit "
@@ -376,9 +393,9 @@ EN_CONTENT = f"""            <section id="how-to-read">
               <p>
                 The ampacity columns are in amperes, and amperes are amperes: a conductor does not care
                 whether the heat came from DC or AC. What changes completely is what those amperes are
-                <em>worth</em>. The same 0&nbsp;AWG conductor at its 112&nbsp;A rating delivers
-                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>13.4&nbsp;kW</strong> on
-                120&nbsp;V single-phase, and <strong>37&nbsp;kW</strong> on 208&nbsp;V three-phase — a
+                <em>worth</em>. The same 0&nbsp;AWG conductor at its 109.7&nbsp;A rating delivers
+                <strong>2.6&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>13.2&nbsp;kW</strong> on
+                120&nbsp;V single-phase, and <strong>36&nbsp;kW</strong> on 208&nbsp;V three-phase — a
                 factor of fourteen, from voltage and the √3. On a 230/400&nbsp;V system the spread is
                 wider still, at twenty-nine.
               </p>
@@ -398,7 +415,7 @@ EN_CONTENT = f"""            <section id="how-to-read">
               </p>
               <p>
                 That last column is worth staring at. The same 0&nbsp;AWG conductor is good for
-                <strong>9.8&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>107&nbsp;m</strong> on
+                <strong>9.6&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>105&nbsp;m</strong> on
                 208&nbsp;V three-phase — a factor of eleven, from voltage and the √3 alone, with the
                 copper completely unchanged. Ampacity is rarely what limits a long run; voltage drop is.
               </p>
@@ -480,7 +497,7 @@ EN_CONTENT = f"""            <section id="how-to-read">
                 separate <em>2 loaded conductors</em> and <em>3 loaded conductors</em> columns; across its
                 copper tables the ratio averages <strong>0.915</strong>, and that is the factor applied to
                 the in-cable columns here. It is a frequency-independent, roughly 9&nbsp;% cut — the reason
-                0&nbsp;AWG reads 112&nbsp;A on DC and 102&nbsp;A on three-phase. The free-air columns
+                0&nbsp;AWG reads 109.7&nbsp;A on DC and 100.4&nbsp;A on three-phase. The free-air columns
                 describe one isolated conductor, which is the same object in every mode, so they do not
                 move.
               </p>
@@ -493,12 +510,12 @@ EN_CONTENT = f"""            <section id="how-to-read">
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
                 Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
-                dominates once you leave mains frequency. Together they come to <strong>0.43&nbsp;%</strong>
-                at 60&nbsp;Hz for 0&nbsp;AWG, 0.07&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
+                dominates once you leave mains frequency. Together they come to <strong>0.40&nbsp;%</strong>
+                at 60&nbsp;Hz for 0&nbsp;AWG, 0.06&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
                 This is the entire difference between DC and single-phase AC here: both have two loaded
                 conductors, and unarmoured low-voltage wire has no sheath or dielectric losses to add. The
                 table shows a decimal place so you can see it on the gauges where it exists — 0&nbsp;AWG
-                goes from 112.0&nbsp;A to 111.8&nbsp;A — and read as identical where it genuinely is. Ampacity scales as
+                goes from 109.7&nbsp;A to 109.5&nbsp;A — and read as identical where it genuinely is. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
                 spread between one manufacturer's datasheet and another's. So the frequency term alone would not justify a
                 separate AC column; the conductor count is what does.
@@ -745,9 +762,10 @@ EN = {
     "BC_CURRENT": "AWG to amps",
     "EYEBROW": "Wire sizing / 30—0 AWG · copper",
     "H1": "AWG to amps chart &amp; calculator",
-    "HERO_P": "A working reference for flexible, fine-stranded tinned copper wire with silicone "
-    "insulation. Read current capacity by real copper cross-section in mm², then use the calculator to "
-    "check a custom strand construction, thermal reference, bundle derating and DC voltage drop.",
+    "HERO_P": "A working reference for flexible, fine-stranded lead wire, from 30 AWG to 0 AWG. Read "
+    "current capacity by real conductor cross-section in mm², then use the calculator to check a custom "
+    "strand construction, conductor material, insulation temperature rating, bundle derating and voltage "
+    "drop on DC or AC.",
     "MAP_ALT": "Abstract diagram of conductors and thermal paths",
     "MAP_CAPTION": "conductors / thermal path",
     "LAYOUT_LABEL": "AWG chart and wire gauge calculator",
@@ -777,6 +795,7 @@ EN = {
     "AWG 24–30 rows are indicative for fine-stranded silicone wire and must be checked against the exact "
     "cable datasheet.",
     "MATERIALS": material_json("en"),
+    "DEFAULT_MATERIAL": DEFAULT_MATERIAL,
     "INSULATIONS": insulation_json("en"),
     "INSULATION_OPTIONS": insulation_options("en"),
     "INSULATION_LABEL": "Insulation",
@@ -786,7 +805,8 @@ EN = {
     "MATERIAL_OPTIONS": material_options("en"),
     "MATERIAL_LABEL": "Conductor material",
     "IACS_LABEL": "% IACS",
-    "MATERIAL_NOTE_CU": "<strong>Copper, annealed.</strong> 100% IACS, ρ = 0.0175 Ω·mm²/m, ampacity ×1.000.",
+    "MATERIAL_NOTE_DEFAULT": "<strong>Copper, tinned.</strong> 96% IACS, ρ = 0.01823 Ω·mm²/m, "
+    "ampacity ×0.98 against annealed copper.",
     "MODE_VOLTAGE": "{ dc: 24, ac1: 120, ac3: 208 }",
     "DEF_FREQ": "60",
     "MODE_LEGEND": "Current type",
@@ -949,9 +969,10 @@ EN = {
 UK_FAQ = [
     (
         "Скільки ампер витримує дріт кожного розміру AWG?",
-        "<p>Для мідних провідників за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C "
-        "у таблиці вище дає приблизно 8&nbsp;А для 18&nbsp;AWG, 14&nbsp;А для 14&nbsp;AWG, 26&nbsp;А для "
-        "10&nbsp;AWG, 35&nbsp;А для 8&nbsp;AWG, 62&nbsp;А для 4&nbsp;AWG і 112&nbsp;А для 0&nbsp;AWG за "
+        "<p>Для лудженої мідної жили за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C "
+        "у таблиці вище дає приблизно 7,8&nbsp;А для 18&nbsp;AWG, 13,7&nbsp;А для 14&nbsp;AWG, "
+        "25,5&nbsp;А для 10&nbsp;AWG, 34,3&nbsp;А для 8&nbsp;AWG, 60,7&nbsp;А для 4&nbsp;AWG і "
+        "109,7&nbsp;А для 0&nbsp;AWG за "
         "умови до трьох струмопровідних жил у кабелі. Одинарний провідник у вільному повітрі охолоджується "
         "краще й витримує більше. Силіконовий дріт із робочою температурою 200&nbsp;°C витримує приблизно "
         "вдвічі більше, але лише якщо кожна клема, запобіжник і конектор у колі також розраховані на таку "
@@ -1069,9 +1090,9 @@ UK_CONTENT = f"""            <section id="how-to-read">
               <p>
                 Колонки допустимого струму — в амперах, і ампер є ампер: провіднику байдуже, від постійного
                 чи змінного струму він нагрівся. Повністю змінюється те, чого ці ампери <em>варті</em>. Та
-                сама жила 0&nbsp;AWG на своїх 112&nbsp;А віддає <strong>2,7&nbsp;кВт</strong> у системі
-                24&nbsp;В постійного струму, <strong>26&nbsp;кВт</strong> на 230&nbsp;В однофазних і
-                <strong>78&nbsp;кВт</strong> на 400&nbsp;В трифазних — різниця у двадцять дев'ять разів,
+                сама жила 0&nbsp;AWG на своїх 109,7&nbsp;А віддає <strong>2,6&nbsp;кВт</strong> у системі
+                24&nbsp;В постійного струму, <strong>25&nbsp;кВт</strong> на 230&nbsp;В однофазних і
+                <strong>76&nbsp;кВт</strong> на 400&nbsp;В трифазних — різниця у двадцять дев'ять разів,
                 лише за рахунок напруги та √3.
               </p>
               <p>
@@ -1090,7 +1111,7 @@ UK_CONTENT = f"""            <section id="how-to-read">
               </p>
               <p>
                 На цю колонку варто подивитись уважно. Та сама жила 0&nbsp;AWG придатна для
-                <strong>9,8&nbsp;м</strong> у системі 24&nbsp;В постійного струму і <strong>189&nbsp;м</strong>
+                <strong>9,6&nbsp;м</strong> у системі 24&nbsp;В постійного струму і <strong>185&nbsp;м</strong>
                 у трифазній 400&nbsp;В — різниця в дев'ятнадцять разів, лише за рахунок напруги та √3, за
                 абсолютно незмінної міді. Довгу трасу рідко обмежує допустимий струм; її обмежує падіння напруги.
               </p>
@@ -1173,7 +1194,7 @@ UK_CONTENT = f"""            <section id="how-to-read">
                 <em>3 навантажені жили</em>; по мідних таблицях це відношення в середньому дорівнює
                 <strong>0,915</strong> — саме цей коефіцієнт застосовано тут до колонок «у кабелі». Він не
                 залежить від частоти й дає зниження приблизно на 9&nbsp;%: тому 0&nbsp;AWG показує
-                112&nbsp;А для постійного струму і 102&nbsp;А для трифазного. Колонки вільного повітря
+                109,7&nbsp;А для постійного струму і 100,4&nbsp;А для трифазного. Колонки вільного повітря
                 описують одну ізольовану жилу — той самий об'єкт у будь-якому режимі, тож вони не
                 змінюються.
               </p>
@@ -1185,12 +1206,12 @@ UK_CONTENT = f"""            <section id="how-to-read">
               <p class="formula"><span>Скін-ефект і ефект близькості, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0,312 (d/s)² + 1,18 / (y<sub>s</sub> + 0,27)]</span></p>
               <p>
                 Враховано обидва ефекти — скін-ефект і ефект близькості сусідніх жил, який переважає одразу
-                поза мережевою частотою. Разом вони дають <strong>0,30&nbsp;%</strong> на 50&nbsp;Гц для
-                0&nbsp;AWG, 0,05&nbsp;% для 4&nbsp;AWG і нічого вимірного для тоншого. Це і є вся різниця
+                поза мережевою частотою. Разом вони дають <strong>0,28&nbsp;%</strong> на 50&nbsp;Гц для
+                0&nbsp;AWG, 0,04&nbsp;% для 4&nbsp;AWG і нічого вимірного для тоншого. Це і є вся різниця
                 між постійним і однофазним змінним струмом тут: обидва мають дві навантажені жили, а в
                 неброньованого низьковольтного дроту немає ані втрат в оболонці, ані діелектричних. У
                 таблиці показано десяткову частку, щоб цю різницю було видно там, де вона є — 0&nbsp;AWG
-                переходить зі 112,0&nbsp;А на 111,8&nbsp;А — і щоб рядки читались однаково там, де вона
+                переходить зі 109,7&nbsp;А на 109,6&nbsp;А — і щоб рядки читались однаково там, де вона
                 справді нульова. Допустимий струм
                 масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
                 значно менше за розбіжність між даташитами двох виробників. Тож сама лише частота не виправдала б окремої колонки для
@@ -1438,9 +1459,10 @@ UK = {
     "BC_CURRENT": "AWG в ампери",
     "EYEBROW": "Переріз дроту / 30—0 AWG · мідь",
     "H1": "AWG в ампери: таблиця і калькулятор",
-    "HERO_P": "Робочий довідник для гнучкого тонкожильного лудженого мідного дроту в силіконовій "
-    "ізоляції. Дивіться допустимий струм за реальним перерізом міді в мм², а потім перевіряйте власну "
-    "конструкцію жилок, температурний режим, поправку на пучок і падіння напруги в калькуляторі.",
+    "HERO_P": "Робочий довідник для гнучкого тонкожильного монтажного дроту, від 30 AWG до 0 AWG. "
+    "Дивіться допустимий струм за реальним перерізом жили в мм², а потім перевіряйте в калькуляторі "
+    "власну конструкцію жилок, матеріал жили, температурний клас ізоляції, поправку на пучок і падіння "
+    "напруги на постійному чи змінному струмі.",
     "MAP_ALT": "Абстрактна схема провідників і шляхів тепловідведення",
     "MAP_CAPTION": "провідники / тепловий шлях",
     "LAYOUT_LABEL": "Таблиця AWG і калькулятор перерізу",
@@ -1470,6 +1492,7 @@ UK = {
     "AWG 24–30 є орієнтовними для тонкожильного силіконового дроту й потребують звірки з даташитом "
     "конкретного кабелю.",
     "MATERIALS": material_json("uk"),
+    "DEFAULT_MATERIAL": DEFAULT_MATERIAL,
     "INSULATIONS": insulation_json("uk"),
     "INSULATION_OPTIONS": insulation_options("uk"),
     "INSULATION_LABEL": "Ізоляція",
@@ -1479,7 +1502,8 @@ UK = {
     "MATERIAL_OPTIONS": material_options("uk"),
     "MATERIAL_LABEL": "Матеріал жили",
     "IACS_LABEL": "% IACS",
-    "MATERIAL_NOTE_CU": "<strong>Мідь, відпалена.</strong> 100% IACS, ρ = 0,0175 Ом·мм²/м, струм ×1,000.",
+    "MATERIAL_NOTE_DEFAULT": "<strong>Мідь, луджена.</strong> 96% IACS, ρ = 0,01823 Ом·мм²/м, "
+    "струм ×0,98 відносно відпаленої міді.",
     "MODE_VOLTAGE": "{ dc: 24, ac1: 230, ac3: 400 }",
     "DEF_FREQ": "50",
     "MODE_LEGEND": "\u0420\u0456\u0434 \u0441\u0442\u0440\u0443\u043c\u0443",

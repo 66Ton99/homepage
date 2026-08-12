@@ -200,6 +200,13 @@ about 1.5 % above the 0.017241 solid-wire IACS reference, the usual allowance
 for the helical lay of a stranded conductor. Selecting copper therefore leaves
 every previously published number untouched.
 
+The selector **starts on tinned copper**, because that is what fine-stranded
+silicone lead wire actually is, so the default view carries the 96 % penalty:
+0 AWG opens at 109.7 A rather than 112 A, and the server-rendered table is
+computed for it. Figures quoted elsewhere in this README are at the
+annealed-copper reference unless they say otherwise; the page prose is written
+at the default.
+
 Everything is quoted at 20 °C. There is no temperature correction of
 resistivity, which would need a conductor temperature rather than the ambient
 the calculator asks for; the materials section says so explicitly.
@@ -272,6 +279,11 @@ Rules that keep this from turning into an SEO problem or a mess:
 
 `localStorage` still holds the mode as a fallback for visitors arriving without
 parameters; an explicit URL always wins over it.
+
+- **The load pass never writes.** URL writing is armed only after the initial
+  render, so a restored mode stays out of the address bar: arriving at a clean
+  `/uk/awg-to-amps` with `ac3` remembered leaves the URL clean while still
+  showing three-phase. Only the reader's own changes shape the query string.
 
 ## SEO notes
 

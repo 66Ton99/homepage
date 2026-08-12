@@ -212,7 +212,7 @@
           "name": "How many amps can each AWG wire size carry?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "For copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in the chart above gives roughly 8&nbsp;A for 18&nbsp;AWG, 14&nbsp;A for 14&nbsp;AWG, 26&nbsp;A for 10&nbsp;AWG, 35&nbsp;A for 8&nbsp;AWG, 62&nbsp;A for 4&nbsp;AWG and 112&nbsp;A for 0&nbsp;AWG with up to three current-carrying conductors in a cable. A single conductor in free air runs cooler and carries more. High-temperature silicone wire rated to 200&nbsp;°C carries roughly twice the conservative figure, but only if every terminal, fuse and connector in the circuit is rated for that temperature too."
+            "text": "For tinned copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in the chart above gives roughly 7.8&nbsp;A for 18&nbsp;AWG, 13.7&nbsp;A for 14&nbsp;AWG, 25.5&nbsp;A for 10&nbsp;AWG, 34.3&nbsp;A for 8&nbsp;AWG, 60.7&nbsp;A for 4&nbsp;AWG and 109.7&nbsp;A for 0&nbsp;AWG with up to three current-carrying conductors in a cable. A single conductor in free air runs cooler and carries more. High-temperature silicone wire rated to 200&nbsp;°C carries roughly twice the conservative figure, but only if every terminal, fuse and connector in the circuit is rated for that temperature too."
           }
         },
         {
@@ -1593,7 +1593,7 @@
           <div class="hero-copy">
             <p class="eyebrow">Wire sizing / 30—0 AWG · copper</p>
             <h1 id="page-title">AWG to amps chart &amp; calculator</h1>
-            <p>A working reference for flexible, fine-stranded tinned copper wire with silicone insulation. Read current capacity by real copper cross-section in mm², then use the calculator to check a custom strand construction, thermal reference, bundle derating and DC voltage drop.</p>
+            <p>A working reference for flexible, fine-stranded lead wire, from 30 AWG to 0 AWG. Read current capacity by real conductor cross-section in mm², then use the calculator to check a custom strand construction, conductor material, insulation temperature rating, bundle derating and voltage drop on DC or AC.</p>
           </div>
           <div class="hero-map" aria-label="Abstract diagram of conductors and thermal paths" role="img">
             <span class="map-line one"></span>
@@ -1628,7 +1628,7 @@
             <label class="section-kicker" for="material">Conductor material</label>
             <select id="material" name="material">
                 <option value="cu">Copper, annealed · 100% IACS</option>
-                <option value="cusn">Copper, tinned · 96% IACS</option>
+                <option value="cusn" selected>Copper, tinned · 96% IACS</option>
                 <option value="cuag">Copper, silver-plated · 100% IACS</option>
                 <option value="cuni">Copper, nickel-plated · 95% IACS</option>
                 <option value="al">Aluminium 1350 · 61.2% IACS</option>
@@ -1665,7 +1665,7 @@
             </span>
           </div>
           <p class="modebar-note" id="modeNote"><strong>Direct current.</strong> Voltage drop is counted over the full loop, out and back.</p>
-          <p class="modebar-note" id="materialNote"><strong>Copper, annealed.</strong> 100% IACS, ρ = 0.0175 Ω·mm²/m, ampacity ×1.000.</p>
+          <p class="modebar-note" id="materialNote"><strong>Copper, tinned.</strong> 96% IACS, ρ = 0.01823 Ω·mm²/m, ampacity ×0.98 against annealed copper.</p>
           <p class="modebar-note" id="insulationNote"><strong>Silicone, 200 °C.</strong> Conductor rating 200 °C, ampacity ×1.000 against the published silicone data.</p>
         </div>
 
@@ -1702,188 +1702,188 @@
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 30 AWG into the calculator">30 <span class="unit">AWG</span></button></th>
                     <td>0.051</td>
                     <td class="js-b60">2.0 A</td>
-                    <td class="js-f60">3.0 A</td>
-                    <td class="js-b200">3.0 A</td>
-                    <td class="js-f200">4.0 A</td>
-                    <td class="js-r">343</td>
+                    <td class="js-f60">2.9 A</td>
+                    <td class="js-b200">2.9 A</td>
+                    <td class="js-f200">3.9 A</td>
+                    <td class="js-r">357</td>
                     <td class="js-len">0.5</td>
-                    <td class="js-p">48 W</td>
+                    <td class="js-p">47 W</td>
                   </tr>
                   <tr data-gauge="28">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 28 AWG into the calculator">28 <span class="unit">AWG</span></button></th>
                     <td>0.080</td>
-                    <td class="js-b60">3.0 A</td>
-                    <td class="js-f60">4.0 A</td>
-                    <td class="js-b200">4.0 A</td>
-                    <td class="js-f200">6.0 A</td>
-                    <td class="js-r">219</td>
+                    <td class="js-b60">2.9 A</td>
+                    <td class="js-f60">3.9 A</td>
+                    <td class="js-b200">3.9 A</td>
+                    <td class="js-f200">5.9 A</td>
+                    <td class="js-r">228</td>
                     <td class="js-len">0.5</td>
-                    <td class="js-p">72 W</td>
+                    <td class="js-p">71 W</td>
                   </tr>
                   <tr data-gauge="26">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 26 AWG into the calculator">26 <span class="unit">AWG</span></button></th>
                     <td>0.129</td>
-                    <td class="js-b60">4.0 A</td>
-                    <td class="js-f60">5.0 A</td>
-                    <td class="js-b200">5.0 A</td>
-                    <td class="js-f200">7.0 A</td>
-                    <td class="js-r">136</td>
+                    <td class="js-b60">3.9 A</td>
+                    <td class="js-f60">4.9 A</td>
+                    <td class="js-b200">4.9 A</td>
+                    <td class="js-f200">6.9 A</td>
+                    <td class="js-r">141</td>
                     <td class="js-len">0.7</td>
-                    <td class="js-p">96 W</td>
+                    <td class="js-p">94 W</td>
                   </tr>
                   <tr data-gauge="24">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 24 AWG into the calculator">24 <span class="unit">AWG</span></button></th>
                     <td>0.205</td>
-                    <td class="js-b60">5.0 A</td>
-                    <td class="js-f60">7.0 A</td>
-                    <td class="js-b200">7.0 A</td>
-                    <td class="js-f200">10.0 A</td>
-                    <td class="js-r">85.4</td>
+                    <td class="js-b60">4.9 A</td>
+                    <td class="js-f60">6.9 A</td>
+                    <td class="js-b200">6.9 A</td>
+                    <td class="js-f200">9.8 A</td>
+                    <td class="js-r">88.9</td>
                     <td class="js-len">0.8</td>
-                    <td class="js-p">120 W</td>
+                    <td class="js-p">118 W</td>
                   </tr>
                   <tr data-gauge="22">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 22 AWG into the calculator">22 <span class="unit">AWG</span></button></th>
                     <td>0.326</td>
-                    <td class="js-b60">5.0 A</td>
-                    <td class="js-f60">7.0 A</td>
-                    <td class="js-b200">11.0 A</td>
-                    <td class="js-f200">15.0 A</td>
-                    <td class="js-r">53.7</td>
+                    <td class="js-b60">4.9 A</td>
+                    <td class="js-f60">6.9 A</td>
+                    <td class="js-b200">10.8 A</td>
+                    <td class="js-f200">14.7 A</td>
+                    <td class="js-r">55.9</td>
                     <td class="js-len">1.3</td>
-                    <td class="js-p">120 W</td>
+                    <td class="js-p">118 W</td>
                   </tr>
                   <tr data-gauge="20">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 20 AWG into the calculator">20 <span class="unit">AWG</span></button></th>
                     <td>0.518</td>
-                    <td class="js-b60">6.0 A</td>
-                    <td class="js-f60">9.0 A</td>
-                    <td class="js-b200">14.0 A</td>
-                    <td class="js-f200">20.0 A</td>
-                    <td class="js-r">33.8</td>
-                    <td class="js-len">1.8</td>
-                    <td class="js-p">144 W</td>
+                    <td class="js-b60">5.9 A</td>
+                    <td class="js-f60">8.8 A</td>
+                    <td class="js-b200">13.7 A</td>
+                    <td class="js-f200">19.6 A</td>
+                    <td class="js-r">35.2</td>
+                    <td class="js-len">1.7</td>
+                    <td class="js-p">141 W</td>
                   </tr>
                   <tr data-gauge="18">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 18 AWG into the calculator">18 <span class="unit">AWG</span></button></th>
                     <td>0.823</td>
-                    <td class="js-b60">8.0 A</td>
-                    <td class="js-f60">12.0 A</td>
-                    <td class="js-b200">19.0 A</td>
-                    <td class="js-f200">26.0 A</td>
-                    <td class="js-r">21.3</td>
+                    <td class="js-b60">7.8 A</td>
+                    <td class="js-f60">11.8 A</td>
+                    <td class="js-b200">18.6 A</td>
+                    <td class="js-f200">25.5 A</td>
+                    <td class="js-r">22.1</td>
                     <td class="js-len">2.1</td>
-                    <td class="js-p">192 W</td>
+                    <td class="js-p">188 W</td>
                   </tr>
                   <tr data-gauge="16">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 16 AWG into the calculator">16 <span class="unit">AWG</span></button></th>
                     <td>1.310</td>
-                    <td class="js-b60">11.0 A</td>
-                    <td class="js-f60">15.0 A</td>
-                    <td class="js-b200">24.0 A</td>
-                    <td class="js-f200">34.0 A</td>
-                    <td class="js-r">13.4</td>
+                    <td class="js-b60">10.8 A</td>
+                    <td class="js-f60">14.7 A</td>
+                    <td class="js-b200">23.5 A</td>
+                    <td class="js-f200">33.3 A</td>
+                    <td class="js-r">13.9</td>
                     <td class="js-len">2.4</td>
-                    <td class="js-p">264 W</td>
+                    <td class="js-p">259 W</td>
                   </tr>
                   <tr data-gauge="14">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 14 AWG into the calculator">14 <span class="unit">AWG</span></button></th>
                     <td>2.080</td>
-                    <td class="js-b60">14.0 A</td>
-                    <td class="js-f60">21.0 A</td>
-                    <td class="js-b200">32.0 A</td>
-                    <td class="js-f200">46.0 A</td>
-                    <td class="js-r">8.41</td>
-                    <td class="js-len">3.1</td>
-                    <td class="js-p">336 W</td>
+                    <td class="js-b60">13.7 A</td>
+                    <td class="js-f60">20.6 A</td>
+                    <td class="js-b200">31.4 A</td>
+                    <td class="js-f200">45.1 A</td>
+                    <td class="js-r">8.76</td>
+                    <td class="js-len">3.0</td>
+                    <td class="js-p">329 W</td>
                   </tr>
                   <tr data-gauge="12">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 12 AWG into the calculator">12 <span class="unit">AWG</span></button></th>
                     <td>3.310</td>
-                    <td class="js-b60">19.0 A</td>
-                    <td class="js-f60">27.0 A</td>
-                    <td class="js-b200">41.0 A</td>
-                    <td class="js-f200">60.0 A</td>
-                    <td class="js-r">5.29</td>
-                    <td class="js-len">3.6</td>
-                    <td class="js-p">456 W</td>
+                    <td class="js-b60">18.6 A</td>
+                    <td class="js-f60">26.5 A</td>
+                    <td class="js-b200">40.2 A</td>
+                    <td class="js-f200">58.8 A</td>
+                    <td class="js-r">5.51</td>
+                    <td class="js-len">3.5</td>
+                    <td class="js-p">447 W</td>
                   </tr>
                   <tr data-gauge="10">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 10 AWG into the calculator">10 <span class="unit">AWG</span></button></th>
                     <td>5.260</td>
-                    <td class="js-b60">26.0 A</td>
-                    <td class="js-f60">36.0 A</td>
-                    <td class="js-b200">54.0 A</td>
-                    <td class="js-f200">81.0 A</td>
-                    <td class="js-r">3.33</td>
-                    <td class="js-len">4.2</td>
-                    <td class="js-p">624 W</td>
+                    <td class="js-b60">25.5 A</td>
+                    <td class="js-f60">35.3 A</td>
+                    <td class="js-b200">52.9 A</td>
+                    <td class="js-f200">79.4 A</td>
+                    <td class="js-r">3.47</td>
+                    <td class="js-len">4.1</td>
+                    <td class="js-p">611 W</td>
                   </tr>
                   <tr data-gauge="8">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 8 AWG into the calculator">8 <span class="unit">AWG</span></button></th>
                     <td>8.370</td>
-                    <td class="js-b60">35.0 A</td>
-                    <td class="js-f60">50.0 A</td>
-                    <td class="js-b200">74.0 A</td>
-                    <td class="js-f200">113.0 A</td>
-                    <td class="js-r">2.09</td>
-                    <td class="js-len">4.9</td>
-                    <td class="js-p">840 W</td>
+                    <td class="js-b60">34.3 A</td>
+                    <td class="js-f60">49.0 A</td>
+                    <td class="js-b200">72.5 A</td>
+                    <td class="js-f200">110.7 A</td>
+                    <td class="js-r">2.18</td>
+                    <td class="js-len">4.8</td>
+                    <td class="js-p">823 W</td>
                   </tr>
                   <tr data-gauge="6">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 6 AWG into the calculator">6 <span class="unit">AWG</span></button></th>
                     <td>13.30</td>
-                    <td class="js-b60">48.0 A</td>
-                    <td class="js-f60">71.0 A</td>
-                    <td class="js-b200">100.0 A</td>
-                    <td class="js-f200">156.0 A</td>
-                    <td class="js-r">1.32</td>
-                    <td class="js-len">5.7</td>
-                    <td class="js-p">1.15 kW</td>
+                    <td class="js-b60">47.0 A</td>
+                    <td class="js-f60">69.6 A</td>
+                    <td class="js-b200">98.0 A</td>
+                    <td class="js-f200">152.8 A</td>
+                    <td class="js-r">1.37</td>
+                    <td class="js-len">5.6</td>
+                    <td class="js-p">1.13 kW</td>
                   </tr>
                   <tr data-gauge="4">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 4 AWG into the calculator">4 <span class="unit">AWG</span></button></th>
                     <td>21.15</td>
-                    <td class="js-b60">62.0 A</td>
-                    <td class="js-f60">95.0 A</td>
-                    <td class="js-b200">131.0 A</td>
-                    <td class="js-f200">210.0 A</td>
-                    <td class="js-r">0.827</td>
-                    <td class="js-len">7.0</td>
-                    <td class="js-p">1.49 kW</td>
+                    <td class="js-b60">60.7 A</td>
+                    <td class="js-f60">93.1 A</td>
+                    <td class="js-b200">128.4 A</td>
+                    <td class="js-f200">205.8 A</td>
+                    <td class="js-r">0.862</td>
+                    <td class="js-len">6.9</td>
+                    <td class="js-p">1.46 kW</td>
                   </tr>
                   <tr data-gauge="2">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 2 AWG into the calculator">2 <span class="unit">AWG</span></button></th>
                     <td>33.62</td>
-                    <td class="js-b60">81.0 A</td>
-                    <td class="js-f60">129.0 A</td>
-                    <td class="js-b200">173.0 A</td>
-                    <td class="js-f200">286.0 A</td>
-                    <td class="js-r">0.521</td>
-                    <td class="js-len">8.5</td>
-                    <td class="js-p">1.94 kW</td>
+                    <td class="js-b60">79.4 A</td>
+                    <td class="js-f60">126.4 A</td>
+                    <td class="js-b200">169.5 A</td>
+                    <td class="js-f200">280.2 A</td>
+                    <td class="js-r">0.542</td>
+                    <td class="js-len">8.4</td>
+                    <td class="js-p">1.90 kW</td>
                   </tr>
                   <tr data-gauge="1">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 1 AWG into the calculator">1 <span class="unit">AWG</span></button></th>
                     <td>42.41</td>
-                    <td class="js-b60">93.0 A</td>
-                    <td class="js-f60">152.0 A</td>
-                    <td class="js-b200">199.0 A</td>
-                    <td class="js-f200">338.0 A</td>
-                    <td class="js-r">0.413</td>
-                    <td class="js-len">9.4</td>
-                    <td class="js-p">2.23 kW</td>
+                    <td class="js-b60">91.1 A</td>
+                    <td class="js-f60">148.9 A</td>
+                    <td class="js-b200">195.0 A</td>
+                    <td class="js-f200">331.2 A</td>
+                    <td class="js-r">0.430</td>
+                    <td class="js-len">9.2</td>
+                    <td class="js-p">2.19 kW</td>
                   </tr>
                   <tr data-gauge="0">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Load 0 AWG into the calculator">0 <span class="unit">AWG</span></button></th>
                     <td>53.49</td>
-                    <td class="js-b60">112.0 A</td>
-                    <td class="js-f60">167.0 A</td>
-                    <td class="js-b200">224.0 A</td>
-                    <td class="js-f200">348.0 A</td>
-                    <td class="js-r">0.327</td>
-                    <td class="js-len">9.8</td>
-                    <td class="js-p">2.69 kW</td>
+                    <td class="js-b60">109.7 A</td>
+                    <td class="js-f60">163.6 A</td>
+                    <td class="js-b200">219.5 A</td>
+                    <td class="js-f200">341.0 A</td>
+                    <td class="js-r">0.341</td>
+                    <td class="js-len">9.6</td>
+                    <td class="js-p">2.63 kW</td>
                   </tr>
                 </tbody>
               </table>
@@ -1943,7 +1943,7 @@
                     </div>
                     <div class="field">
                       <label for="loadCurrent">Load current / A <span class="optional-tag">optional</span></label>
-                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="35" placeholder="35" inputmode="decimal" />
+                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="30" placeholder="30" inputmode="decimal" />
                     </div>
                     <div class="field">
                       <label for="ambient">Ambient / °C <span class="optional-tag">optional</span></label>
@@ -2050,9 +2050,9 @@
               <p>
                 The ampacity columns are in amperes, and amperes are amperes: a conductor does not care
                 whether the heat came from DC or AC. What changes completely is what those amperes are
-                <em>worth</em>. The same 0&nbsp;AWG conductor at its 112&nbsp;A rating delivers
-                <strong>2.7&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>13.4&nbsp;kW</strong> on
-                120&nbsp;V single-phase, and <strong>37&nbsp;kW</strong> on 208&nbsp;V three-phase — a
+                <em>worth</em>. The same 0&nbsp;AWG conductor at its 109.7&nbsp;A rating delivers
+                <strong>2.6&nbsp;kW</strong> on a 24&nbsp;V DC system, <strong>13.2&nbsp;kW</strong> on
+                120&nbsp;V single-phase, and <strong>36&nbsp;kW</strong> on 208&nbsp;V three-phase — a
                 factor of fourteen, from voltage and the √3. On a 230/400&nbsp;V system the spread is
                 wider still, at twenty-nine.
               </p>
@@ -2072,7 +2072,7 @@
               </p>
               <p>
                 That last column is worth staring at. The same 0&nbsp;AWG conductor is good for
-                <strong>9.8&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>107&nbsp;m</strong> on
+                <strong>9.6&nbsp;m</strong> on a 24&nbsp;V DC system and <strong>105&nbsp;m</strong> on
                 208&nbsp;V three-phase — a factor of eleven, from voltage and the √3 alone, with the
                 copper completely unchanged. Ampacity is rarely what limits a long run; voltage drop is.
               </p>
@@ -2154,7 +2154,7 @@
                 separate <em>2 loaded conductors</em> and <em>3 loaded conductors</em> columns; across its
                 copper tables the ratio averages <strong>0.915</strong>, and that is the factor applied to
                 the in-cable columns here. It is a frequency-independent, roughly 9&nbsp;% cut — the reason
-                0&nbsp;AWG reads 112&nbsp;A on DC and 102&nbsp;A on three-phase. The free-air columns
+                0&nbsp;AWG reads 109.7&nbsp;A on DC and 100.4&nbsp;A on three-phase. The free-air columns
                 describe one isolated conductor, which is the same object in every mode, so they do not
                 move.
               </p>
@@ -2167,12 +2167,12 @@
               <p class="formula"><span>Skin and proximity, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0.8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0.312 (d/s)² + 1.18 / (y<sub>s</sub> + 0.27)]</span></p>
               <p>
                 Both effects are counted — skin, plus the proximity effect of neighbouring conductors, which
-                dominates once you leave mains frequency. Together they come to <strong>0.43&nbsp;%</strong>
-                at 60&nbsp;Hz for 0&nbsp;AWG, 0.07&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
+                dominates once you leave mains frequency. Together they come to <strong>0.40&nbsp;%</strong>
+                at 60&nbsp;Hz for 0&nbsp;AWG, 0.06&nbsp;% at 4&nbsp;AWG and nothing measurable below that.
                 This is the entire difference between DC and single-phase AC here: both have two loaded
                 conductors, and unarmoured low-voltage wire has no sheath or dielectric losses to add. The
                 table shows a decimal place so you can see it on the gauges where it exists — 0&nbsp;AWG
-                goes from 112.0&nbsp;A to 111.8&nbsp;A — and read as identical where it genuinely is. Ampacity scales as
+                goes from 109.7&nbsp;A to 109.5&nbsp;A — and read as identical where it genuinely is. Ampacity scales as
                 1/√(1+y<sub>s</sub>), so it moves by well under a tenth of a percent — far less than the
                 spread between one manufacturer's datasheet and another's. So the frequency term alone would not justify a
                 separate AC column; the conductor count is what does.
@@ -2373,7 +2373,7 @@
             <div class="faq">
               <details class="faq-item">
                 <summary class="faq-q"><h3>How many amps can each AWG wire size carry?</h3></summary>
-                <div class="faq-a"><p>For copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in the chart above gives roughly 8&nbsp;A for 18&nbsp;AWG, 14&nbsp;A for 14&nbsp;AWG, 26&nbsp;A for 10&nbsp;AWG, 35&nbsp;A for 8&nbsp;AWG, 62&nbsp;A for 4&nbsp;AWG and 112&nbsp;A for 0&nbsp;AWG with up to three current-carrying conductors in a cable. A single conductor in free air runs cooler and carries more. High-temperature silicone wire rated to 200&nbsp;°C carries roughly twice the conservative figure, but only if every terminal, fuse and connector in the circuit is rated for that temperature too.</p></div>
+                <div class="faq-a"><p>For tinned copper conductors at 30&nbsp;°C ambient, the conservative 60&nbsp;°C reference in the chart above gives roughly 7.8&nbsp;A for 18&nbsp;AWG, 13.7&nbsp;A for 14&nbsp;AWG, 25.5&nbsp;A for 10&nbsp;AWG, 34.3&nbsp;A for 8&nbsp;AWG, 60.7&nbsp;A for 4&nbsp;AWG and 109.7&nbsp;A for 0&nbsp;AWG with up to three current-carrying conductors in a cable. A single conductor in free air runs cooler and carries more. High-temperature silicone wire rated to 200&nbsp;°C carries roughly twice the conservative figure, but only if every terminal, fuse and connector in the circuit is rated for that temperature too.</p></div>
               </details>
               <details class="faq-item">
                 <summary class="faq-q"><h3>What is the difference between the 60&nbsp;°C and 200&nbsp;°C columns?</h3></summary>
@@ -2527,6 +2527,9 @@
       // solid-wire IACS reference — the usual allowance for the strand lay.
       const COPPER_RESISTIVITY = 0.0175;
       const MATERIALS = {"cu": {"iacs": 100.0, "name": "Copper, annealed"}, "cusn": {"iacs": 96.0, "name": "Copper, tinned"}, "cuag": {"iacs": 100.0, "name": "Copper, silver-plated"}, "cuni": {"iacs": 95.0, "name": "Copper, nickel-plated"}, "al": {"iacs": 61.2, "name": "Aluminium 1350"}, "al8000": {"iacs": 61.0, "name": "Aluminium alloy 8000"}, "cca": {"iacs": 61.5, "name": "Copper-clad aluminium"}, "ccs": {"iacs": 30.0, "name": "Copper-clad steel"}, "ag": {"iacs": 105.0, "name": "Silver"}};
+      // Matches the selected option in the markup, so the URL only carries a
+      // material when the reader has actually changed it.
+      const DEFAULT_MATERIAL = "cusn";
 
       // Same geometry, same permitted temperature rise, so I²R is fixed and the
       // current goes as the inverse square root of resistivity.
@@ -2903,11 +2906,18 @@
         });
       }
 
+      // Nothing touches the address bar until the reader has actually changed
+      // something. The first pass runs with a mode restored from localStorage,
+      // and rewriting the URL for it turned a clean shared link into
+      // ?mode=ac3&u=400 the moment the page loaded.
+      let urlWritable = false;
+
       function writeUrl() {
+        if (!urlWritable) return;
         const params = new URLSearchParams();
         const mode = currentMode();
         if (mode !== "dc") params.set("mode", mode);
-        if ($("material").value !== "cu") params.set("mat", $("material").value);
+        if ($("material").value !== DEFAULT_MATERIAL) params.set("mat", $("material").value);
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
         if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
@@ -2928,6 +2938,9 @@
       // Browsers rate-limit replaceState, so do not call it on every keystroke.
       let urlTimer = null;
       function scheduleUrlWrite() {
+        // The init pass schedules one of these too, and its timer would fire
+        // after the flag flips; drop it here rather than 350 ms later.
+        if (!urlWritable) return;
         clearTimeout(urlTimer);
         urlTimer = setTimeout(writeUrl, 350);
       }
@@ -3105,6 +3118,9 @@
       syncOptionalResults();
       if (!readUrl()) restoreMode();
       applyMode();
+      // The reader arrived at whatever URL they arrived at; from here on, their
+      // own changes are what shape it.
+      urlWritable = true;
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>

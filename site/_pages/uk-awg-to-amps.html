@@ -212,7 +212,7 @@
           "name": "Скільки ампер витримує дріт кожного розміру AWG?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Для мідних провідників за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C у таблиці вище дає приблизно 8&nbsp;А для 18&nbsp;AWG, 14&nbsp;А для 14&nbsp;AWG, 26&nbsp;А для 10&nbsp;AWG, 35&nbsp;А для 8&nbsp;AWG, 62&nbsp;А для 4&nbsp;AWG і 112&nbsp;А для 0&nbsp;AWG за умови до трьох струмопровідних жил у кабелі. Одинарний провідник у вільному повітрі охолоджується краще й витримує більше. Силіконовий дріт із робочою температурою 200&nbsp;°C витримує приблизно вдвічі більше, але лише якщо кожна клема, запобіжник і конектор у колі також розраховані на таку температуру."
+            "text": "Для лудженої мідної жили за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C у таблиці вище дає приблизно 7,8&nbsp;А для 18&nbsp;AWG, 13,7&nbsp;А для 14&nbsp;AWG, 25,5&nbsp;А для 10&nbsp;AWG, 34,3&nbsp;А для 8&nbsp;AWG, 60,7&nbsp;А для 4&nbsp;AWG і 109,7&nbsp;А для 0&nbsp;AWG за умови до трьох струмопровідних жил у кабелі. Одинарний провідник у вільному повітрі охолоджується краще й витримує більше. Силіконовий дріт із робочою температурою 200&nbsp;°C витримує приблизно вдвічі більше, але лише якщо кожна клема, запобіжник і конектор у колі також розраховані на таку температуру."
           }
         },
         {
@@ -1593,7 +1593,7 @@
           <div class="hero-copy">
             <p class="eyebrow">Переріз дроту / 30—0 AWG · мідь</p>
             <h1 id="page-title">AWG в ампери: таблиця і калькулятор</h1>
-            <p>Робочий довідник для гнучкого тонкожильного лудженого мідного дроту в силіконовій ізоляції. Дивіться допустимий струм за реальним перерізом міді в мм², а потім перевіряйте власну конструкцію жилок, температурний режим, поправку на пучок і падіння напруги в калькуляторі.</p>
+            <p>Робочий довідник для гнучкого тонкожильного монтажного дроту, від 30 AWG до 0 AWG. Дивіться допустимий струм за реальним перерізом жили в мм², а потім перевіряйте в калькуляторі власну конструкцію жилок, матеріал жили, температурний клас ізоляції, поправку на пучок і падіння напруги на постійному чи змінному струмі.</p>
           </div>
           <div class="hero-map" aria-label="Абстрактна схема провідників і шляхів тепловідведення" role="img">
             <span class="map-line one"></span>
@@ -1628,7 +1628,7 @@
             <label class="section-kicker" for="material">Матеріал жили</label>
             <select id="material" name="material">
                 <option value="cu">Мідь, відпалена · 100% IACS</option>
-                <option value="cusn">Мідь, луджена · 96% IACS</option>
+                <option value="cusn" selected>Мідь, луджена · 96% IACS</option>
                 <option value="cuag">Мідь, посріблена · 100% IACS</option>
                 <option value="cuni">Мідь, нікельована · 95% IACS</option>
                 <option value="al">Алюміній 1350 · 61.2% IACS</option>
@@ -1665,7 +1665,7 @@
             </span>
           </div>
           <p class="modebar-note" id="modeNote"><strong>Постійний струм.</strong> Падіння напруги рахується по всьому колу, туди й назад.</p>
-          <p class="modebar-note" id="materialNote"><strong>Мідь, відпалена.</strong> 100% IACS, ρ = 0,0175 Ом·мм²/м, струм ×1,000.</p>
+          <p class="modebar-note" id="materialNote"><strong>Мідь, луджена.</strong> 96% IACS, ρ = 0,01823 Ом·мм²/м, струм ×0,98 відносно відпаленої міді.</p>
           <p class="modebar-note" id="insulationNote"><strong>Силікон, 200 °C.</strong> Робоча температура жили 200 °C, струм ×1,000 відносно опублікованих даних для силікону.</p>
         </div>
 
@@ -1702,188 +1702,188 @@
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 30 AWG у калькулятор">30 <span class="unit">AWG</span></button></th>
                     <td>0,051</td>
                     <td class="js-b60">2,0 А</td>
-                    <td class="js-f60">3,0 А</td>
-                    <td class="js-b200">3,0 А</td>
-                    <td class="js-f200">4,0 А</td>
-                    <td class="js-r">343</td>
+                    <td class="js-f60">2,9 А</td>
+                    <td class="js-b200">2,9 А</td>
+                    <td class="js-f200">3,9 А</td>
+                    <td class="js-r">357</td>
                     <td class="js-len">0,5</td>
-                    <td class="js-p">48 Вт</td>
+                    <td class="js-p">47 Вт</td>
                   </tr>
                   <tr data-gauge="28">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 28 AWG у калькулятор">28 <span class="unit">AWG</span></button></th>
                     <td>0,080</td>
-                    <td class="js-b60">3,0 А</td>
-                    <td class="js-f60">4,0 А</td>
-                    <td class="js-b200">4,0 А</td>
-                    <td class="js-f200">6,0 А</td>
-                    <td class="js-r">219</td>
+                    <td class="js-b60">2,9 А</td>
+                    <td class="js-f60">3,9 А</td>
+                    <td class="js-b200">3,9 А</td>
+                    <td class="js-f200">5,9 А</td>
+                    <td class="js-r">228</td>
                     <td class="js-len">0,5</td>
-                    <td class="js-p">72 Вт</td>
+                    <td class="js-p">71 Вт</td>
                   </tr>
                   <tr data-gauge="26">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 26 AWG у калькулятор">26 <span class="unit">AWG</span></button></th>
                     <td>0,129</td>
-                    <td class="js-b60">4,0 А</td>
-                    <td class="js-f60">5,0 А</td>
-                    <td class="js-b200">5,0 А</td>
-                    <td class="js-f200">7,0 А</td>
-                    <td class="js-r">136</td>
+                    <td class="js-b60">3,9 А</td>
+                    <td class="js-f60">4,9 А</td>
+                    <td class="js-b200">4,9 А</td>
+                    <td class="js-f200">6,9 А</td>
+                    <td class="js-r">141</td>
                     <td class="js-len">0,7</td>
-                    <td class="js-p">96 Вт</td>
+                    <td class="js-p">94 Вт</td>
                   </tr>
                   <tr data-gauge="24">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 24 AWG у калькулятор">24 <span class="unit">AWG</span></button></th>
                     <td>0,205</td>
-                    <td class="js-b60">5,0 А</td>
-                    <td class="js-f60">7,0 А</td>
-                    <td class="js-b200">7,0 А</td>
-                    <td class="js-f200">10,0 А</td>
-                    <td class="js-r">85,4</td>
+                    <td class="js-b60">4,9 А</td>
+                    <td class="js-f60">6,9 А</td>
+                    <td class="js-b200">6,9 А</td>
+                    <td class="js-f200">9,8 А</td>
+                    <td class="js-r">88,9</td>
                     <td class="js-len">0,8</td>
-                    <td class="js-p">120 Вт</td>
+                    <td class="js-p">118 Вт</td>
                   </tr>
                   <tr data-gauge="22">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 22 AWG у калькулятор">22 <span class="unit">AWG</span></button></th>
                     <td>0,326</td>
-                    <td class="js-b60">5,0 А</td>
-                    <td class="js-f60">7,0 А</td>
-                    <td class="js-b200">11,0 А</td>
-                    <td class="js-f200">15,0 А</td>
-                    <td class="js-r">53,7</td>
+                    <td class="js-b60">4,9 А</td>
+                    <td class="js-f60">6,9 А</td>
+                    <td class="js-b200">10,8 А</td>
+                    <td class="js-f200">14,7 А</td>
+                    <td class="js-r">55,9</td>
                     <td class="js-len">1,3</td>
-                    <td class="js-p">120 Вт</td>
+                    <td class="js-p">118 Вт</td>
                   </tr>
                   <tr data-gauge="20">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 20 AWG у калькулятор">20 <span class="unit">AWG</span></button></th>
                     <td>0,518</td>
-                    <td class="js-b60">6,0 А</td>
-                    <td class="js-f60">9,0 А</td>
-                    <td class="js-b200">14,0 А</td>
-                    <td class="js-f200">20,0 А</td>
-                    <td class="js-r">33,8</td>
-                    <td class="js-len">1,8</td>
-                    <td class="js-p">144 Вт</td>
+                    <td class="js-b60">5,9 А</td>
+                    <td class="js-f60">8,8 А</td>
+                    <td class="js-b200">13,7 А</td>
+                    <td class="js-f200">19,6 А</td>
+                    <td class="js-r">35,2</td>
+                    <td class="js-len">1,7</td>
+                    <td class="js-p">141 Вт</td>
                   </tr>
                   <tr data-gauge="18">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 18 AWG у калькулятор">18 <span class="unit">AWG</span></button></th>
                     <td>0,823</td>
-                    <td class="js-b60">8,0 А</td>
-                    <td class="js-f60">12,0 А</td>
-                    <td class="js-b200">19,0 А</td>
-                    <td class="js-f200">26,0 А</td>
-                    <td class="js-r">21,3</td>
+                    <td class="js-b60">7,8 А</td>
+                    <td class="js-f60">11,8 А</td>
+                    <td class="js-b200">18,6 А</td>
+                    <td class="js-f200">25,5 А</td>
+                    <td class="js-r">22,1</td>
                     <td class="js-len">2,1</td>
-                    <td class="js-p">192 Вт</td>
+                    <td class="js-p">188 Вт</td>
                   </tr>
                   <tr data-gauge="16">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 16 AWG у калькулятор">16 <span class="unit">AWG</span></button></th>
                     <td>1,310</td>
-                    <td class="js-b60">11,0 А</td>
-                    <td class="js-f60">15,0 А</td>
-                    <td class="js-b200">24,0 А</td>
-                    <td class="js-f200">34,0 А</td>
-                    <td class="js-r">13,4</td>
+                    <td class="js-b60">10,8 А</td>
+                    <td class="js-f60">14,7 А</td>
+                    <td class="js-b200">23,5 А</td>
+                    <td class="js-f200">33,3 А</td>
+                    <td class="js-r">13,9</td>
                     <td class="js-len">2,4</td>
-                    <td class="js-p">264 Вт</td>
+                    <td class="js-p">259 Вт</td>
                   </tr>
                   <tr data-gauge="14">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 14 AWG у калькулятор">14 <span class="unit">AWG</span></button></th>
                     <td>2,080</td>
-                    <td class="js-b60">14,0 А</td>
-                    <td class="js-f60">21,0 А</td>
-                    <td class="js-b200">32,0 А</td>
-                    <td class="js-f200">46,0 А</td>
-                    <td class="js-r">8,41</td>
-                    <td class="js-len">3,1</td>
-                    <td class="js-p">336 Вт</td>
+                    <td class="js-b60">13,7 А</td>
+                    <td class="js-f60">20,6 А</td>
+                    <td class="js-b200">31,4 А</td>
+                    <td class="js-f200">45,1 А</td>
+                    <td class="js-r">8,76</td>
+                    <td class="js-len">3,0</td>
+                    <td class="js-p">329 Вт</td>
                   </tr>
                   <tr data-gauge="12">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 12 AWG у калькулятор">12 <span class="unit">AWG</span></button></th>
                     <td>3,310</td>
-                    <td class="js-b60">19,0 А</td>
-                    <td class="js-f60">27,0 А</td>
-                    <td class="js-b200">41,0 А</td>
-                    <td class="js-f200">60,0 А</td>
-                    <td class="js-r">5,29</td>
-                    <td class="js-len">3,6</td>
-                    <td class="js-p">456 Вт</td>
+                    <td class="js-b60">18,6 А</td>
+                    <td class="js-f60">26,5 А</td>
+                    <td class="js-b200">40,2 А</td>
+                    <td class="js-f200">58,8 А</td>
+                    <td class="js-r">5,51</td>
+                    <td class="js-len">3,5</td>
+                    <td class="js-p">447 Вт</td>
                   </tr>
                   <tr data-gauge="10">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 10 AWG у калькулятор">10 <span class="unit">AWG</span></button></th>
                     <td>5,260</td>
-                    <td class="js-b60">26,0 А</td>
-                    <td class="js-f60">36,0 А</td>
-                    <td class="js-b200">54,0 А</td>
-                    <td class="js-f200">81,0 А</td>
-                    <td class="js-r">3,33</td>
-                    <td class="js-len">4,2</td>
-                    <td class="js-p">624 Вт</td>
+                    <td class="js-b60">25,5 А</td>
+                    <td class="js-f60">35,3 А</td>
+                    <td class="js-b200">52,9 А</td>
+                    <td class="js-f200">79,4 А</td>
+                    <td class="js-r">3,47</td>
+                    <td class="js-len">4,1</td>
+                    <td class="js-p">611 Вт</td>
                   </tr>
                   <tr data-gauge="8">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 8 AWG у калькулятор">8 <span class="unit">AWG</span></button></th>
                     <td>8,370</td>
-                    <td class="js-b60">35,0 А</td>
-                    <td class="js-f60">50,0 А</td>
-                    <td class="js-b200">74,0 А</td>
-                    <td class="js-f200">113,0 А</td>
-                    <td class="js-r">2,09</td>
-                    <td class="js-len">4,9</td>
-                    <td class="js-p">840 Вт</td>
+                    <td class="js-b60">34,3 А</td>
+                    <td class="js-f60">49,0 А</td>
+                    <td class="js-b200">72,5 А</td>
+                    <td class="js-f200">110,7 А</td>
+                    <td class="js-r">2,18</td>
+                    <td class="js-len">4,8</td>
+                    <td class="js-p">823 Вт</td>
                   </tr>
                   <tr data-gauge="6">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 6 AWG у калькулятор">6 <span class="unit">AWG</span></button></th>
                     <td>13,30</td>
-                    <td class="js-b60">48,0 А</td>
-                    <td class="js-f60">71,0 А</td>
-                    <td class="js-b200">100,0 А</td>
-                    <td class="js-f200">156,0 А</td>
-                    <td class="js-r">1,32</td>
-                    <td class="js-len">5,7</td>
-                    <td class="js-p">1,15 кВт</td>
+                    <td class="js-b60">47,0 А</td>
+                    <td class="js-f60">69,6 А</td>
+                    <td class="js-b200">98,0 А</td>
+                    <td class="js-f200">152,8 А</td>
+                    <td class="js-r">1,37</td>
+                    <td class="js-len">5,6</td>
+                    <td class="js-p">1,13 кВт</td>
                   </tr>
                   <tr data-gauge="4">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 4 AWG у калькулятор">4 <span class="unit">AWG</span></button></th>
                     <td>21,15</td>
-                    <td class="js-b60">62,0 А</td>
-                    <td class="js-f60">95,0 А</td>
-                    <td class="js-b200">131,0 А</td>
-                    <td class="js-f200">210,0 А</td>
-                    <td class="js-r">0,827</td>
-                    <td class="js-len">7,0</td>
-                    <td class="js-p">1,49 кВт</td>
+                    <td class="js-b60">60,7 А</td>
+                    <td class="js-f60">93,1 А</td>
+                    <td class="js-b200">128,4 А</td>
+                    <td class="js-f200">205,8 А</td>
+                    <td class="js-r">0,862</td>
+                    <td class="js-len">6,9</td>
+                    <td class="js-p">1,46 кВт</td>
                   </tr>
                   <tr data-gauge="2">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 2 AWG у калькулятор">2 <span class="unit">AWG</span></button></th>
                     <td>33,62</td>
-                    <td class="js-b60">81,0 А</td>
-                    <td class="js-f60">129,0 А</td>
-                    <td class="js-b200">173,0 А</td>
-                    <td class="js-f200">286,0 А</td>
-                    <td class="js-r">0,521</td>
-                    <td class="js-len">8,5</td>
-                    <td class="js-p">1,94 кВт</td>
+                    <td class="js-b60">79,4 А</td>
+                    <td class="js-f60">126,4 А</td>
+                    <td class="js-b200">169,5 А</td>
+                    <td class="js-f200">280,2 А</td>
+                    <td class="js-r">0,542</td>
+                    <td class="js-len">8,4</td>
+                    <td class="js-p">1,90 кВт</td>
                   </tr>
                   <tr data-gauge="1">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 1 AWG у калькулятор">1 <span class="unit">AWG</span></button></th>
                     <td>42,41</td>
-                    <td class="js-b60">93,0 А</td>
-                    <td class="js-f60">152,0 А</td>
-                    <td class="js-b200">199,0 А</td>
-                    <td class="js-f200">338,0 А</td>
-                    <td class="js-r">0,413</td>
-                    <td class="js-len">9,4</td>
-                    <td class="js-p">2,23 кВт</td>
+                    <td class="js-b60">91,1 А</td>
+                    <td class="js-f60">148,9 А</td>
+                    <td class="js-b200">195,0 А</td>
+                    <td class="js-f200">331,2 А</td>
+                    <td class="js-r">0,430</td>
+                    <td class="js-len">9,2</td>
+                    <td class="js-p">2,19 кВт</td>
                   </tr>
                   <tr data-gauge="0">
                     <th scope="row"><button type="button" class="row-btn" aria-label="Підставити 0 AWG у калькулятор">0 <span class="unit">AWG</span></button></th>
                     <td>53,49</td>
-                    <td class="js-b60">112,0 А</td>
-                    <td class="js-f60">167,0 А</td>
-                    <td class="js-b200">224,0 А</td>
-                    <td class="js-f200">348,0 А</td>
-                    <td class="js-r">0,327</td>
-                    <td class="js-len">9,8</td>
-                    <td class="js-p">2,69 кВт</td>
+                    <td class="js-b60">109,7 А</td>
+                    <td class="js-f60">163,6 А</td>
+                    <td class="js-b200">219,5 А</td>
+                    <td class="js-f200">341,0 А</td>
+                    <td class="js-r">0,341</td>
+                    <td class="js-len">9,6</td>
+                    <td class="js-p">2,63 кВт</td>
                   </tr>
                 </tbody>
               </table>
@@ -1943,7 +1943,7 @@
                     </div>
                     <div class="field">
                       <label for="loadCurrent">Струм навантаження / А <span class="optional-tag">необов'язково</span></label>
-                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="35" placeholder="35" inputmode="decimal" />
+                      <input id="loadCurrent" name="loadCurrent" type="number" min="0" step="0.1" value="30" placeholder="30" inputmode="decimal" />
                     </div>
                     <div class="field">
                       <label for="ambient">Довкілля / °C <span class="optional-tag">необов'язково</span></label>
@@ -2050,9 +2050,9 @@
               <p>
                 Колонки допустимого струму — в амперах, і ампер є ампер: провіднику байдуже, від постійного
                 чи змінного струму він нагрівся. Повністю змінюється те, чого ці ампери <em>варті</em>. Та
-                сама жила 0&nbsp;AWG на своїх 112&nbsp;А віддає <strong>2,7&nbsp;кВт</strong> у системі
-                24&nbsp;В постійного струму, <strong>26&nbsp;кВт</strong> на 230&nbsp;В однофазних і
-                <strong>78&nbsp;кВт</strong> на 400&nbsp;В трифазних — різниця у двадцять дев'ять разів,
+                сама жила 0&nbsp;AWG на своїх 109,7&nbsp;А віддає <strong>2,6&nbsp;кВт</strong> у системі
+                24&nbsp;В постійного струму, <strong>25&nbsp;кВт</strong> на 230&nbsp;В однофазних і
+                <strong>76&nbsp;кВт</strong> на 400&nbsp;В трифазних — різниця у двадцять дев'ять разів,
                 лише за рахунок напруги та √3.
               </p>
               <p>
@@ -2071,7 +2071,7 @@
               </p>
               <p>
                 На цю колонку варто подивитись уважно. Та сама жила 0&nbsp;AWG придатна для
-                <strong>9,8&nbsp;м</strong> у системі 24&nbsp;В постійного струму і <strong>189&nbsp;м</strong>
+                <strong>9,6&nbsp;м</strong> у системі 24&nbsp;В постійного струму і <strong>185&nbsp;м</strong>
                 у трифазній 400&nbsp;В — різниця в дев'ятнадцять разів, лише за рахунок напруги та √3, за
                 абсолютно незмінної міді. Довгу трасу рідко обмежує допустимий струм; її обмежує падіння напруги.
               </p>
@@ -2154,7 +2154,7 @@
                 <em>3 навантажені жили</em>; по мідних таблицях це відношення в середньому дорівнює
                 <strong>0,915</strong> — саме цей коефіцієнт застосовано тут до колонок «у кабелі». Він не
                 залежить від частоти й дає зниження приблизно на 9&nbsp;%: тому 0&nbsp;AWG показує
-                112&nbsp;А для постійного струму і 102&nbsp;А для трифазного. Колонки вільного повітря
+                109,7&nbsp;А для постійного струму і 100,4&nbsp;А для трифазного. Колонки вільного повітря
                 описують одну ізольовану жилу — той самий об'єкт у будь-якому режимі, тож вони не
                 змінюються.
               </p>
@@ -2166,12 +2166,12 @@
               <p class="formula"><span>Скін-ефект і ефект близькості, IEC 60287-1-1</span>y<sub>s</sub> = x<sub>s</sub>⁴ / (192 + 0,8 x<sub>s</sub>⁴)<span style="margin-top:10px">y<sub>p</sub> = y<sub>s</sub> (d/s)² [0,312 (d/s)² + 1,18 / (y<sub>s</sub> + 0,27)]</span></p>
               <p>
                 Враховано обидва ефекти — скін-ефект і ефект близькості сусідніх жил, який переважає одразу
-                поза мережевою частотою. Разом вони дають <strong>0,30&nbsp;%</strong> на 50&nbsp;Гц для
-                0&nbsp;AWG, 0,05&nbsp;% для 4&nbsp;AWG і нічого вимірного для тоншого. Це і є вся різниця
+                поза мережевою частотою. Разом вони дають <strong>0,28&nbsp;%</strong> на 50&nbsp;Гц для
+                0&nbsp;AWG, 0,04&nbsp;% для 4&nbsp;AWG і нічого вимірного для тоншого. Це і є вся різниця
                 між постійним і однофазним змінним струмом тут: обидва мають дві навантажені жили, а в
                 неброньованого низьковольтного дроту немає ані втрат в оболонці, ані діелектричних. У
                 таблиці показано десяткову частку, щоб цю різницю було видно там, де вона є — 0&nbsp;AWG
-                переходить зі 112,0&nbsp;А на 111,8&nbsp;А — і щоб рядки читались однаково там, де вона
+                переходить зі 109,7&nbsp;А на 109,6&nbsp;А — і щоб рядки читались однаково там, де вона
                 справді нульова. Допустимий струм
                 масштабується як 1/√(1+y<sub>s</sub>), тобто змінюється менш ніж на десяту частку відсотка —
                 значно менше за розбіжність між даташитами двох виробників. Тож сама лише частота не виправдала б окремої колонки для
@@ -2373,7 +2373,7 @@
             <div class="faq">
               <details class="faq-item">
                 <summary class="faq-q"><h3>Скільки ампер витримує дріт кожного розміру AWG?</h3></summary>
-                <div class="faq-a"><p>Для мідних провідників за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C у таблиці вище дає приблизно 8&nbsp;А для 18&nbsp;AWG, 14&nbsp;А для 14&nbsp;AWG, 26&nbsp;А для 10&nbsp;AWG, 35&nbsp;А для 8&nbsp;AWG, 62&nbsp;А для 4&nbsp;AWG і 112&nbsp;А для 0&nbsp;AWG за умови до трьох струмопровідних жил у кабелі. Одинарний провідник у вільному повітрі охолоджується краще й витримує більше. Силіконовий дріт із робочою температурою 200&nbsp;°C витримує приблизно вдвічі більше, але лише якщо кожна клема, запобіжник і конектор у колі також розраховані на таку температуру.</p></div>
+                <div class="faq-a"><p>Для лудженої мідної жили за температури довкілля 30&nbsp;°C консервативна колонка 60&nbsp;°C у таблиці вище дає приблизно 7,8&nbsp;А для 18&nbsp;AWG, 13,7&nbsp;А для 14&nbsp;AWG, 25,5&nbsp;А для 10&nbsp;AWG, 34,3&nbsp;А для 8&nbsp;AWG, 60,7&nbsp;А для 4&nbsp;AWG і 109,7&nbsp;А для 0&nbsp;AWG за умови до трьох струмопровідних жил у кабелі. Одинарний провідник у вільному повітрі охолоджується краще й витримує більше. Силіконовий дріт із робочою температурою 200&nbsp;°C витримує приблизно вдвічі більше, але лише якщо кожна клема, запобіжник і конектор у колі також розраховані на таку температуру.</p></div>
               </details>
               <details class="faq-item">
                 <summary class="faq-q"><h3>Чим відрізняються колонки 60&nbsp;°C і 200&nbsp;°C?</h3></summary>
@@ -2527,6 +2527,9 @@
       // solid-wire IACS reference — the usual allowance for the strand lay.
       const COPPER_RESISTIVITY = 0.0175;
       const MATERIALS = {"cu": {"iacs": 100.0, "name": "Мідь, відпалена"}, "cusn": {"iacs": 96.0, "name": "Мідь, луджена"}, "cuag": {"iacs": 100.0, "name": "Мідь, посріблена"}, "cuni": {"iacs": 95.0, "name": "Мідь, нікельована"}, "al": {"iacs": 61.2, "name": "Алюміній 1350"}, "al8000": {"iacs": 61.0, "name": "Алюмінієвий сплав 8000"}, "cca": {"iacs": 61.5, "name": "Мідно-алюмінієвий (CCA)"}, "ccs": {"iacs": 30.0, "name": "Мідно-сталевий (CCS)"}, "ag": {"iacs": 105.0, "name": "Срібло"}};
+      // Matches the selected option in the markup, so the URL only carries a
+      // material when the reader has actually changed it.
+      const DEFAULT_MATERIAL = "cusn";
 
       // Same geometry, same permitted temperature rise, so I²R is fixed and the
       // current goes as the inverse square root of resistivity.
@@ -2903,11 +2906,18 @@
         });
       }
 
+      // Nothing touches the address bar until the reader has actually changed
+      // something. The first pass runs with a mode restored from localStorage,
+      // and rewriting the URL for it turned a clean shared link into
+      // ?mode=ac3&u=400 the moment the page loaded.
+      let urlWritable = false;
+
       function writeUrl() {
+        if (!urlWritable) return;
         const params = new URLSearchParams();
         const mode = currentMode();
         if (mode !== "dc") params.set("mode", mode);
-        if ($("material").value !== "cu") params.set("mat", $("material").value);
+        if ($("material").value !== DEFAULT_MATERIAL) params.set("mat", $("material").value);
         if ($("material").value === "custom") params.set("iacs", $("conductivity").value);
         if ($("insulation").value !== "sil200") params.set("ins", $("insulation").value);
         if ($("insulation").value === "custom") params.set("tc", $("tempRating").value);
@@ -2928,6 +2938,9 @@
       // Browsers rate-limit replaceState, so do not call it on every keystroke.
       let urlTimer = null;
       function scheduleUrlWrite() {
+        // The init pass schedules one of these too, and its timer would fire
+        // after the flag flips; drop it here rather than 350 ms later.
+        if (!urlWritable) return;
         clearTimeout(urlTimer);
         urlTimer = setTimeout(writeUrl, 350);
       }
@@ -3105,6 +3118,9 @@
       syncOptionalResults();
       if (!readUrl()) restoreMode();
       applyMode();
+      // The reader arrived at whatever URL they arrived at; from here on, their
+      // own changes are what shape it.
+      urlWritable = true;
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R39FXET3KM"></script>
