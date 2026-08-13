@@ -1897,7 +1897,7 @@
               <div>
                 <p class="section-kicker">Live calculation</p>
                 <h2 id="calculator-title">Wire gauge calculator</h2>
-                <p>Count strands, enter their diameter, and compare the result to the nearest AWG row at both temperature references.</p>
+                <p>Count strands, enter their diameter, and get the ampacity of that exact cross-section at both temperature references — interpolated between the table rows, not rounded to one.</p>
               </div>
             </div>
 
@@ -2114,7 +2114,11 @@
               <h3>3. Ambient and grouping derating</h3>
               <p class="formula"><span>Derated ampacity</span>I = I<sub>base</sub> × k<sub>ambient</sub> × k<sub>grouping</sub></p>
               <p>
-                Base ampacity comes from the nearest chart row. The ambient factor is interpolated between
+                Base ampacity comes from your own cross-section, not from whichever row is closest:
+                between two tabulated gauges the current follows a power law in area,
+                <em>I</em>&nbsp;∝&nbsp;<em>A</em><sup>k</sup>, with <em>k</em> taken from that pair of rows
+                — 0.5 to 0.7 here, because heat arrives through a section and leaves through a surface. Land
+                exactly on a gauge and you get the published figure back. The ambient factor is interpolated between
                 the published correction points — 60&nbsp;°C conductors lose capacity quickly above
                 30&nbsp;°C, while 200&nbsp;°C conductors keep working far into the heat. The grouping factor
                 comes from the installation selector, and the two multiply.
@@ -2587,6 +2591,27 @@
           : "—";
       }
 
+      // Ampacity for a cross-section that falls between two tabulated gauges.
+      // It follows a power law in area — I ∝ A^k — with k read off the pair
+      // itself, 0.5 to 0.7 across this table, because heat arrives through a
+      // section and leaves through a surface. At a tabulated area this returns
+      // the published figure unchanged, and it stays monotonic in between.
+      //
+      // The calculator used to quote the nearest row's rating outright, which
+      // was wrong in both directions: 5000 strands of 0.08 mm is 25.13 mm² and
+      // read 4 AWG's 60.7 A while carrying 19% more copper, and 29.15 mm² read
+      // 2 AWG's 79.4 A on 13% less. Outside the table the end pair's exponent
+      // carries on rather than the value flat-lining at the last row.
+      function ampacityAt(area, key) {
+        if (!(area > 0)) return 0;
+        let index = wireRows.findIndex((row) => area <= row.area);
+        if (index < 1) index = index === 0 ? 1 : wireRows.length - 1;
+        const low = wireRows[index - 1];
+        const high = wireRows[index];
+        const exponent = Math.log(high[key] / low[key]) / Math.log(high.area / low.area);
+        return low[key] * Math.pow(area / low.area, exponent);
+      }
+
       function nearestRow(area) {
         return wireRows.reduce((best, row) => {
           return Math.abs(row.area - area) < Math.abs(best.area - area) ? row : best;
@@ -2793,6 +2818,8 @@
 
         const area = strandCount * Math.PI * Math.pow(strandDiameter, 2) / 4;
         const equivalent = equivalentAwg(area);
+        // Only for the row highlight in the table. The numbers come from the
+        // reader's own cross-section, not from whichever gauge is closest.
         const row = nearestRow(area);
         const freeAir = installation === "free";
         const groupingFactor = groupingFactors[installation] ?? 1;
@@ -2804,7 +2831,7 @@
           return {
             ambientFactor: factor,
             ampacity:
-              row[baseKey] * scale * factor * groupingFactor *
+              ampacityAt(area, baseKey) * scale * factor * groupingFactor *
               (freeAir ? 1 : PHASE_FACTOR[mode]),
             context: formatNumber(rating, 0) + I18N.conductorSuffix
           };

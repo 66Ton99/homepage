@@ -260,6 +260,40 @@ termination's rating — usually 60 or 75 °C — so a 200 °C column is margin
 against a hot environment, not permission to push more current through the same
 lug. That is why the 60 °C column never moves.
 
+## Ampacity between the gauges
+
+The table is a set of 17 rows; a reader's wire is an arbitrary cross-section.
+The calculator used to answer with the nearest row's rating outright, which was
+wrong in both directions — 5000 strands of 0.08 mm is 25.13 mm² and read 4 AWG's
+60.7 A while carrying 19 % more copper, and 29.15 mm² read 2 AWG's 79.4 A on
+13 % less, which is the unsafe direction.
+
+Between two tabulated gauges the current now follows a power law in area, with
+the exponent taken from that pair of rows rather than assumed:
+
+```
+k     = ln(I_high / I_low) / ln(A_high / A_low)
+I(A)  = I_low * (A / A_low)^k
+```
+
+Across this table k lands between 0.5 and 0.7 — heat arrives through a section
+and leaves through a surface, so current does not scale with area. Two
+consequences worth knowing:
+
+- **At a tabulated area the published figure comes back unchanged**, so the
+  table stays the reference and the calculator agrees with it.
+- **Off the top of the table the value keeps climbing** on the last pair's
+  exponent instead of flat-lining at 0 AWG's 112 A. It degrades the further out
+  you go: at 107 mm² it predicts 195 A against NEC 310.16's 195 A at 60 °C, at
+  253 mm² it is about 20 % high. The equivalent-AWG readout already says
+  "larger than 0 AWG" there.
+
+The table preset for a row is a *representative* construction, so it lands a
+fraction off the nominal area — 10 strands of 0.08 mm is 0.0503 mm² against
+30 AWG's 0.051. The calculator reports what those strands actually give, so a
+preset can read 0.1 A away from its own row. That is the honest answer, not a
+rounding bug.
+
 ## Shareable links
 
 Mode and every calculator input are reflected in the query string, so a

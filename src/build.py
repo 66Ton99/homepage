@@ -457,7 +457,11 @@ EN_CONTENT = f"""            <section id="how-to-read">
               <h3>3. Ambient and grouping derating</h3>
               <p class="formula"><span>Derated ampacity</span>I = I<sub>base</sub> × k<sub>ambient</sub> × k<sub>grouping</sub></p>
               <p>
-                Base ampacity comes from the nearest chart row. The ambient factor is interpolated between
+                Base ampacity comes from your own cross-section, not from whichever row is closest:
+                between two tabulated gauges the current follows a power law in area,
+                <em>I</em>&nbsp;∝&nbsp;<em>A</em><sup>k</sup>, with <em>k</em> taken from that pair of rows
+                — 0.5 to 0.7 here, because heat arrives through a section and leaves through a surface. Land
+                exactly on a gauge and you get the published figure back. The ambient factor is interpolated between
                 the published correction points — 60&nbsp;°C conductors lose capacity quickly above
                 30&nbsp;°C, while 200&nbsp;°C conductors keep working far into the heat. The grouping factor
                 comes from the installation selector, and the two multiply.
@@ -821,8 +825,8 @@ EN = {
     "SCROLL_HINT": "Scroll the table sideways for resistance and maximum run →",
     "KICKER_CALC": "Live calculation",
     "H2_CALC": "Wire gauge calculator",
-    "P_CALC": "Count strands, enter their diameter, and compare the result to the nearest AWG row at both "
-    "temperature references.",
+    "P_CALC": "Count strands, enter their diameter, and get the ampacity of that exact cross-section at both "
+    "temperature references — interpolated between the table rows, not rounded to one.",
     "L_STRANDS": "Strand count",
     "L_DIAM": "Strand diameter / mm",
     "L_INSTALL": "Installation / grouping",
@@ -1153,7 +1157,11 @@ UK_CONTENT = f"""            <section id="how-to-read">
               <h3>3. Поправки на температуру та групування</h3>
               <p class="formula"><span>Знижений струм</span>I = I<sub>баз</sub> × k<sub>темп</sub> × k<sub>груп</sub></p>
               <p>
-                Базовий струм береться з найближчого рядка таблиці. Температурний коефіцієнт інтерполюється
+                Базовий струм рахується для вашого перерізу, а не береться з найближчого рядка: між двома
+                табличними калібрами струм змінюється за степеневим законом від площі,
+                <em>I</em>&nbsp;∝&nbsp;<em>A</em><sup>k</sup>, де <em>k</em> береться із самої пари рядків —
+                тут це 0,5–0,7, бо тепло приходить через переріз, а йде через поверхню. Якщо переріз точно
+                збігається з калібром, повертається опубліковане число. Температурний коефіцієнт інтерполюється
                 між опублікованими точками корекції: провідники на 60&nbsp;°C швидко втрачають запас вище
                 30&nbsp;°C, тоді як провідники на 200&nbsp;°C зберігають працездатність глибоко в зоні
                 високих температур. Коефіцієнт групування береться з селектора прокладання, і обидва
@@ -1518,8 +1526,8 @@ UK = {
     "SCROLL_HINT": "Гортайте таблицю вбік — опір і максимальна траса →",
     "KICKER_CALC": "Живий розрахунок",
     "H2_CALC": "Калькулятор перерізу дроту",
-    "P_CALC": "Вкажіть кількість жилок і їхній діаметр — і порівняйте результат із найближчим рядком AWG "
-    "за обома температурними режимами.",
+    "P_CALC": "Вкажіть кількість жилок і їхній діаметр — і отримайте допустимий струм саме цього перерізу за "
+    "обома температурними режимами: з інтерполяцією між рядками таблиці, а не з округленням до рядка.",
     "L_STRANDS": "Кількість жилок",
     "L_DIAM": "Діаметр жилки / мм",
     "L_INSTALL": "Прокладання / групування",

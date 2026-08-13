@@ -55,6 +55,48 @@ async function run(file, label, expect) {
   check("area after reset", $("areaResult").textContent, expect.area);
 }
 
+// ---------------------------------------------------------------------------
+// Ampacity for a cross-section that is not one of the tabulated gauges
+// ---------------------------------------------------------------------------
+async function runAmpacity(file, label) {
+  console.log(`\n== ${label}: between the gauges ==`);
+  const dom = new JSDOM(fs.readFileSync(file, "utf8"), {
+    runScripts: "dangerously", pretendToBeVisual: true,
+    url: "https://66ton99.org.ua/awg-to-amps",
+  });
+  const { document } = dom.window;
+  const $ = (id) => document.getElementById(id);
+  const toNumber = (text) => parseFloat(text.replace(",", ".").replace(/[^\d.]/g, ""));
+  const amps = () => toNumber($("ampacity60Result").textContent);
+  const cell = (gauge) =>
+    toNumber(document.querySelector(`tr[data-gauge="${gauge}"] .js-b60`).textContent);
+  const strands = (value) => {
+    $("strandCount").value = value;
+    $("strandCount").dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  };
+
+  // a tabulated gauge must still read exactly what the table publishes
+  strands("4208");                       // the 4 AWG preset, 21.15 mm²
+  checkClose("a tabulated gauge reads its published figure", amps(), cell("4"), 0.1);
+  strands("10643");                      // the 0 AWG preset, 53.49 mm²
+  checkClose("so does the largest one", amps(), cell("0"), 0.1);
+
+  // 25.13 mm² is 19 % more copper than 4 AWG and used to read 4 AWG's rating
+  strands("5000");
+  checkClose("25.13 mm² interpolates between 4 and 2 AWG", amps(), 67.1, 0.1);
+  check("more copper than 4 AWG carries more current", amps() > cell("4"), true);
+  check("less copper than 2 AWG carries less", amps() < cell("2"), true);
+
+  // and 29.15 mm² used to borrow 2 AWG's rating on 13 % less copper
+  strands("5800");
+  check("just under a gauge does not borrow its rating", amps() < cell("2"), true);
+  check("but still beats the gauge below", amps() > cell("4"), true);
+
+  // off the top of the table the figure has to keep climbing, not flat-line
+  strands("20000");
+  check("beyond 0 AWG the value keeps climbing", amps() > cell("0"), true);
+}
+
 async function runBasics() {
   await run("../site/_pages/awg-to-amps.html", "EN", {
     area: "8.29 mm²",
@@ -426,6 +468,8 @@ async function runUrl(file, label, expect) {
 // killed the second mid-run — silently, because the exit code was still 0.
 (async () => {
   await runBasics();
+  await runAmpacity("../site/_pages/awg-to-amps.html", "EN");
+  await runAmpacity("../site/_pages/uk-awg-to-amps.html", "UK");
   await runUrl("../site/_pages/awg-to-amps.html", "EN",
     { path: "/awg-to-amps", area: "21.15", v3: "208", alZero: "87.6 A" });
   await runUrl("../site/_pages/uk-awg-to-amps.html", "UK",
