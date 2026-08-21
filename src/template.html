@@ -2097,6 +2097,19 @@
         } catch (error) {
           /* some embedding contexts forbid history writes; sharing degrades, page does not */
         }
+        syncLangLink();
+      }
+
+      // The language switch is a plain link, so on its own /uk/awg-to-amps
+      // arrives as a blank form and throws away everything the reader set up.
+      // Keep its href in step with the address bar instead, so the other
+      // language opens on the same wire — and so do a middle-click and a
+      // copied link address.
+      function syncLangLink() {
+        document.querySelectorAll(".langswitch a").forEach((link) => {
+          link.search = location.search;
+          link.hash = location.hash;
+        });
       }
 
       // Browsers rate-limit replaceState, so do not call it on every keystroke.
@@ -2287,6 +2300,7 @@
       syncOptionalResults();
       if (!readUrl()) restoreMode();
       applyMode();
+      syncLangLink();
       // The reader arrived at whatever URL they arrived at; from here on, their
       // own changes are what shape it.
       urlWritable = true;

@@ -340,7 +340,10 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function runUrl(file, label, expect) {
   console.log(`\n== ${label}: shareable URL ==`);
   const path = (w) => w.location.href.replace("https://66ton99.org.ua", "");
+  const lang = (w) =>
+    w.document.querySelector(".langswitch a").href.replace("https://66ton99.org.ua", "");
   const base = expect.path;
+  const other = expect.other;
 
   // 1. state travels into the URL
   const dom = new JSDOM(fs.readFileSync(file, "utf8"), {
@@ -360,8 +363,10 @@ async function runUrl(file, label, expect) {
   };
 
   check("defaults leave the URL clean", path(w), base);
+  check("the language switch starts clean", lang(w), other);
   pick("ac3");
   check("mode reaches the URL immediately", path(w), base + "?mode=ac3&u=" + expect.v3);
+  check("the language switch keeps the state", lang(w), other + "?mode=ac3&u=" + expect.v3);
   set("loadCurrent", "50");
   await wait(500);
   check("calculator inputs reach the URL", path(w).includes("a=50"), true);
@@ -371,6 +376,7 @@ async function runUrl(file, label, expect) {
   $("resetButton").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
   await wait(500);
   check("reset restores a clean URL", path(w), base);
+  check("reset clears the language switch too", lang(w), other);
 
   // a gauge picked from the table travels as a gauge, not as a strand count
   d.querySelector('tr[data-gauge="20"] .row-btn')
@@ -410,6 +416,8 @@ async function runUrl(file, label, expect) {
   check("shared link restores voltage", g2("systemVoltage").value, "400");
   check("shared link restores frequency", g2("frequency").value, "400");
   check("shared link opens the optional section", g2("optionalChecks").open, true);
+  check("the language switch carries a shared link across",
+        lang(shared.window), other + "?mode=ac3&n=4208&u=400&a=50&f=400");
 
   const picked = new JSDOM(fs.readFileSync(file, "utf8"), {
     runScripts: "dangerously", pretendToBeVisual: true,
@@ -471,9 +479,9 @@ async function runUrl(file, label, expect) {
   await runAmpacity("../site/_pages/awg-to-amps.html", "EN");
   await runAmpacity("../site/_pages/uk-awg-to-amps.html", "UK");
   await runUrl("../site/_pages/awg-to-amps.html", "EN",
-    { path: "/awg-to-amps", area: "21.15", v3: "208", alZero: "87.6 A" });
+    { path: "/awg-to-amps", other: "/uk/awg-to-amps", area: "21.15", v3: "208", alZero: "87.6 A" });
   await runUrl("../site/_pages/uk-awg-to-amps.html", "UK",
-    { path: "/uk/awg-to-amps", area: "21,15", v3: "400", alZero: "87,6 А" });
+    { path: "/uk/awg-to-amps", other: "/awg-to-amps", area: "21,15", v3: "400", alZero: "87,6 А" });
   await runModes("../site/_pages/awg-to-amps.html", "EN",
     { skin50: "+0.01%", lineLabel: "Line voltage / V", watt: "W", ac1Zero: "111.8 A",
       v1: "120", v3: "208", freq: "60",
