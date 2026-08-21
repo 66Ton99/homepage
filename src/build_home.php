@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+/** Build the EN + UK homepage from src/template-home.html. */
+
+require __DIR__ . '/lib.php';
+
+const BASE = 'https://66ton99.org.ua';
+
+define('HERE', __DIR__);
+define('OUT', dirname(__DIR__) . '/site');
+
+function system_map(string $alt, string $stack, string $mapping): string
+{
+    $svg = file_get_contents(__DIR__ . '/system-map.svg');
+    $svg = str_replace(
+        ['{{SVG_ALT}}', '{{SVG_STACK}}', '{{SVG_MAP}}'],
+        [$alt, $stack, $mapping],
+        $svg
+    );
+
+    return base64_encode($svg);
+}
+
+const ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" '
+    . 'd="M3 5.5h18v1.6H3V5.5Zm0 4.1h18v2.2H3V9.6Zm0 4.7h18v3H3v-3Zm0 5.5h18v1.2H3v-1.2Z"/></svg>';
+
+/**
+ * Render the Tools list.
+ *
+ * Each homepage links only to the tools in its own language — the header
+ * language switcher is what moves between languages, so listing the other
+ * translation here as a second entry would just be the same page twice.
+ *
+ * @param list<array{string,string}> $items
+ */
+function tools(array $items, string $openLabel, string $hreflang): string
+{
+    $out = [];
+    foreach ($items as [$href, $label]) {
+        $out[] = "            <li>\n"
+            . '              <a class="profile-link" href="' . $href . '" hreflang="' . $hreflang . "\">\n"
+            . '                ' . ICON . "\n"
+            . '                <strong>' . $label . "</strong>\n"
+            . '                <span>' . $openLabel . "</span>\n"
+            . "              </a>\n"
+            . '            </li>';
+    }
+
+    return implode("\n", $out);
+}
+
+$enTools = [['/awg-to-amps', 'AWG to amps']];
+$ukTools = [['/uk/awg-to-amps', 'AWG в ампери']];
+
+$EN = [
+    'LANG' => 'en',
+    'CANONICAL' => BASE . '/',
+    'OG_LOCALE' => 'en_US',
+    'OG_LOCALE_ALT' => 'uk_UA',
+    'OG_IMAGE' => BASE . '/og-home.png',
+    'OG_IMAGE_ALT' => '66Ton99 — profiles and engineering references',
+    'TITLE' => '66Ton99 — profiles and engineering references',
+    'DESC' => '66Ton99 personal index: profile links and engineering references, '
+        . 'including an AWG to amps chart and wire gauge ampacity calculator.',
+    'LANG_LINKS' => '<span aria-current="true" lang="en">EN</span>'
+        . '<a href="/uk" hreflang="uk" lang="uk">УК</a>',
+    'A_HEADER' => 'Site header',
+    'A_LANG' => 'Language',
+    'A_MAIN' => '66Ton99 homepage',
+    'A_VISUAL' => 'Visual profile',
+    'A_PROFILES' => 'Social profiles',
+    'A_TOOLS' => 'Tools and references',
+    'T_PROFILES' => 'Profiles',
+    'T_TOOLS' => 'Tools',
+    'OPEN' => 'Open',
+    'SVG_ALT' => 'Abstract monochrome system map',
+    'SYSTEM_MAP' => system_map('Abstract monochrome system map', 'WEB / LINUX / CLOUD', 'SYSTEM MAP'),
+    'TOOLS_LIST' => tools($enTools, 'Open', 'en'),
+    'N_TOOLS' => sprintf('%02d', count($enTools)),
+    'FOOTER_R' => 'Personal index',
+];
+
+$UK = [
+    'LANG' => 'uk',
+    'CANONICAL' => BASE . '/uk',
+    'OG_LOCALE' => 'uk_UA',
+    'OG_LOCALE_ALT' => 'en_US',
+    'OG_IMAGE' => BASE . '/og-home-uk.png',
+    'OG_IMAGE_ALT' => '66Ton99 — профілі та інженерні довідники',
+    'TITLE' => '66Ton99 — профілі та інженерні довідники',
+    'DESC' => 'Персональний індекс 66Ton99: посилання на профілі та інженерні довідники, '
+        . 'зокрема таблиця AWG в ампери й калькулятор перерізу дроту.',
+    'LANG_LINKS' => '<a href="/" hreflang="en" lang="en">EN</a>'
+        . '<span aria-current="true" lang="uk">УК</span>',
+    'A_HEADER' => 'Шапка сайту',
+    'A_LANG' => 'Мова',
+    'A_MAIN' => 'Головна сторінка 66Ton99',
+    'A_VISUAL' => 'Візуальний профіль',
+    'A_PROFILES' => 'Профілі в соцмережах',
+    'A_TOOLS' => 'Інструменти та довідники',
+    'T_PROFILES' => 'Профілі',
+    'T_TOOLS' => 'Інструменти',
+    'OPEN' => 'Відкрити',
+    'SVG_ALT' => 'Абстрактна монохромна системна карта',
+    'SYSTEM_MAP' => system_map('Абстрактна монохромна системна карта', 'ВЕБ / LINUX / ХМАРА', 'СИСТЕМНА КАРТА'),
+    'TOOLS_LIST' => tools($ukTools, 'Відкрити', 'uk'),
+    'N_TOOLS' => sprintf('%02d', count($ukTools)),
+    'FOOTER_R' => 'Персональний індекс',
+];
+
+/** @param array<string,string> $cfg */
+function render(array $cfg, string $outPath): void
+{
+    render_template(file_get_contents(HERE . '/template-home.html'), $cfg, $outPath, OUT);
+}
+
+render($EN, OUT . '/_pages/index.html');
+render($UK, OUT . '/_pages/uk-index.html');
