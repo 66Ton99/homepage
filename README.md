@@ -94,6 +94,10 @@ authoritative table.
 Edit `src/build.php`, never `site/_pages/*.html` — those are build output. Run
 `php build.php && npm test` before opening a pull request.
 
+`CLAUDE.md` holds the instructions for coding agents. Most of it is imported
+from the private infra repo, so a clone without that checkout beside it keeps
+only the repo-specific half — which is the part that matters here.
+
 `.github/workflows/ci.yml` runs on every commit on every branch and on every
 pull request, through the same `nix develop` shell described above, so CI and a
 local checkout are on the same PHP. It rebuilds the pages, fails if the
