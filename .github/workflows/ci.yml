@@ -15,35 +15,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      # flake.nix pins PHP 8.5 and Node 22, so CI runs the same interpreter a
+      # contributor gets from `nix develop`. The step below compares generator
+      # output against what is committed, which is only meaningful if both
+      # sides are on the same toolchain.
+      - uses: DeterminateSystems/nix-installer-action@main
 
       - name: Build the pages
-        run: |
-          python3 src/build.py
-          python3 src/build_home.py
+        run: nix develop --command bash -c 'php src/build.php && php src/build_home.php'
 
       - name: site/ matches the sources
         run: |
           if [ -n "$(git status --porcelain -- site)" ]; then
-            echo "::error::site/ is out of date with src/. Run 'python3 src/build.py && python3 src/build_home.py' and commit the result."
+            echo "::error::site/ is out of date with src/. Run 'php src/build.php && php src/build_home.php' and commit the result."
             git status --porcelain -- site
             git diff -- site
             exit 1
           fi
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
       - name: Install test dependencies
-        run: npm install --no-audit --no-fund
-        working-directory: src
+        run: nix develop --command bash -c 'cd src && npm install --no-audit --no-fund'
 
       # test.js drives the built pages themselves — the same HTML that ships —
       # so it covers the server-rendered table, the calculator, the mode and
       # material selectors and the shareable URL in both languages.
       - name: Run tests
-        run: npm test
-        working-directory: src
+        run: nix develop --command bash -c 'cd src && npm test'

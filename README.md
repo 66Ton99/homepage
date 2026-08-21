@@ -36,25 +36,39 @@ every page — the homepage included — is wired up with `try_files` instead.
 Every page exists in English and Ukrainian, generated from one template per page
 type so the two languages cannot drift apart.
 
-- `src/template.html` / `src/build.py` — the AWG page: content, translations,
+- `src/template.html` / `src/build.php` — the AWG page: content, translations,
   JSON-LD, the data table, `robots.txt` and `sitemap.xml`
-- `src/template-home.html` / `src/build_home.py` — the homepage
+- `src/template-home.html` / `src/build_home.php` — the homepage
 - `src/system-map.svg` — homepage artwork, inlined as a data URI at build time
   with its labels translated per language
-- `src/make_og.py` — the four 1200×630 Open Graph cards
+- `src/lib.php` — the shared template renderer and JSON encoder
+- `src/make_og.php` — the four 1200×630 Open Graph cards
 - `src/test.js` — jsdom checks of the calculator against the rendered pages,
   including the DC / AC 1-phase / AC 3-phase behaviour
-- `src/make_home_template.py` — one-shot, only rerun if the homepage is redesigned
+- `src/make_home_template.php` — one-shot, only rerun if the homepage is redesigned
+
+The generators need **PHP 8.5** with `mbstring`; `make_og.php` additionally
+needs `gd` built with FreeType. There are no Composer dependencies.
+
+`flake.nix` pins that exact toolchain, so the shortest path to a working
+checkout is:
+
+```bash
+nix develop
+```
+
+That puts PHP 8.5 and Node 22 on `PATH`. Without Nix, install PHP 8.5 yourself
+and check `php -m` lists `gd` and `mbstring`.
 
 ```bash
 cd src
-python3 build.py        # AWG pages + robots.txt + sitemap.xml
-python3 build_home.py   # homepages
-python3 make_og.py      # ../site/og-*.png
+php build.php           # AWG pages + robots.txt + sitemap.xml
+php build_home.php      # homepages
+php make_og.php         # ../site/og-*.png
 npm install && npm test # jsdom checks against the pages just built
 ```
 
-Edit content in `src/build.py`, never in `site/_pages/*.html` — those are build
+Edit content in `src/build.php`, never in `site/_pages/*.html` — those are build
 output and get overwritten.
 
 ## Deploy
@@ -77,15 +91,16 @@ standard to back them. The AWG 24–30 rows are the least certain: they are
 indicative for fine-stranded silicone wire rather than taken from one
 authoritative table.
 
-Edit `src/build.py`, never `site/_pages/*.html` — those are build output. Run
-`python3 build.py && npm test` before opening a pull request.
+Edit `src/build.php`, never `site/_pages/*.html` — those are build output. Run
+`php build.php && npm test` before opening a pull request.
 
 `.github/workflows/ci.yml` runs on every commit on every branch and on every
-pull request. It rebuilds the pages, fails if the committed `site/` differs from
-what the generators produce — the deploy is a plain rsync of `site/`, so a stale
-build here is a stale site — and then runs the jsdom suite against the pages it
-just built. `make_og.py` is not in CI: it needs Pillow and fonts, and its output
-only changes when the cards are redesigned.
+pull request, through the same `nix develop` shell described above, so CI and a
+local checkout are on the same PHP. It rebuilds the pages, fails if the
+committed `site/` differs from what the generators produce — the deploy is a
+plain rsync of `site/`, so a stale build here is a stale site — and then runs
+the jsdom suite against the pages it just built. `make_og.php` is not in CI: it needs GD, FreeType and the macOS
+system fonts, and its output only changes when the cards are redesigned.
 
 ## The DC / AC toggle
 
@@ -138,7 +153,7 @@ The three-phase run comes out *longer* despite the √3, because the current it
 has to hold is lower.
 
 The system voltage follows the mode unless the reader has typed their own, which
-is never overwritten. Defaults are regional, set per language in `build.py`:
+is never overwritten. Defaults are regional, set per language in `build.php`:
 
 | | DC | 1-phase | 3-phase | frequency |
 |---|---|---|---|---|
