@@ -12,7 +12,7 @@ If the import above did not load — no `homepage-infra` checkout beside this on
 or the external-import prompt was declined — these are the rules that matter
 most here:
 
-- Enter the toolchain first: `nix develop` (PHP 8.5 + Node 22, pinned in `flake.nix`).
+- Enter the toolchain first: `nix develop` (PHP 8.5 + Node 24, pinned in `flake.nix`).
 - Never edit `site/_pages/*.html`; they are build output. Edit `src/build.php`
   or `src/build_home.php`, then rebuild.
 - Verify with `php src/build.php && php src/build_home.php`, check

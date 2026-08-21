@@ -24,7 +24,7 @@
         default = pkgs.mkShell {
           packages = [
             pkgs.php85 # gd + freetype + mbstring, all needed by the generators
-            pkgs.nodejs_22
+            pkgs.nodejs_24
           ];
         };
       });

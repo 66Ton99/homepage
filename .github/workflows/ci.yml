@@ -13,9 +13,9 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      # flake.nix pins PHP 8.5 and Node 22, so CI runs the same interpreter a
+      # flake.nix pins PHP 8.5 and Node 24, so CI runs the same interpreter a
       # contributor gets from `nix develop`. The step below compares generator
       # output against what is committed, which is only meaningful if both
       # sides are on the same toolchain.

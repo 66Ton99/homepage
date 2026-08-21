@@ -57,7 +57,7 @@ checkout is:
 nix develop
 ```
 
-That puts PHP 8.5 and Node 22 on `PATH`. Without Nix, install PHP 8.5 yourself
+That puts PHP 8.5 and Node 24 on `PATH`. Without Nix, install PHP 8.5 yourself
 and check `php -m` lists `gd` and `mbstring`.
 
 ```bash
